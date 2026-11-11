@@ -158,12 +158,12 @@ namespace SandsOfLegends.Editor
             }
 
             File.WriteAllText(Path.Combine(destination, "SOURCE.txt"),
-                "Quaternius RPG Characters — current Quaternius License (not CC0).\\n" +
-                "Commercial use inside a completed game/product is permitted; standalone asset-pack redistribution is prohibited.\\n" +
-                "Files: Warrior.fbx, Cleric.fbx, Monk.fbx, Ranger.fbx, Rogue.fbx, Wizard.fbx.\\n" +
-                "Source repository: https://github.com/Andahmed/LegendsStyleRPG\\n" +
-                "Source path: GameClient/Assets/Resources/GameArt/Free3D/Quaternius_RPGCharacters/FBX/\\n" +
-                "License reference: https://quaternius.com/license.html\\n");
+                "Quaternius RPG Characters — current Quaternius License (not CC0).\n" +
+                "Commercial use inside a completed game/product is permitted; standalone asset-pack redistribution is prohibited.\n" +
+                "Files: Warrior.fbx, Cleric.fbx, Monk.fbx, Ranger.fbx, Rogue.fbx, Wizard.fbx.\n" +
+                "Source repository: https://github.com/Andahmed/LegendsStyleRPG\n" +
+                "Source path: GameClient/Assets/Resources/GameArt/Free3D/Quaternius_RPGCharacters/FBX/\n" +
+                "License reference: https://quaternius.com/license.html\n");
             AssetDatabase.Refresh();
             return ready;
         }
