@@ -21,6 +21,7 @@ namespace SandsOfLegends.UI
         private Canvas overlayCanvas;
         private RectTransform overlayRoot;
         private RectTransform panel;
+        private RectTransform contentRoot;
         private Text battleStatus;
         private Text battleLog;
         private Text battleSummary;
@@ -31,6 +32,7 @@ namespace SandsOfLegends.UI
         private HomeWorldStage homeWorldStage;
         private DamageNumbers damageNumbers;
         private readonly Dictionary<string, HeroView> actors = new Dictionary<string, HeroView>();
+        private readonly Dictionary<string, Sprite> portraitCache = new Dictionary<string, Sprite>();
         private int activeStage;
         private bool bound;
         private bool battleResolved;
@@ -94,6 +96,7 @@ namespace SandsOfLegends.UI
 
         private void CreatePanel(string title, string subtitle, bool withBack)
         {
+            contentRoot = null;
             if (panel != null && panel.parent != null) Destroy(panel.parent.gameObject);
             GameObject backdrop = new GameObject("Screen Backdrop", typeof(RectTransform), typeof(Image));
             backdrop.transform.SetParent(overlayRoot, false);
@@ -124,12 +127,57 @@ namespace SandsOfLegends.UI
             AddText(panel, subtitle, 21, cream, 76);
             AddText(panel, " ", 8, cream, 8);
             if (withBack) AddButton(panel, "RETURN TO CITY", ReturnToCity, 66, teal);
+
+            GameObject viewportObject = new GameObject("Scrollable Content Viewport",
+                typeof(RectTransform), typeof(Image), typeof(RectMask2D), typeof(ScrollRect), typeof(LayoutElement));
+            viewportObject.transform.SetParent(panel, false);
+            RectTransform viewportRect = viewportObject.GetComponent<RectTransform>();
+            viewportRect.anchorMin = Vector2.zero;
+            viewportRect.anchorMax = Vector2.one;
+            viewportRect.offsetMin = Vector2.zero;
+            viewportRect.offsetMax = Vector2.zero;
+            Image viewportImage = viewportObject.GetComponent<Image>();
+            viewportImage.color = new Color(0f, 0f, 0f, .04f);
+            viewportImage.raycastTarget = true;
+            LayoutElement viewportLayout = viewportObject.GetComponent<LayoutElement>();
+            viewportLayout.minHeight = 240f;
+            viewportLayout.flexibleHeight = 1f;
+
+            GameObject contentObject = new GameObject("Scrollable Content",
+                typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+            contentObject.transform.SetParent(viewportObject.transform, false);
+            contentRoot = contentObject.GetComponent<RectTransform>();
+            contentRoot.anchorMin = new Vector2(0f, 1f);
+            contentRoot.anchorMax = new Vector2(1f, 1f);
+            contentRoot.pivot = new Vector2(.5f, 1f);
+            contentRoot.anchoredPosition = Vector2.zero;
+            contentRoot.sizeDelta = Vector2.zero;
+            VerticalLayoutGroup contentLayout = contentObject.GetComponent<VerticalLayoutGroup>();
+            contentLayout.padding = new RectOffset(4, 4, 8, 20);
+            contentLayout.spacing = 10f;
+            contentLayout.childControlWidth = true;
+            contentLayout.childControlHeight = true;
+            contentLayout.childForceExpandWidth = true;
+            contentLayout.childForceExpandHeight = false;
+            ContentSizeFitter fitter = contentObject.GetComponent<ContentSizeFitter>();
+            fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            ScrollRect scroll = viewportObject.GetComponent<ScrollRect>();
+            scroll.content = contentRoot;
+            scroll.viewport = viewportRect;
+            scroll.horizontal = false;
+            scroll.vertical = true;
+            scroll.movementType = ScrollRect.MovementType.Elastic;
+            scroll.inertia = true;
+            scroll.scrollSensitivity = 36f;
         }
 
         private Text AddText(Transform parent, string value, int size, Color color, float height)
         {
             GameObject go = new GameObject("Text - " + value, typeof(RectTransform), typeof(Text), typeof(LayoutElement));
-            go.transform.SetParent(parent, false);
+            Transform actualParent = parent == panel && contentRoot != null ? contentRoot : parent;
+            go.transform.SetParent(actualParent, false);
             Text text = go.GetComponent<Text>();
             text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
             text.text = value;
@@ -149,7 +197,8 @@ namespace SandsOfLegends.UI
         private Button AddButton(Transform parent, string label, Action action, float height, Color accent)
         {
             GameObject go = new GameObject("Button - " + label, typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
-            go.transform.SetParent(parent, false);
+            Transform actualParent = parent == panel && contentRoot != null ? contentRoot : parent;
+            go.transform.SetParent(actualParent, false);
             Image image = go.GetComponent<Image>();
             image.color = ink;
             Button button = go.GetComponent<Button>();
@@ -209,11 +258,50 @@ namespace SandsOfLegends.UI
                 HeroCardData card = HeroCatalog.Get(instance.HeroId);
                 if (card == null) continue;
                 string id = instance.HeroId;
+                int nextStarCost = instance.Stars < Progression.MaxStars
+                    ? Progression.ShardsForNextStar(instance.Stars) : 0;
                 string line = card.DisplayName + "  •  " + HeroCatalog.RarityName(card.Rarity) +
                     "\nLV " + instance.Level + "  •  " + card.Role + "  •  " + card.Faction +
+                    "\nSTARS " + instance.Stars + "/5  •  ASCENSION " + instance.Ascension + "/4" +
                     "  •  " + instance.Shards + " shards";
-                AddButton(panel, line + "\nTAP TO LEVEL UP", () => LevelUpHero(id), 104, teal);
+                AddHeroPortrait(id);
+                AddButton(panel, line + "\nTAP TO LEVEL UP", () => LevelUpHero(id), 116, teal);
+                if (instance.Stars < Progression.MaxStars)
+                    AddButton(panel, "STAR UP  •  " + instance.Shards + " / " + nextStarCost + " SHARDS",
+                        () => StarUpHero(id), 58, gold);
+                if (instance.Ascension < Progression.MaxAscension)
+                {
+                    int requiredStars = instance.Ascension + 1;
+                    AddButton(panel, "ASCEND  •  NEED " + requiredStars + " STARS",
+                        () => AscendHero(id), 58, teal);
+                }
             }
+        }
+
+        private void AddHeroPortrait(string heroId)
+        {
+            if (contentRoot == null || string.IsNullOrEmpty(heroId)) return;
+            Sprite sprite;
+            if (!portraitCache.TryGetValue(heroId, out sprite))
+            {
+                Texture2D texture = Resources.Load<Texture2D>("HeroPortraits/hero_" + heroId);
+                if (texture == null) return;
+                sprite = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height),
+                    new Vector2(.5f, .5f), 100f, 0, SpriteMeshType.FullRect);
+                portraitCache[heroId] = sprite;
+            }
+
+            GameObject go = new GameObject("Hero Portrait - " + heroId,
+                typeof(RectTransform), typeof(Image), typeof(LayoutElement));
+            go.transform.SetParent(contentRoot, false);
+            Image image = go.GetComponent<Image>();
+            image.sprite = sprite;
+            image.preserveAspect = true;
+            image.raycastTarget = false;
+            LayoutElement layout = go.GetComponent<LayoutElement>();
+            layout.minHeight = 210f;
+            layout.preferredHeight = 210f;
+            layout.flexibleWidth = 1f;
         }
 
         private void LevelUpHero(string heroId)
@@ -228,6 +316,28 @@ namespace SandsOfLegends.UI
             {
                 AddInfo("Not enough Gold or Experience, or this hero reached the current level cap.", 68);
             }
+        }
+
+        private void StarUpHero(string heroId)
+        {
+            if (State == null) return;
+            if (HeroesScreen.TryStarUp(State, heroId))
+            {
+                Save();
+                OpenHeroes();
+            }
+            else AddInfo("Not enough hero shards, or this hero already has five stars.", 68);
+        }
+
+        private void AscendHero(string heroId)
+        {
+            if (State == null) return;
+            if (HeroesScreen.TryAscend(State, heroId))
+            {
+                Save();
+                OpenHeroes();
+            }
+            else AddInfo("Ascension needs the required star level, Gold and Gear Materials.", 68);
         }
 
         private void OpenFormation()
@@ -522,7 +632,7 @@ namespace SandsOfLegends.UI
 
         private void BuildBattleWorld()
         {
-            homeWorldStage = FindObjectOfType<HomeWorldStage>();
+            if (homeWorldStage == null) homeWorldStage = FindObjectOfType<HomeWorldStage>();
             if (homeWorldStage != null) homeWorldStage.gameObject.SetActive(false);
             if (battleWorld != null) Destroy(battleWorld);
             actors.Clear();

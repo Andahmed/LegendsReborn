@@ -10,11 +10,12 @@ Working title: **Sands of Legends**. Unity 2022.3.62f3, Android IL2CPP/ARM64 tar
 - Roster level-up and star-up operations; duplicate summons convert into rarity-based shards.
 - 200 generated campaign stage definitions across five biomes, boss stages every ten stages and stage-scaled 5-unit enemy teams.
 - Deterministic 5v5 combat core remains engine-free. Battle flow now consumes campaign energy, plays BattleSim events, supports x1/x2/x4 and manual or automatic ultimates, awards win rewards and updates campaign progress.
-- Six equipment slots per hero; upgrades spend Gold and Gear Materials and gear levels add combat stats.
+- Six equipment slots per hero; upgrades spend Gold and Gear Materials and gear levels add combat stats. Hero progression includes shard-based star-up and resource-gated ascension.
+- Five approved hero portrait PNGs are bundled and shown in the roster; these are concept/portrait art, not the missing rigged 3D hero models.
 - Save schema version 2 persists formation and equipment in addition to resources, roster, campaign, pity, energy and quests.
 
 ### Runtime UI and art pipeline
-- GameFlowController connects the Home HUD UnityEvents to Campaign, Heroes, Formation, Summon, Equipment, Backpack, Quests and feature-status screens.
+- GameFlowController connects the Home HUD UnityEvents to Campaign, Heroes, Formation, Summon, Equipment, Backpack, Quests and feature-status screens. Long screens and the battle HUD now use a scrollable viewport.
 - Heroes, Campaign and Summon screen classes now expose validated gameplay operations; BattleHud controls speed/ultimates.
 - HeroView loads Quaternius FBX models when imported; combat feedback uses floating damage numbers.
 - 21 Quaternius FBX files are bundled in Assets/Resources: 11 modular dungeon pieces, four animated monster types, and six nature props.
