@@ -1,133 +1,155 @@
+// Home hub castle assembled exclusively from bundled Quaternius CC0 FBX meshes.
+// No procedural block/cube castle or primitive-geometry fallback is used.
 using UnityEngine;
 
 namespace SandsOfLegends.UI
 {
-    /// <summary>
-    /// Loads the original generated castle mesh and Quaternius CC0 nature and hero models.
-    /// The castle is a real multi-part Mesh prefab, not Unity primitive cubes.
-    /// </summary>
     public sealed class HomeWorldStage : MonoBehaviour
     {
         private Transform root;
-        private float castleDaisTop = 0.91f;
 
         private void Awake()
         {
-            root = new GameObject("Home World - Castle Mesh Stage").transform;
+            root = new GameObject("Home World - FBX Castle Stage").transform;
             root.SetParent(transform, false);
-            PlaceCastle();
-            PlaceNature();
+            BuildCourtyard();
+            BuildCastle();
+            BuildNature();
             PlaceHero();
             ConfigureCamera();
             CreateWarmLights();
         }
 
-        private void OnEnable()
+        private void BuildCourtyard()
         {
-            if (root != null) ConfigureCamera();
+            // Nine imported floor modules form the courtyard; each remains a real FBX mesh.
+            for (int x = -1; x <= 1; x++)
+            for (int z = -1; z <= 1; z++)
+                PlaceAsset("Floor_Modular",
+                    new Vector3(x * 5.15f, -.08f, z * 5.15f + 1.5f),
+                    new Vector3(5.25f, .28f, 5.25f), Quaternion.identity,
+                    "Courtyard Floor " + x + " " + z);
+
+            PlaceAsset("Stairs_Modular", new Vector3(0f, .02f, -1.15f),
+                new Vector3(4.4f, .9f, 2.8f), Quaternion.identity, "Castle Approach Stairs");
         }
 
-        private void PlaceCastle()
+        private void BuildCastle()
         {
-            GameObject prefab = Resources.Load<GameObject>("HomeCastle/LegendsRebornCastle");
-            if (prefab == null)
+            PlaceAsset("Arch_Door", new Vector3(0f, .02f, 6.15f),
+                new Vector3(4.5f, 5.7f, 1.5f), Quaternion.identity, "Main Gate");
+            PlaceAsset("Wall_Modular", new Vector3(-4.75f, 1.9f, 6.15f),
+                new Vector3(5.2f, 4.1f, 1.35f), Quaternion.identity, "Left Curtain Wall");
+            PlaceAsset("Wall_Modular", new Vector3(4.75f, 1.9f, 6.15f),
+                new Vector3(5.2f, 4.1f, 1.35f), Quaternion.identity, "Right Curtain Wall");
+            PlaceAsset("Decorative_Wall", new Vector3(-4.75f, 4.1f, 6.12f),
+                new Vector3(5.2f, .85f, 1.45f), Quaternion.identity, "Left Battlements");
+            PlaceAsset("Decorative_Wall", new Vector3(4.75f, 4.1f, 6.12f),
+                new Vector3(5.2f, .85f, 1.45f), Quaternion.identity, "Right Battlements");
+
+            for (int side = -1; side <= 1; side += 2)
             {
-                Debug.LogError("Original 3D castle prefab is missing. Run Sands > Setup MVP Home Scene in the Unity Editor.");
-                return;
+                float x = side * 6.8f;
+                PlaceAsset("Column2", new Vector3(x, 2.9f, 6.0f),
+                    new Vector3(2.5f, 6.2f, 2.5f), Quaternion.identity,
+                    side < 0 ? "West Tower" : "East Tower");
+                PlaceAsset("Column", new Vector3(x, 6.0f, 6.0f),
+                    new Vector3(2.9f, .95f, 2.9f), Quaternion.identity,
+                    side < 0 ? "West Tower Crown" : "East Tower Crown");
+                PlaceAsset("Banner", new Vector3(x - side * .78f, 5.2f, 4.75f),
+                    new Vector3(1.35f, 2.55f, .28f),
+                    Quaternion.Euler(0f, side < 0 ? 12f : -12f, 0f),
+                    side < 0 ? "West Tower Banner" : "East Tower Banner");
+                PlaceAsset("Banner_wall", new Vector3(x - side * .8f, 5.15f, 4.78f),
+                    new Vector3(1.45f, 2.7f, .3f), Quaternion.identity,
+                    side < 0 ? "West Banner Mount" : "East Banner Mount");
             }
 
-            GameObject castle = Instantiate(prefab, root);
-            castle.name = "Original Low-Poly Castle Mesh";
-            castle.transform.localRotation = Quaternion.identity;
-            castle.transform.localScale = Vector3.one;
+            PlaceAsset("Arch", new Vector3(0f, 3.65f, 8.0f),
+                new Vector3(4.1f, 3.8f, 1.65f), Quaternion.identity, "Inner Keep Arch");
 
-            Renderer[] renderers = castle.GetComponentsInChildren<Renderer>(true);
-            if (renderers.Length == 0)
+            for (int i = 0; i < 3; i++)
             {
-                Debug.LogError("Generated castle has no MeshRenderer components.");
-                return;
+                float x = -3.35f + i * 3.35f;
+                PlaceAsset("Decorative_Wall", new Vector3(x, 4.75f, 6.0f),
+                    new Vector3(1.3f, .8f, 1.35f), Quaternion.identity,
+                    "Upper Wall Detail " + i);
             }
 
-            Bounds bounds = renderers[0].bounds;
-            for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
-
-            float fit = Mathf.Min(
-                15.5f / Mathf.Max(.01f, bounds.size.x),
-                9.6f / Mathf.Max(.01f, bounds.size.y),
-                17f / Mathf.Max(.01f, bounds.size.z));
-
-            castle.transform.localScale = Vector3.one * fit;
-            castle.transform.localPosition = new Vector3(
-                -bounds.center.x * fit,
-                -bounds.min.y * fit,
-                0f);
-
-            // The dais top is y=0.7075 in the generated mesh; account for the castle's ground offset.
-            castleDaisTop = (0.7075f - bounds.min.y) * fit;
+            for (int side = -1; side <= 1; side += 2)
+                PlaceAsset("Torch", new Vector3(side * 3.05f, .08f, 1.55f),
+                    new Vector3(.5f, 1.8f, .5f), Quaternion.identity,
+                    side < 0 ? "Left Gate Torch" : "Right Gate Torch");
         }
 
-        private void PlaceNature()
+        private void BuildNature()
         {
-            PlaceNatureAsset("PalmTree_1", new Vector3(-8.2f, 0f, 3.4f), new Vector3(2.8f, 5.6f, 2.8f));
-            PlaceNatureAsset("PalmTree_2", new Vector3(8.1f, 0f, 2.6f), new Vector3(2.5f, 5.1f, 2.5f));
-            PlaceNatureAsset("Cactus_1", new Vector3(-7.2f, 0f, -3.4f), new Vector3(1.05f, 1.8f, 1.05f));
-            PlaceNatureAsset("Bush_1", new Vector3(6.5f, 0f, -3.5f), new Vector3(1.65f, 1.1f, 1.65f));
-            PlaceNatureAsset("Rock_1", new Vector3(-5.7f, 0f, 4.4f), new Vector3(1.4f, .8f, 1.25f));
-            PlaceNatureAsset("Grass", new Vector3(5.7f, 0f, 4.3f), new Vector3(1.5f, .8f, 1.5f));
+            PlaceNatureAsset("PalmTree_1", new Vector3(-8.5f, 0f, 2.6f), new Vector3(2.8f, 5.6f, 2.8f));
+            PlaceNatureAsset("PalmTree_2", new Vector3(8.4f, 0f, 2.3f), new Vector3(2.5f, 5.1f, 2.5f));
+            PlaceNatureAsset("Cactus_1", new Vector3(-7.2f, 0f, -4.1f), new Vector3(1.05f, 1.8f, 1.05f));
+            PlaceNatureAsset("Bush_1", new Vector3(6.7f, 0f, -4.0f), new Vector3(1.65f, 1.1f, 1.65f));
+            PlaceNatureAsset("Rock_1", new Vector3(-5.8f, 0f, 5.1f), new Vector3(1.4f, .8f, 1.25f));
+            PlaceNatureAsset("Grass", new Vector3(5.8f, 0f, 5.0f), new Vector3(1.5f, .8f, 1.5f));
         }
 
         private void PlaceNatureAsset(string assetName, Vector3 position, Vector3 targetSize)
         {
-            GameObject prefab = Resources.Load<GameObject>("HomeNature/" + assetName);
-            if (prefab == null)
-            {
-                Debug.LogWarning("Missing HomeNature model: " + assetName);
-                return;
-            }
-
-            GameObject instance = Instantiate(prefab, root);
-            instance.name = assetName;
-            instance.transform.localPosition = position;
-            instance.transform.localRotation = Quaternion.identity;
-            instance.transform.localScale = Vector3.one;
-
-            Renderer[] renderers = instance.GetComponentsInChildren<Renderer>(true);
-            if (renderers.Length == 0) return;
-
-            Bounds bounds = renderers[0].bounds;
-            for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
-            Vector3 size = bounds.size;
-            float scaleY = size.y > .0001f ? targetSize.y / size.y : 1f;
-            instance.transform.localScale = new Vector3(
-                size.x > .0001f ? targetSize.x / size.x : 1f,
-                scaleY,
-                size.z > .0001f ? targetSize.z / size.z : 1f);
-            // Align the bottom of the imported mesh with the courtyard instead of assuming its pivot is at the feet.
-            instance.transform.localPosition = position + Vector3.up * (-bounds.min.y * scaleY);
+            PlaceAsset(assetName, position, targetSize, Quaternion.identity, assetName, "HomeNature/");
         }
 
         private void PlaceHero()
         {
-            GameObject prefab = Resources.Load<GameObject>("HomeHeroes/Warrior");
+            PlaceAsset("Warrior", new Vector3(0f, .05f, -2.35f),
+                new Vector3(1.45f, 2.7f, 1.1f), Quaternion.Euler(0f, 180f, 0f),
+                "Home Hero - Warrior", "HomeHeroes/");
+        }
+
+        private bool PlaceAsset(string assetName, Vector3 position, Vector3 targetSize,
+            Quaternion rotation, string instanceName, string resourceFolder = "HomeCastle/")
+        {
+            GameObject prefab = Resources.Load<GameObject>(resourceFolder + assetName);
             if (prefab == null)
             {
-                Debug.LogWarning("Hero FBX is not installed yet. Run Legends Reborn > Art > Install MVP Art.");
-                return;
+                Debug.LogError("Required CC0 FBX model is missing: Resources/" +
+                    resourceFolder + assetName + ". Run the matching Legends Reborn art installer.");
+                return false;
             }
 
-            GameObject hero = Instantiate(prefab, root);
-            hero.name = "Home Hero - Warrior";
-            hero.transform.localPosition = new Vector3(0f, 0f, -2.15f);
-            hero.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+            GameObject instance = Instantiate(prefab, root);
+            instance.name = instanceName;
+            instance.transform.localPosition = position;
+            instance.transform.localRotation = rotation;
+            instance.transform.localScale = Vector3.one;
 
-            Renderer[] renderers = hero.GetComponentsInChildren<Renderer>(true);
-            if (renderers.Length == 0) return;
+            Renderer[] renderers = instance.GetComponentsInChildren<Renderer>(true);
+            if (renderers.Length == 0)
+            {
+                Debug.LogError("Imported model has no Renderer: " + resourceFolder + assetName);
+                Destroy(instance);
+                return false;
+            }
+
             Bounds bounds = renderers[0].bounds;
             for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
-            float scale = 2.65f / Mathf.Max(.01f, bounds.size.y);
-            hero.transform.localScale = Vector3.one * scale;
-            // The generated dais top sits just below one world unit after the castle fit.
-            hero.transform.localPosition = new Vector3(0f, castleDaisTop - bounds.min.y * scale, -2.15f);
+            Vector3 sourceSize = bounds.size;
+            Vector3 scale = new Vector3(
+                sourceSize.x > .0001f ? targetSize.x / sourceSize.x : 1f,
+                sourceSize.y > .0001f ? targetSize.y / sourceSize.y : 1f,
+                sourceSize.z > .0001f ? targetSize.z / sourceSize.z : 1f);
+            instance.transform.localScale = scale;
+
+            // Correct FBX pivots so each imported mesh rests on its intended placement height.
+            bounds = CalculateBounds(instance);
+            instance.transform.localPosition += Vector3.up * (position.y - bounds.min.y);
+            return true;
+        }
+
+        private static Bounds CalculateBounds(GameObject instance)
+        {
+            Renderer[] renderers = instance.GetComponentsInChildren<Renderer>(true);
+            Bounds bounds = renderers[0].bounds;
+            for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
+            return bounds;
         }
 
         private void CreateWarmLights()
@@ -136,7 +158,7 @@ namespace SandsOfLegends.UI
             {
                 GameObject go = new GameObject("Castle Warm Point Light");
                 go.transform.SetParent(root, false);
-                go.transform.localPosition = new Vector3(side * 3.1f, 2.1f, .9f);
+                go.transform.localPosition = new Vector3(side * 3.1f, 2.1f, 1.4f);
                 Light light = go.AddComponent<Light>();
                 light.type = LightType.Point;
                 light.color = new Color(1f, .63f, .31f);
@@ -155,8 +177,8 @@ namespace SandsOfLegends.UI
                 go.tag = "MainCamera";
             }
 
-            cam.transform.position = new Vector3(0f, 6.1f, -14.2f);
-            cam.transform.LookAt(new Vector3(0f, 3f, 3.3f));
+            cam.transform.position = new Vector3(0f, 6.2f, -14.5f);
+            cam.transform.LookAt(new Vector3(0f, 3.0f, 4.0f));
             cam.fieldOfView = 40f;
             cam.nearClipPlane = .1f;
             cam.farClipPlane = 120f;
@@ -173,7 +195,6 @@ namespace SandsOfLegends.UI
             bool hasDirectional = false;
             for (int i = 0; i < lights.Length; i++)
                 if (lights[i].type == LightType.Directional) hasDirectional = true;
-
             if (!hasDirectional)
             {
                 GameObject sun = new GameObject("Home Directional Light");
