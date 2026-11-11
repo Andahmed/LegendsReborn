@@ -158,6 +158,18 @@ namespace SandsOfLegends.UI
 
         private void AddNav(RectTransform parent,string label,UnityEvent action,Color accent,float height)
         {
+            VerticalLayoutGroup layout=parent.GetComponent<VerticalLayoutGroup>();
+            if(layout==null)
+            {
+                layout=parent.gameObject.AddComponent<VerticalLayoutGroup>();
+                layout.spacing=9;
+                layout.padding=new RectOffset(2,2,2,2);
+                layout.childAlignment=TextAnchor.MiddleCenter;
+                layout.childControlWidth=true;
+                layout.childControlHeight=true;
+                layout.childForceExpandWidth=true;
+                layout.childForceExpandHeight=false;
+            }
             Button b=MakeButton(label,parent,accent,0,height);
             b.onClick.AddListener(()=>action.Invoke());
         }
