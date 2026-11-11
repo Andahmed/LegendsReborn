@@ -73,24 +73,20 @@ namespace SandsOfLegends.Presentation
                 }
 
                 animator = model.GetComponentInChildren<Animator>(true);
+                if (animator == null) animator = model.AddComponent<Animator>();
+                if (animator.avatar == null)
+                {
+                    Avatar[] avatars = Resources.LoadAll<Avatar>(folder + modelId);
+                    if (avatars.Length > 0) animator.avatar = avatars[0];
+                }
                 LoadAnimationClips(modelId, monster);
                 TryCreatePlayableGraph();
             }
             else
             {
-                // Temporary fallback remains visible until the humanoid FBX files are committed and imported.
-                GameObject body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-                body.name = "Model Missing - Temporary Silhouette";
-                body.transform.SetParent(transform, false);
-                body.transform.localScale = new Vector3(.8f, 1.05f, .55f);
-                Renderer renderer = body.GetComponent<Renderer>();
-                Shader shader = Shader.Find("Universal Render Pipeline/Lit");
-                if (shader == null) shader = Shader.Find("Standard");
-                Material material = new Material(shader);
-                material.color = team == 0 ? new Color(.12f, .68f, .65f) : new Color(.62f, .2f, .18f);
-                renderer.sharedMaterial = material;
-                Destroy(body.GetComponent<Collider>());
-                modelRoot = body.transform;
+                Debug.LogError("[HeroView] Missing required FBX model at Resources/" + folder + modelId +
+                    ". Run Legends Reborn > Art > Install All CC0 3D Models. No primitive character fallback is created.");
+                return;
             }
 
             baseScale = modelRoot != null ? modelRoot.localScale : Vector3.one;
