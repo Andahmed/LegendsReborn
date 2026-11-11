@@ -24,6 +24,7 @@ namespace SandsOfLegends.Presentation
         private AnimationClip deathClip;
         private bool graphReady;
         private bool actionPlaying;
+        private bool actionFading;
         private float actionElapsed;
         private float actionBlend;
 
@@ -109,7 +110,7 @@ namespace SandsOfLegends.Presentation
                 int hash = 17 + slot * 31;
                 if (!string.IsNullOrEmpty(id))
                     for (int i = 0; i < id.Length; i++) hash = hash * 31 + id[i];
-                return (Mathf.Abs(hash) % 4);
+                return ((hash & 0x7fffffff) % 4);
             }
         }
 
@@ -200,6 +201,7 @@ namespace SandsOfLegends.Presentation
             actionPlayable.SetTime(0d);
             actionElapsed = 0f;
             actionBlend = 0f;
+            actionFading = false;
             actionPlaying = true;
         }
 
@@ -256,6 +258,7 @@ namespace SandsOfLegends.Presentation
             actionPlayable.SetTime(0d);
             actionElapsed = 0f;
             actionBlend = 0f;
+            actionFading = false;
             actionPlaying = true;
         }
 
@@ -273,28 +276,31 @@ namespace SandsOfLegends.Presentation
         {
             if (modelRoot == null) return;
 
-            if (actionPlaying)
+            if (actionPlaying || actionFading)
             {
-                actionElapsed += Time.deltaTime;
-                actionBlend = Mathf.MoveTowards(actionBlend, 1f, Time.deltaTime * 10f);
-                animationMixer.SetInputWeight(0, 1f - actionBlend);
-                animationMixer.SetInputWeight(1, actionBlend);
-
-                if (actionPlayable.IsValid() && actionElapsed >= actionPlayable.GetAnimationClip().length && !dead)
+                if (actionPlaying)
                 {
-                    actionPlaying = false;
-                }
-                if (!actionPlaying)
-                {
-                    actionBlend = Mathf.MoveTowards(actionBlend, 0f, Time.deltaTime * 8f);
-                    animationMixer.SetInputWeight(0, 1f - actionBlend);
-                    animationMixer.SetInputWeight(1, actionBlend);
-                    if (actionBlend <= .001f)
+                    actionElapsed += Time.deltaTime;
+                    actionBlend = Mathf.MoveTowards(actionBlend, 1f, Time.deltaTime * 10f);
+                    if (actionPlayable.IsValid() && actionPlayable.GetAnimationClip() != null &&
+                        actionElapsed >= actionPlayable.GetAnimationClip().length && !dead)
                     {
-                        animationMixer.SetInputWeight(0, 1f);
-                        animationMixer.SetInputWeight(1, 0f);
+                        actionPlaying = false;
+                        actionFading = true;
                     }
                 }
+                else if (actionFading)
+                {
+                    actionBlend = Mathf.MoveTowards(actionBlend, 0f, Time.deltaTime * 8f);
+                    if (actionBlend <= .001f)
+                    {
+                        actionBlend = 0f;
+                        actionFading = false;
+                    }
+                }
+
+                animationMixer.SetInputWeight(0, 1f - actionBlend);
+                animationMixer.SetInputWeight(1, actionBlend);
             }
 
             float bob = Mathf.Sin(Time.time * 2.2f + Slot) * .035f;
