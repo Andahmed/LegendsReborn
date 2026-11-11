@@ -1,5 +1,8 @@
 # Work Log (newest first)
 
+## 2026-11-12 - B4 server/API contract (GPT Lane B)
+- Added server-side MVP summon/API contract and HTTP tests; GitHub Actions Server Tests run #35 passed (10 tests, 0 failures). Production deployment and Unity integration not verified.
+
 ## 2026-11-11 - Foundations pass (Ahmed + Claude)
 **Done**
 - Added all foundation folders and files per the project plan (see ARCHITECTURE.md): Meta (economy, roster, gacha, idle, campaign, quests, save), Services, Bootstrap, Presentation, UI framework + 5 screen stubs, Localization, Editor build script, Server skeleton, docs.
