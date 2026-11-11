@@ -45,12 +45,23 @@ namespace SandsOfLegends.EditorTools
                 if (hero == null || hero.prefab == null)
                     throw new Exception("HeroDefinition has no prefab reference: " + path);
                 ValidateCharacterPrefab(hero.prefab, 8000, register, true);
+                string heroId = hero.id.StartsWith("hero_", StringComparison.Ordinal) ? hero.id.Substring(5) : hero.id;
+                ValidateFbxModel("Assets/Art/Characters/" + heroId + "/hero_" + heroId + ".fbx", 8000, register);
             }
 
             GameObject enemy = AssetDatabase.LoadAssetAtPath<GameObject>(
                 "Assets/Art/Characters/Enemies/gloom_raider/enemy_gloom_raider.prefab");
             if (enemy == null) throw new Exception("Missing enemy_gloom_raider.prefab.");
             ValidateCharacterPrefab(enemy, 6000, register, true);
+            ValidateFbxModel("Assets/Art/Characters/Enemies/gloom_raider/enemy_gloom_raider.fbx", 6000, register);
+            string[] biomes = { "forest", "desert", "mountain", "sea", "ruins" };
+            for (int i = 0; i < biomes.Length; i++)
+            {
+                string root = "Assets/Art/Environments/" + biomes[i] + "/";
+                ValidateFbxModel(root + "env_" + biomes[i] + ".fbx", 40000, register);
+                ValidateFbxModel(root + "props/prop_ancient_gate.fbx", 1500, register);
+                ValidateFbxModel(root + "props/prop_forest_crystal.fbx", 1500, register);
+            }
 
             string[] prefabGuids = AssetDatabase.FindAssets("t:GameObject", new[] { "Assets/Art", "Assets/Prefabs/Heroes" });
             for (int i = 0; i < prefabGuids.Length; i++)
@@ -107,6 +118,22 @@ namespace SandsOfLegends.EditorTools
                 if (!found) throw new Exception("Missing " + RequiredClips[i] + " clip on " + path);
             }
             int triangles = CountTriangles(prefab);
+            if (triangles > budget)
+                throw new Exception(path + " exceeds " + budget + " triangles: " + triangles);
+        }
+
+
+        private static void ValidateFbxModel(string path, int budget, string register)
+        {
+            if (!File.Exists(path))
+                throw new Exception("Missing required FBX model: " + path);
+            string name = Path.GetFileNameWithoutExtension(path);
+            if (!register.Contains(name))
+                throw new Exception("FBX model is not registered in docs/ASSETS.md: " + name);
+            GameObject model = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (model == null)
+                throw new Exception("Unity could not import FBX model: " + path);
+            int triangles = CountTriangles(model);
             if (triangles > budget)
                 throw new Exception(path + " exceeds " + budget + " triangles: " + triangles);
         }
