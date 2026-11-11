@@ -313,7 +313,7 @@ namespace SandsOfLegends.EditorTools
 
         private static Transform[] CreateHumanoidBones(Transform root)
         {
-            Transform[] b = new Transform[18];
+            Transform[] b = new Transform[20];
             b[0] = root;
             b[0].name = "Root";
             b[1] = Bone("Hips", b[0], new Vector3(0f,.88f,0f));
@@ -333,6 +333,8 @@ namespace SandsOfLegends.EditorTools
             b[15] = Bone("RightUpperLeg", b[1], new Vector3(.13f,-.09f,0f));
             b[16] = Bone("RightLowerLeg", b[15], new Vector3(0f,-.38f,0f));
             b[17] = Bone("RightFoot", b[16], new Vector3(0f,-.34f,.06f));
+            b[18] = Bone("LeftHand", b[8], new Vector3(-.13f,-.05f,0f));
+            b[19] = Bone("RightHand", b[11], new Vector3(.13f,-.05f,0f));
             return b;
         }
 
@@ -349,7 +351,7 @@ namespace SandsOfLegends.EditorTools
             string[] humanNames =
             {
                 "Hips","Spine","Chest","Neck","Head","LeftShoulder","LeftUpperArm","LeftLowerArm",
-                "RightShoulder","RightUpperArm","RightLowerArm","LeftUpperLeg","LeftLowerLeg","LeftFoot",
+                "RightShoulder","RightUpperArm","RightLowerArm","LeftHand","RightHand","LeftUpperLeg","LeftLowerLeg","LeftFoot",
                 "RightUpperLeg","RightLowerLeg","RightFoot"
             };
             var human = new HumanBone[humanNames.Length];
