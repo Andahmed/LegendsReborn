@@ -54,6 +54,25 @@ namespace SandsOfLegends.Tests
         }
 
         [Test]
+        public void HeroStarUpAndAscensionConsumeShardsAndMaterials()
+        {
+            GameState state = GameState.NewGame(1000);
+            int shards;
+            state.Roster.AddHeroOrShards("warrior", Rarity.Common, out shards);
+            HeroInstance hero = state.Roster.Find("warrior");
+            hero.Shards = 30;
+            state.Wallet.Set(Currency.Gold, 10000);
+            state.Wallet.Set(Currency.GearMaterials, 100);
+
+            Assert.IsTrue(state.Roster.TryStarUp("warrior"));
+            Assert.AreEqual(1, hero.Stars);
+            Assert.IsTrue(state.Roster.TryAscend("warrior", state.Wallet));
+            Assert.AreEqual(1, hero.Ascension);
+            Assert.AreEqual(40, Progression.LevelCap(hero.Ascension));
+            Assert.AreEqual(20, hero.Shards);
+        }
+
+        [Test]
         public void LevelUpAndEquipmentUpgradeSpendTheirResources()
         {
             GameState state = GameState.NewGame(1000);

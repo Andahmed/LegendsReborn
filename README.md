@@ -23,8 +23,9 @@ The Android build menu also creates/registers the Home scene before calling Buil
 - 200 generated campaign stages: five biomes × 40 stages, with boss encounters every ten stages.
 - 5v5 deterministic auto-battle, 2 front + 3 back positions, x1/x2/x4 speed and optional manual ultimates.
 - Battle presentation loads imported character/monster FBX models, shows combat numbers and updates the result/rewards. Four monster FBXs and 17 environment FBXs are included; humanoid rigs are imported from the local legacy Free3D folder.
-- Local save includes roster, five-slot formation, six equipment slots per hero, currencies, pity, energy, campaign and daily quests.
-- Home menu routes to Campaign, Heroes, Formation, Summon, Equipment, Backpack and feature-status screens.
+- Local save includes roster, five-slot formation, six equipment slots per hero, currencies, pity, energy, campaign and daily quests. Heroes have level, star-up and ascension progression.
+- The five approved starter-hero portrait PNGs are bundled and shown in the roster; these are 2D portraits, not rigged 3D character models.
+- Home menu routes to Campaign, Heroes, Formation, Summon, Equipment, Backpack and feature-status screens. Screen content uses a touch-scroll viewport for long rosters and battle controls.
 - Idle rewards capped at 12 hours; daily quest progress and claims.
 - FastAPI development backend with guest accounts, persistent SQLite profiles, server-side summon RNG and summon audit history.
 

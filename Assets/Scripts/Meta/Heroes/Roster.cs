@@ -96,5 +96,23 @@ namespace SandsOfLegends.Meta
             hero.Stars++;
             return true;
         }
+
+        public bool TryAscend(string heroId, Wallet wallet)
+        {
+            HeroInstance hero = Find(heroId);
+            if (hero == null || hero.Ascension >= Progression.MaxAscension) return false;
+            if (hero.Stars < hero.Ascension + 1) return false;
+
+            long goldCost = 1000L * (hero.Ascension + 1);
+            long materialCost = 15L * (hero.Ascension + 1);
+            if (!wallet.TrySpend(Currency.Gold, goldCost)) return false;
+            if (!wallet.TrySpend(Currency.GearMaterials, materialCost))
+            {
+                wallet.Add(Currency.Gold, goldCost);
+                return false;
+            }
+            hero.Ascension++;
+            return true;
+        }
     }
 }

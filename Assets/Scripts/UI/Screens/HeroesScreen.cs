@@ -17,6 +17,11 @@ namespace SandsOfLegends.UI
             return state != null && state.Roster.TryStarUp(heroId);
         }
 
+        public static bool TryAscend(GameState state, string heroId)
+        {
+            return state != null && state.Roster.TryAscend(heroId, state.Wallet);
+        }
+
         public static void SetFormation(GameState state, int slot, string heroId)
         {
             if (state != null) state.Roster.SetFormation(slot, heroId);
