@@ -6,6 +6,7 @@
 // STATUS: Implemented
 // =============================================================================
 using System;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
@@ -18,6 +19,7 @@ namespace SandsOfLegends.EditorTools
         public static void BuildAndroid()
         {
             PrototypeSetup.SetupPrototype();
+            Directory.CreateDirectory("Builds");
             var scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray();
             var opts = new BuildPlayerOptions
             {
