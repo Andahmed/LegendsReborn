@@ -72,6 +72,10 @@ class CrossLanguageSummonContractTests(unittest.TestCase):
         server_rates = python_assignment(self.server, "RARITY_RATES")
         self.assertEqual(client_rates, server_rates)
         self.assertEqual(100, sum(server_rates.values()))
+        self.assertEqual(
+            [(rarity, rate * 100) for rarity, rate in server_rates.items()],
+            python_assignment(self.server, "RARITY_WEIGHTS"),
+        )
 
         self.assertEqual(csharp_int(self.gacha, "EpicPity"), python_assignment(self.server, "EPIC_PITY"))
         self.assertEqual(csharp_int(self.gacha, "LegendaryPity"), python_assignment(self.server, "LEGENDARY_PITY"))
