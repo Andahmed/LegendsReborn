@@ -79,6 +79,8 @@ def default_profile() -> Dict:
         "highest_stage": 0,
         "idle_last_claim_at": int(time.time()),
         "daily_claimed_day": "",
+        "energy": 20,
+        "energy_updated_at": int(time.time()),
     }
 
 
@@ -266,7 +268,7 @@ def summon(payload: SummonRequest, authorization: Optional[str] = Header(default
 
 
 @app.post("/idle/claim")
-def claim_idle_rewards(payload: EmptyRequest, authorization: Optional[str] = Header(default=None)):
+def claim_idle_rewards(authorization: Optional[str] = Header(default=None)):
     account_id = require_account(authorization)
     now = int(time.time())
     with connect() as db:
@@ -284,7 +286,7 @@ def claim_idle_rewards(payload: EmptyRequest, authorization: Optional[str] = Hea
 
 
 @app.post("/daily/claim")
-def claim_daily_login(payload: EmptyRequest, authorization: Optional[str] = Header(default=None)):
+def claim_daily_login(authorization: Optional[str] = Header(default=None)):
     account_id = require_account(authorization)
     now = int(time.time())
     day = utc_day(now)
