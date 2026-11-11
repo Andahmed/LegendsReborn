@@ -159,16 +159,24 @@ namespace SandsOfLegends.EditorTools
                 TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
                 if (importer == null || importer.textureType != TextureImporterType.Sprite)
                     throw new Exception("Missing Sprite portrait: " + path);
+                if (!register.Contains(Path.GetFileNameWithoutExtension(path)))
+                    throw new Exception("Portrait is not registered: " + path);
                 ValidateAndroidAstc(importer, path);
                 string iconPath = "Assets/Prefabs/UI/faction_" + ids[i] + "_icon.png";
                 TextureImporter iconImporter = AssetImporter.GetAtPath(iconPath) as TextureImporter;
                 if (iconImporter == null || iconImporter.textureType != TextureImporterType.Sprite)
                     throw new Exception("Missing faction icon Sprite: " + iconPath);
+                if (!register.Contains(Path.GetFileNameWithoutExtension(iconPath)))
+                    throw new Exception("Faction icon is not registered: " + iconPath);
                 ValidateAndroidAstc(iconImporter, iconPath);
-                TextureImporterPlatformSettings android = importer.GetPlatformTextureSettings("Android");
-                if (!android.overridden || android.format != TextureImporterFormat.ASTC_6x6)
-                    throw new Exception("Portrait must use ASTC 6x6 on Android: " + path);
+
             }
+            const string framePath = "Assets/Prefabs/UI/ui_frame_gold.png";
+            TextureImporter frameImporter = AssetImporter.GetAtPath(framePath) as TextureImporter;
+            if (frameImporter == null || frameImporter.textureType != TextureImporterType.Sprite ||
+                !register.Contains("ui_frame_gold"))
+                throw new Exception("Missing or unregistered UI frame Sprite.");
+            ValidateAndroidAstc(frameImporter, framePath);
         }
 
 
