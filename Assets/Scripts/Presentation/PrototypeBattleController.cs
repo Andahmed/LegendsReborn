@@ -143,7 +143,7 @@ namespace SandsOfLegends.Presentation
             BattleUnit unit = _simulation.Get(team, slot);
             if (unit == null) return;
             if (models != null && slot < models.Length && models[slot] != null)
-                models[slot].gameObject.SetActive(unit.Alive);
+                models[slot].gameObject.SetActive(true);
             if (health != null && slot < health.Length && health[slot] != null)
                 health[slot].fillAmount = unit.MaxHp > 0 ? (float)unit.Hp / unit.MaxHp : 0f;
             if (labels != null && slot < labels.Length && labels[slot] != null)
