@@ -1,35 +1,21 @@
-# Home Scene — Mobile Hub Setup
+# Home Hub — Castle Stage
 
-## Target composition
-Build the Home scene as a portrait mobile hub matching the approved fantasy direction:
-- A large 3D castle gate and walls as the center background, with faction banners and side buildings.
-- One selected 3D hero standing on the foreground platform, facing the camera.
-- Keep the center third of the screen visually clear so the hero remains readable behind the HUD.
-- Turquoise, deep blue-green, warm gold and sand palette; restrained Arabic geometric decoration.
+## Added in this branch
+- Fixed left/right menu anchors so fixed-width rails are not collapsed to zero width.
+- Creates an EventSystem + StandaloneInputModule only when the scene has none.
+- Keeps the portrait HUD and adds a live idle reward preview based on the existing 12-hour capped reward calculation.
+- Claim now calls `GameState.ClaimIdle(TimeService.NowUnix)`, saves with `GameBootstrap.SaveNow()`, and refreshes the displayed values.
+- Adds a procedural castle courtyard with gate, round towers, faction banners, torches and an armored hero silhouette.
 
-## HUD delivered in HomeScreen.cs
-The runtime uGUI layer now creates:
-- Player profile / level strip and live Gems, Gold and Energy values.
-- Events, Daily Login, Battle Pass and Monthly Card rail.
-- Heroes, Formation, Quests and Equipment navigation on the left.
-- Summon, Arena, Alliance Boss and Shop navigation on the right.
-- Idle Rewards card with a claim event.
-- Campaign stage label and primary Campaign button.
-- Bottom navigation for Home, Heroes, Bag, Guild, Arena and More.
+## Scene setup
+1. Boot must initialize `GameBootstrap` before Home is shown.
+2. Add an empty GameObject named `HomeScreen` to the Home scene and attach `HomeScreen.cs`.
+3. The HUD Canvas is generated at runtime (1080×1920 reference resolution) if none is assigned.
+4. The castle preview is generated automatically by `HomeWorldStage`. Remove/disable this preview when the approved licensed castle and hero prefabs are imported.
+5. Connect the public UnityEvents to real screen controllers in the Inspector as those screens are implemented.
 
-All destinations are exposed as serialized UnityEvents on HomeScreen so they can be connected to actual screens in the Inspector. Until those screens are implemented and assigned, the corresponding event has no destination; do not treat the navigation as fully integrated.
-
-## Unity scene setup
-1. Create a scene named `Home` and add it to Build Settings after `Boot`.
-2. Add the existing persistent GameBootstrap object through the project's boot flow; do not duplicate it in Home.
-3. Add a GameObject named `HomeScreen` and attach `Assets/Scripts/UI/Screens/HomeScreen.cs`.
-4. The script creates a portrait Canvas (1080×1920 reference) and safe-area root at runtime if none are assigned.
-5. Add the approved castle/environment and selected hero prefab to the 3D scene. Add camera, lighting and ground; keep the hero centered in the open area.
-6. Connect each HomeScreen UnityEvent to its matching screen controller when available.
-7. Test at 720×1280, 1080×1920 and a narrow/tall Android aspect ratio, including devices with camera cutouts.
-
-## Known limitations — not signed off
-- The repository currently contains no committed Home scene, castle prefab, hero prefab, or imported environment art in this branch. The HUD code does not generate or fake those assets.
-- Arabic text shaping is not enabled by the built-in Arial font. Current labels are English until a properly licensed Arabic-capable font and shaping/TMP setup are added.
-- Idle Rewards claim and navigation events are integration hooks only; the claim event must be connected to the real reward flow.
-- This change has not been compiled or run in Unity Editor and has not been tested on Android. A Unity compile, visual layout pass and device build are required before calling the screen complete.
+## Not final / verification still required
+- The hero and castle are primitive greybox geometry, not the approved five heroes or final 3D art.
+- Built-in Arial does not provide Arabic shaping; current labels remain English.
+- Navigation events without listeners remain hooks, not working destination screens.
+- This repository update has not been compiled or run in Unity Editor, and no Android build or touch/aspect-ratio test has been performed.
