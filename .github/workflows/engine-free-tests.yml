@@ -1,0 +1,23 @@
+name: Engine-Free Tests
+
+on:
+  push:
+    branches: ["main", "agent/gpt/**"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  engine-free-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Run engine-free NUnit tests
+        run: dotnet test Tests/EngineFree/EngineFree.Tests.csproj --configuration Release --verbosity normal
