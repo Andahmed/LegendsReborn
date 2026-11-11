@@ -1,5 +1,8 @@
 # Work Log (newest first)
 
+## 2026-11-12 - B2 team synergy (GPT Lane B)
+- Added five-unit faction synergy and regression/determinism tests for BattleSim. Engine-Free C# CI evidence is pending.
+
 ## 2026-11-11 - Foundations pass (Ahmed + Claude)
 **Done**
 - Added all foundation folders and files per the project plan (see ARCHITECTURE.md): Meta (economy, roster, gacha, idle, campaign, quests, save), Services, Bootstrap, Presentation, UI framework + 5 screen stubs, Localization, Editor build script, Server skeleton, docs.
