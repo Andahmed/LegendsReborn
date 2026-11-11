@@ -90,6 +90,10 @@ class CrossLanguageSummonContractTests(unittest.TestCase):
             {"Common": "COMMON", "Rare": "RARE", "Epic": "EPIC", "Legendary": "LEGENDARY"}[rarity]: int(value)
             for rarity, value in shard_cases
         }
+        # Progression.DuplicateShards uses the default branch for Legendary.
+        default_shards = re.search(r"default:\s*return\s*(\d+)\s*;", self.progression)
+        self.assertIsNotNone(default_shards, "Legendary duplicate shard default not found")
+        client_shards["LEGENDARY"] = int(default_shards.group(1))
         self.assertEqual(
             client_shards,
             python_assignment(self.server, "DUPLICATE_SHARDS"),
