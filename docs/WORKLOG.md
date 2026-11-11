@@ -4,17 +4,19 @@
 **Done**
 - Reworked Assets/Scripts/UI/Screens/HomeWorldStage.cs to assemble the home courtyard and castle from the repository's Quaternius CC0 FBX modules: Floor_Modular, Arch_Door, Wall_Modular, Decorative_Wall, Column, Column2, Banner, Banner_wall, Arch, Stairs_Modular and Torch.
 - Removed the procedural/primitive castle path from the runtime scene. Missing FBX assets now emit explicit errors; no cube or capsule castle fallback is created.
-- Kept the six nature FBX props and the imported Warrior home model, with bounds-based sizing and pivot-to-ground alignment.
-- Updated README and HANDOFF to describe the actual FBX-based assembly and its Unity visual-verification boundary.
+- Removed the setup-time dependency on the procedural castle mesh generator.
+- Updated the Quaternius installer so it checks bundled assets before prompting for a source folder and no longer searches or names another project checkout.
+- Updated README and HANDOFF to describe the actual FBX-based assembly and the correct installer menu.
 
 **Not verified**
 - Unity Editor compilation, FBX import, materials, pivots, camera framing, Play Mode and Android APK were not run in this environment.
 - FBX module names and files are listed by the repository asset-readiness audit; the final placement still requires visual review in Unity.
 
 **Next**
-1. Run the two asset installer menus in Unity and inspect the castle from the mobile camera.
-2. Adjust module scale/position based on actual imported bounds.
-3. Run Unity EditMode/PlayMode tests and Android build after local Unity setup.
+1. Open Unity 2022.3.62f3 and run the Home scene setup.
+2. Run Install MVP Art only if the audit reports missing model files.
+3. Inspect the castle from the mobile camera and adjust module scale/position based on actual imported bounds.
+4. Run Unity EditMode/PlayMode tests and Android build after local Unity setup.
 
 ## 2026-11-11 - Foundations pass (Ahmed + Claude)
 **Done**
