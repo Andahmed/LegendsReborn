@@ -1,9 +1,9 @@
 // =============================================================================
 // FILE: Assets/Scripts/Meta/Heroes/Roster.cs
 // OWNER ROLE: Client Programmer - Systems
-// RESPONSIBILITY: Hero collection, shared Spirit Source ceiling and equipment loadouts.
-// WORK ON: Add economy-approved level/star/ascension operations and five-slot team formation.
-// STATUS: Collection, ceiling and six-slot equip/unequip rules implemented.
+// RESPONSIBILITY: Hero collection, shared Spirit Source ceiling, equipment and team formation.
+// WORK ON: Connect five-slot formation to the Heroes UI and battle UnitSpec creation.
+// STATUS: Collection, ceiling, six-slot equipment and five-slot formation rules implemented.
 // =============================================================================
 using System;
 using System.Collections.Generic;
@@ -14,9 +14,11 @@ namespace SandsOfLegends.Meta
     public sealed class Roster
     {
         public List<HeroInstance> Heroes = new List<HeroInstance>();
+        public readonly TeamFormation Formation = new TeamFormation();
 
         public HeroInstance Find(string heroId)
         {
+            if (string.IsNullOrEmpty(heroId)) return null;
             for (int i = 0; i < Heroes.Count; i++)
                 if (Heroes[i] != null && Heroes[i].HeroId == heroId) return Heroes[i];
             return null;
@@ -58,6 +60,21 @@ namespace SandsOfLegends.Meta
         {
             removed = null;
             return EquipmentRules.TryUnequip(Find(heroId), slot, out removed);
+        }
+
+        public bool TryAssignFormationSlot(int slot, string heroId, out string replacedHeroId)
+        {
+            return Formation.TryAssign(slot, heroId, this, out replacedHeroId);
+        }
+
+        public bool TryMoveFormationSlot(int fromSlot, int toSlot, out string displacedHeroId)
+        {
+            return Formation.TryMove(fromSlot, toSlot, out displacedHeroId);
+        }
+
+        public bool TryRemoveFormationSlot(int slot, out string removedHeroId)
+        {
+            return Formation.TryRemove(slot, out removedHeroId);
         }
     }
 }
