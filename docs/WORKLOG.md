@@ -1,3 +1,25 @@
+## 2026-11-11 - Exact 3D asset implementation pass
+**Done in this branch**
+- Closed the previous 3D PR #5 without merging it. This replacement branch starts from the prototype setup branch.
+- Added `CharacterArtGenerator.cs`: Unity Editor-generated low-poly humanoid mesh assets for four visually distinct factions and one separate enemy silhouette; Humanoid Avatar skeletons; Idle/Run/Attack/Skill/Ultimate/Hit/Death clips; Animator Controllers; faction skill/ultimate Particle System prefabs; five biome environment prefabs; gate/crystal props; 128x128 portraits, faction icons and UI frame.
+- Added direct `HeroDefinition.prefab`, `portrait` and `factionIcon` references. Added `StageDefinition` with direct enemy/environment prefab references and Stage_001 setup.
+- Updated `BattleView` to instantiate the character prefabs in the five formation slots per team and dispatch BattleEvents to each `HeroView`. Updated the prototype Battle scene to create two front-row and three back-row slots per team.
+- Connected biome selection through `CampaignProgress.BiomeOf(stageNumber)`, VFX colors through `UIStyle.FactionColor`, and portrait binding methods in HeroesScreen/SummonScreen.
+- Added `docs/ASSETS.md` with source/license register, exact budgets, folder paths and import rules. Added `Sands > Validate Assets` and invoked it before Android BuildPlayer. Portrait/faction icon importers target Android ASTC 6x6.
+
+**Not verified / uncertainty**
+- Unity 2022.3.62f3 was not available in this session. The Editor generator has not been run, so the generated Mesh, Avatar, AnimationClip, AnimatorController, Prefab, Sprite and Scene assets have not yet been materialized in the Unity project.
+- No Unity compile, Humanoid Avatar validation, animation playback, triangle-budget menu run, PlayMode test, Battle visual inspection or Android APK build has been performed. Therefore the 3D work is NOT marked complete.
+- HeroesScreen and SummonScreen remain existing UI stubs; this pass adds portrait/icon data and binding methods but does not build their full card layouts.
+- Stage_001 is prototype data with four instances of the same original enemy prefab. Production stage formations and five-biome campaign content remain to be authored.
+- The generated character meshes use original Unity procedural geometry and flat-color materials, not third-party FBX/GLB downloads. No commercial-game assets or names were used.
+
+**Next**
+1. Open Unity 2022.3.62f3 and run `Sands > Setup Prototype`.
+2. Inspect all four hero prefabs, the enemy, Humanoid Avatar validity, seven animation clips, VFX, portraits, props and five environments.
+3. Run `Sands > Validate Assets`, then enter Battle and visually verify the 4v4 models, front/back formation and stage biome.
+4. Run PlayMode tests and the Android build only after Unity compile and visual checks pass.
+
 # Work Log (newest first)
 
 ## 2026-11-11 - Foundations pass (Ahmed + Claude)
