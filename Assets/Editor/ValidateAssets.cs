@@ -44,6 +44,8 @@ namespace SandsOfLegends.EditorTools
                 HeroDefinition hero = AssetDatabase.LoadAssetAtPath<HeroDefinition>(path);
                 if (hero == null || hero.prefab == null)
                     throw new Exception("HeroDefinition has no prefab reference: " + path);
+                if (hero.portrait == null || hero.factionIcon == null)
+                    throw new Exception("HeroDefinition is missing its portrait or faction icon: " + path);
                 ValidateCharacterPrefab(hero.prefab, 8000, register, true);
                 string heroId = hero.id.StartsWith("hero_", StringComparison.Ordinal) ? hero.id.Substring(5) : hero.id;
                 string heroFolder = "Assets/Art/Characters/" + heroId + "/";
