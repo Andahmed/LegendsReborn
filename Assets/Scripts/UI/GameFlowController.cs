@@ -37,6 +37,9 @@ namespace SandsOfLegends.UI
         private string selectedEquipmentHeroId;
         private bool bound;
         private bool battleResolved;
+        [SerializeField] private string serverBaseUrl = "http://localhost:8000";
+        private SummonService summonService;
+        private bool summonInFlight;
 
         private readonly Color ink = new Color(.025f, .065f, .085f, .97f);
         private readonly Color panelColor = new Color(.035f, .11f, .13f, .98f);
@@ -49,6 +52,9 @@ namespace SandsOfLegends.UI
             if (bound || target == null) return;
             home = target;
             bound = true;
+            summonService = gameObject.GetComponent<SummonService>();
+            if (summonService == null) summonService = gameObject.AddComponent<SummonService>();
+            summonService.Configure(serverBaseUrl);
             CreateOverlay();
             home.onCampaign.AddListener(OpenCampaign);
             home.onHeroes.AddListener(OpenHeroes);
@@ -375,7 +381,7 @@ namespace SandsOfLegends.UI
         {
             if (State == null) return;
             ReturnToMenuWorld();
-            CreatePanel("SUMMON ALTAR", "A 20-hero pool • client prototype only; production pulls must use server RNG.", true);
+            CreatePanel("SUMMON ALTAR", "LIVE SUMMON • server RNG, debit, pity and roster are authoritative.", true);
             AddInfo("GEMS  " + State.Wallet.Get(Currency.Gems).ToString("N0") +
                 "\nCOMMON 40%   RARE 35%   EPIC 20%   LEGENDARY 5%\nEPIC PITY 30  •  LEGENDARY PITY 90", 164);
             AddButton(panel, "SUMMON x1  •  300 GEMS", () => PullHeroes(1), 72, teal);
@@ -384,15 +390,44 @@ namespace SandsOfLegends.UI
 
         private void PullHeroes(int amount)
         {
-            if (State == null) return;
-            // SummonScreen.TryPull owns the single gem debit. Do not pre-spend here.
-            PullResult[] pulls;
-            if (!SummonScreen.TryPull(State, amount,
-                Environment.TickCount ^ (int)(Time.realtimeSinceStartup * 7919f), out pulls))
+            if (State == null || summonService == null || summonInFlight) return;
+            summonInFlight = true;
+            AddInfo("CONTACTING SUMMON SERVER…", 64);
+            summonService.Summon(amount, OnLiveSummonSucceeded, OnLiveSummonFailed);
+        }
+
+        private void OnLiveSummonFailed(string error)
+        {
+            summonInFlight = false;
+            AddInfo("LIVE SUMMON FAILED\n" + error, 86);
+        }
+
+        private void OnLiveSummonSucceeded(SummonService.SummonResponse response)
+        {
+            summonInFlight = false;
+            if (State == null || response == null) return;
+            State.Wallet.Set(Currency.Gems, response.Gems);
+            State.Wallet.Set(Currency.Gold, response.Gold);
+            State.Wallet.Set(Currency.Exp, response.Exp);
+            State.Wallet.Set(Currency.GearMaterials, response.GearMaterials);
+            State.Pity.SinceEpic = response.SinceEpic;
+            State.Pity.SinceLegendary = response.SinceLegendary;
+            List<HeroInstance> previousHeroes = State.Roster.Heroes;
+            HeroInstance[] serverHeroes = response.Heroes ?? new HeroInstance[0];
+            List<HeroInstance> authoritativeHeroes = new List<HeroInstance>(serverHeroes.Length);
+            for (int i = 0; i < serverHeroes.Length; i++)
             {
-                AddInfo("Not enough Gems.", 64);
-                return;
+                HeroInstance serverHero = serverHeroes[i];
+                HeroInstance previous = null;
+                for (int j = 0; j < previousHeroes.Count; j++)
+                    if (previousHeroes[j].HeroId == serverHero.HeroId) { previous = previousHeroes[j]; break; }
+                serverHero.Ascension = previous != null ? previous.Ascension : 0;
+                authoritativeHeroes.Add(serverHero);
             }
+            State.Roster.Heroes = authoritativeHeroes;
+            Save();
+
+            PullResult[] pulls = response.Results;
             List<string> results = new List<string>();
             for (int i = 0; i < pulls.Length; i++)
             {
@@ -401,8 +436,7 @@ namespace SandsOfLegends.UI
                 results.Add((card != null ? card.DisplayName : result.HeroId) + "  •  " +
                     HeroCatalog.RarityName(result.Rarity) + (result.IsNew ? "  •  NEW" : "  •  +" + result.ShardsGained + " SHARDS"));
             }
-            Save();
-            CreatePanel("SUMMON RESULTS", "Pulls complete. Pity counters have been saved.", true);
+            CreatePanel("SUMMON RESULTS", "Server confirmed. Wallet, pity and roster mirror the authoritative response.", true);
             for (int i = 0; i < pulls.Length; i++)
             {
                 AddHeroPortrait(pulls[i].HeroId);

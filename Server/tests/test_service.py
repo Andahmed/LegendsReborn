@@ -40,6 +40,18 @@ class ServerFlowTests(unittest.TestCase):
         with self.assertRaises(Exception):
             main.summon(main.SummonRequest(count=2), "Bearer " + login.access_token)
 
+    def test_client_seed_is_rejected_and_server_snapshot_is_authoritative(self):
+        login = main.guest_login()
+        with self.assertRaises(Exception):
+            main.SummonRequest(count=1, seed=12345)
+
+        response = main.summon(main.SummonRequest(count=1), "Bearer " + login.access_token)
+        self.assertEqual(response["profile"]["gems"], response["profile_state"]["gems"])
+        self.assertEqual(response["pity"]["epic"], response["profile"]["pity_epic"])
+        self.assertEqual(response["pity"]["legendary"], response["profile"]["pity_legendary"])
+        self.assertTrue(any(hero["hero_id"] == response["results"][0]["hero_id"]
+                            for hero in response["profile_state"]["heroes"]))
+
     def test_unknown_token_is_rejected(self):
         with self.assertRaises(Exception):
             main.require_account("Bearer not-a-real-token")

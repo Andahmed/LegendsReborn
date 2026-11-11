@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from fastapi import FastAPI, Header, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 app = FastAPI(title="Sands of Legends Server", version="0.2.0")
 
@@ -122,7 +122,27 @@ class GuestLoginResponse(BaseModel):
 
 
 class SummonRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     count: int = Field(default=1, description="Only 1 or 10 pulls are supported")
+
+
+def profile_state(profile: Dict) -> Dict:
+    """Flat, JsonUtility-friendly profile projection; the authoritative profile remains server-side."""
+    heroes = []
+    for hero_id, hero in profile.get("heroes", {}).items():
+        heroes.append({
+            "hero_id": hero_id,
+            "level": int(hero.get("level", 1)),
+            "stars": int(hero.get("stars", 0)),
+            "shards": int(hero.get("shards", 0)),
+        })
+    return {
+        "gems": int(profile.get("gems", 0)),
+        "gold": int(profile.get("gold", 0)),
+        "exp": int(profile.get("exp", 0)),
+        "gear_materials": int(profile.get("gear_materials", 0)),
+        "heroes": heroes,
+    }
 
 
 def roll_rarity(profile: Dict) -> str:
@@ -228,6 +248,7 @@ def summon(payload: SummonRequest, authorization: Optional[str] = Header(default
     return {
         "results": results,
         "profile": profile,
+        "profile_state": profile_state(profile),
         "rates_version": 1,
         "rates": {"COMMON": 40, "RARE": 35, "EPIC": 20, "LEGENDARY": 5},
         "pity": {"epic": profile["pity_epic"], "legendary": profile["pity_legendary"]},
