@@ -18,6 +18,7 @@ namespace SandsOfLegends.Combat
         public readonly int Slot;      // 0-1 front row, 2-4 back row
         public int Hp;
         public readonly int MaxHp;
+        public readonly int EffectiveAtk;
         public float Energy;           // 0..100, ultimate at 100
         public float ActionMeter;      // acts when >= 1
         public float SkillCd;
@@ -26,10 +27,12 @@ namespace SandsOfLegends.Combat
         public bool Alive { get { return Hp > 0; } }
         public bool IsFront { get { return Slot < BattleSim.FrontSlots; } }
 
-        public BattleUnit(UnitSpec spec, int team, int slot)
+        public BattleUnit(UnitSpec spec, int team, int slot, float hpMultiplier, float atkMultiplier)
         {
             Spec = spec; Team = team; Slot = slot;
-            Hp = MaxHp = spec.Hp;
+            MaxHp = Math.Max(1, (int)Math.Round(spec.Hp * hpMultiplier));
+            Hp = MaxHp;
+            EffectiveAtk = Math.Max(1, (int)Math.Round(spec.Atk * atkMultiplier));
             SkillCd = spec.Skill != null ? spec.Skill.Cooldown * 0.5f : 0f; // first cast earlier
         }
     }
@@ -55,14 +58,18 @@ namespace SandsOfLegends.Combat
         public bool Finished { get; private set; }
         public int Winner { get; private set; } = -1;   // 0 = team A, 1 = team B
         public bool AutoUltimate = true;
+        public TeamSynergyResult SynergyA { get; private set; }
+        public TeamSynergyResult SynergyB { get; private set; }
 
         private readonly SeededRng _rng;
 
         public BattleSim(IList<UnitSpec> teamA, IList<UnitSpec> teamB, int seed)
         {
             _rng = new SeededRng(seed);
-            for (int i = 0; i < teamA.Count && i < TeamSize; i++) if (teamA[i] != null) Units.Add(new BattleUnit(teamA[i], 0, i));
-            for (int i = 0; i < teamB.Count && i < TeamSize; i++) if (teamB[i] != null) Units.Add(new BattleUnit(teamB[i], 1, i));
+            SynergyA = TeamSynergy.Calculate(teamA);
+            SynergyB = TeamSynergy.Calculate(teamB);
+            for (int i = 0; i < teamA.Count && i < TeamSize; i++) if (teamA[i] != null) Units.Add(new BattleUnit(teamA[i], 0, i, SynergyA.HpMultiplier, SynergyA.AtkMultiplier));
+            for (int i = 0; i < teamB.Count && i < TeamSize; i++) if (teamB[i] != null) Units.Add(new BattleUnit(teamB[i], 1, i, SynergyB.HpMultiplier, SynergyB.AtkMultiplier));
             CheckEnd();
         }
 
@@ -148,7 +155,7 @@ namespace SandsOfLegends.Combat
                 var t = targets[i];
                 if (skill.IsHeal)
                 {
-                    int heal = Math.Max(1, (int)Math.Round(src.Spec.Atk * skill.Power));
+                    int heal = Math.Max(1, (int)Math.Round(src.EffectiveAtk * skill.Power));
                     int before = t.Hp;
                     t.Hp = Math.Min(t.MaxHp, t.Hp + heal);
                     Events.Add(new BattleEvent
@@ -161,7 +168,7 @@ namespace SandsOfLegends.Combat
                 else
                 {
                     bool crit = _rng.NextFloat() < src.Spec.CritChance;
-                    float raw = src.Spec.Atk * skill.Power * (100f / (100f + t.Spec.Def));
+                    float raw = src.EffectiveAtk * skill.Power * (100f / (100f + t.Spec.Def));
                     raw *= FactionChart.Multiplier(src.Spec.Faction, t.Spec.Faction);
                     if (crit) raw *= CritMultiplier;
                     int dmg = Math.Max(1, (int)Math.Round(raw));
