@@ -729,7 +729,13 @@ namespace SandsOfLegends.EditorTools
             {
                 if (!AssetDatabase.DeleteAsset(path)) File.Delete(absolutePath);
             }
-            string exportedPath = ModelExporter.ExportObject(absolutePath, source);
+            ExportModelOptions modelOptions = new ExportModelOptions
+            {
+                ModelAnimIncludeOption = Include.Model,
+                ExportUnrendered = true,
+                ExportFormat = ExportFormat.Binary
+            };
+            string exportedPath = ModelExporter.ExportObject(absolutePath, source, modelOptions);
             if (string.IsNullOrEmpty(exportedPath) || !File.Exists(absolutePath))
                 throw new InvalidOperationException("FBX export failed: " + path);
             AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
