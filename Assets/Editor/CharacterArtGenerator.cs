@@ -533,21 +533,79 @@ namespace SandsOfLegends.EditorTools
             ground.transform.localScale = new Vector3(14f, .35f, 10f);
             UnityEngine.Object.DestroyImmediate(ground.GetComponent<Collider>());
             ground.GetComponent<Renderer>().sharedMaterial = CreateMaterial("env_" + biome, color);
-            for (int i = 0; i < 4; i++)
+            Material landmarkMaterial = CreateMaterial("env_" + biome + "_landmark", Color.Lerp(color, UIStyle.Gold, .22f));
+            if (biome == "forest")
             {
-                GameObject landmark = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                landmark.name = "landmark_" + i;
-                landmark.transform.SetParent(root.transform, false);
-                landmark.transform.localPosition = new Vector3(i < 2 ? -5f : 5f, .8f + (i % 2) * .4f, i % 2 == 0 ? -2.5f : 2.5f);
-                landmark.transform.localScale = new Vector3(.7f, 1.6f + (i % 2) * .8f, .7f);
-                UnityEngine.Object.DestroyImmediate(landmark.GetComponent<Collider>());
-                landmark.GetComponent<Renderer>().sharedMaterial = CreateMaterial("env_" + biome + "_landmark", Color.Lerp(color, UIStyle.Gold, .22f));
+                for (int i = 0; i < 4; i++)
+                {
+                    float x = i < 2 ? -4.8f : 4.8f;
+                    float z = i % 2 == 0 ? -2.8f : 2.8f;
+                    CreateEnvironmentPart(root.transform, PrimitiveType.Cylinder, "tree_trunk_" + i,
+                        new Vector3(x, .85f, z), new Vector3(.24f, 1.7f, .24f), landmarkMaterial, Quaternion.identity);
+                    CreateEnvironmentPart(root.transform, PrimitiveType.Sphere, "tree_canopy_" + i,
+                        new Vector3(x, 2.05f, z), new Vector3(1.05f, 1.2f, 1.05f), CreateMaterial("env_forest_canopy", new Color(.12f,.42f,.20f)), Quaternion.identity);
+                }
+            }
+            else if (biome == "desert")
+            {
+                for (int i = 0; i < 4; i++)
+                    CreateEnvironmentPart(root.transform, PrimitiveType.Cube, "sandstone_spire_" + i,
+                        new Vector3(i < 2 ? -5f : 5f, 1.05f + (i % 2) * .35f, i % 2 == 0 ? -2.8f : 2.8f),
+                        new Vector3(.55f, 2.1f + (i % 2) * .7f, .55f), landmarkMaterial,
+                        Quaternion.Euler(0f, 0f, i % 2 == 0 ? 7f : -9f));
+                CreateEnvironmentPart(root.transform, PrimitiveType.Sphere, "dune_rock",
+                    new Vector3(0f, .45f, 4f), new Vector3(2.8f,.65f,1.1f), CreateMaterial("env_desert_dune", new Color(.78f,.58f,.31f)), Quaternion.identity);
+            }
+            else if (biome == "mountain")
+            {
+                for (int i = 0; i < 4; i++)
+                    CreateEnvironmentPart(root.transform, PrimitiveType.Cube, "mountain_peak_" + i,
+                        new Vector3(i < 2 ? -5.2f : 5.2f, 1.6f + (i % 2) * .5f, i % 2 == 0 ? -2.6f : 2.6f),
+                        new Vector3(1.2f, 3.2f + (i % 2), 1.2f), landmarkMaterial,
+                        Quaternion.Euler(0f, 0f, i % 2 == 0 ? 45f : -45f));
+            }
+            else if (biome == "sea")
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    float x = i < 2 ? -5f : 5f;
+                    float z = i % 2 == 0 ? -2.8f : 2.8f;
+                    CreateEnvironmentPart(root.transform, PrimitiveType.Cylinder, "sea_column_" + i,
+                        new Vector3(x, .9f, z), new Vector3(.42f, 1.8f, .42f), landmarkMaterial, Quaternion.identity);
+                    CreateEnvironmentPart(root.transform, PrimitiveType.Sphere, "sea_cap_" + i,
+                        new Vector3(x, 1.95f, z), new Vector3(.7f,.55f,.7f), CreateMaterial("env_sea_foam", new Color(.55f,.78f,.82f)), Quaternion.identity);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < 4; i++)
+                    CreateEnvironmentPart(root.transform, PrimitiveType.Cube, "ruined_column_" + i,
+                        new Vector3(i < 2 ? -5f : 5f, .75f + (i % 2) * .35f, i % 2 == 0 ? -2.8f : 2.8f),
+                        new Vector3(.65f, 1.5f + (i % 2) * .7f, .65f), landmarkMaterial,
+                        Quaternion.Euler(0f, 0f, i % 2 == 0 ? 4f : -8f));
+                CreateEnvironmentPart(root.transform, PrimitiveType.Cube, "broken_lintel",
+                    new Vector3(0f, 2.3f, -3.2f), new Vector3(6f,.35f,.55f), landmarkMaterial, Quaternion.identity);
             }
             PrefabUtility.SaveAsPrefabAsset(root, path);
             ExportFbx(root, folder + "/env_" + biome + ".fbx");
             UnityEngine.Object.DestroyImmediate(root);
             CreatePropPrefab(folder + "/props/prop_ancient_gate.prefab", "prop_ancient_gate", new Color(.38f,.32f,.24f));
             CreatePropPrefab(folder + "/props/prop_forest_crystal.prefab", "prop_forest_crystal", UIStyle.Turquoise);
+        }
+
+
+        private static GameObject CreateEnvironmentPart(Transform parent, PrimitiveType type, string name,
+            Vector3 position, Vector3 scale, Material material, Quaternion rotation)
+        {
+            GameObject part = GameObject.CreatePrimitive(type);
+            part.name = name;
+            part.transform.SetParent(parent, false);
+            part.transform.localPosition = position;
+            part.transform.localScale = scale;
+            part.transform.localRotation = rotation;
+            UnityEngine.Object.DestroyImmediate(part.GetComponent<Collider>());
+            part.GetComponent<Renderer>().sharedMaterial = material;
+            return part;
         }
 
         private static void CreatePropPrefab(string path, string name, Color color)
