@@ -28,3 +28,6 @@ ProjectSettings/ProjectVersion.txt
 
 ## Factions
 Fortress > Wild > Forest > Shadow > Fortress. Divinity <-> Abyss (rare, mutual).
+
+## Status / handoff
+See [docs/HANDOFF.md](docs/HANDOFF.md) for what is done, what is unverified, and next steps.
