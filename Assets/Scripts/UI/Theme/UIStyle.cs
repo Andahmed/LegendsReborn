@@ -6,6 +6,7 @@
 // STATUS: Implemented (placeholder palette)
 // =============================================================================
 using UnityEngine;
+using SandsOfLegends.Combat;
 
 namespace SandsOfLegends.UI
 {
@@ -17,5 +18,17 @@ namespace SandsOfLegends.UI
         public static readonly Color Night = new Color(0.10f, 0.12f, 0.18f);
         public static readonly Color Crit = new Color(1f, 0.45f, 0.2f);
         public static readonly Color Heal = new Color(0.4f, 0.9f, 0.5f);
+
+        public static Color FactionColor(Faction faction)
+        {
+            switch (faction)
+            {
+                case Faction.Fortress: return Turquoise;
+                case Faction.Wild: return Gold;
+                case Faction.Forest: return Heal;
+                case Faction.Shadow: return new Color(0.62f, 0.42f, 0.86f);
+                default: return Sand;
+            }
+        }
     }
 }
