@@ -61,7 +61,7 @@ Server (`Server/`) can re-run `Combat` + `Meta` logic for authority/anti-cheat.
 ## Prototype setup additions
 | File | Owner role | Responsibility | Work on | Status |
 |---|---|---|---|---|
-| `Assets/Editor/PrototypeSetup.cs` | Client Programmer - Systems | Menu command `Sands > Setup Prototype`; creates missing faction hero/skill assets, Boot/Home/Battle scenes, and Build Settings entries without overwriting existing assets/scenes. | Replace placeholder scene visuals with approved production art. | Prototype implementation |
+| `Assets/Editor/PrototypeSetup.cs` | Client Programmer - Systems | Menu command `Sands > Setup Prototype`; creates missing faction hero/skill assets, Boot/Home/Battle scenes, and Build Settings entries; replaces an obsolete cube-based Battle scene with the five-slot 3D layout while preserving compatible scenes. | Replace placeholder scene visuals with approved production art. | Prototype implementation |
 | `Assets/Scripts/Presentation/PrototypeBattleController.cs` | Client Programmer - Combat | Supplies hero/stage prefabs, five formation slots per team, biome environment and HUD data to BattleView. | Replace Stage_001 prototype data with campaign stage selection and production battle HUD. | 3D prefab integration prototype |
 | `Assets/Scripts/Bootstrap/PrototypeBootRouter.cs` | Client Programmer - Systems | Routes the Boot scene to Home after GameBootstrap initializes. | Replace the prototype handoff with production loading/login. | Prototype implementation |
 | `Assets/Scripts/Presentation/PrototypeHomeController.cs` | Client Programmer - UI | Wires the Home scene's Enter Battle button to the Battle scene. | Replace the temporary scene jump with production navigation/unlock rules. | Prototype implementation |
