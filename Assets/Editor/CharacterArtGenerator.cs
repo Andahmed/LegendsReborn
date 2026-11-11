@@ -160,7 +160,7 @@ namespace SandsOfLegends.EditorTools
                 CreatePortrait(id, Armor[i], Accent[i]);
             }
 
-            GameObject enemy = CreateCharacter("gloom_raider", "shadow", new Color(0.18f, 0.17f, 0.20f),
+            GameObject enemy = CreateCharacter("gloom_raider", "raider", new Color(0.18f, 0.17f, 0.20f),
                 new Color(0.78f, 0.18f, 0.12f), true);
             string enemyPath = "Assets/Art/Characters/Enemies/gloom_raider/enemy_gloom_raider.prefab";
             EnsureFolder(Art + "/Characters/Enemies", "gloom_raider");
@@ -233,11 +233,19 @@ namespace SandsOfLegends.EditorTools
                 Add(groups, "metal", metal).AddCylinder(new Vector3(.57f,1.20f,0f),new Vector3(.63f,.50f,0f),.028f,11);
                 Add(groups, "accent", accent).AddOcta(new Vector3(.63f,.47f,0f),new Vector3(.13f,.17f,.13f),11);
             }
+            else if (style == "raider")
+            {
+                Add(groups, "accent", accent).AddOcta(new Vector3(0f,1.42f,.05f),new Vector3(.31f,.23f,.20f),3);
+                Add(groups, "metal", metal).AddOcta(new Vector3(-.32f,1.55f,0f),new Vector3(.18f,.25f,.18f),6);
+                Add(groups, "metal", metal).AddOcta(new Vector3(.32f,1.55f,0f),new Vector3(.18f,.25f,.18f),9);
+                Add(groups, "metal", metal).AddCylinder(new Vector3(.54f,1.20f,0f),new Vector3(.80f,.84f,0f),.04f,11);
+                Add(groups, "accent", accent).AddOcta(new Vector3(.80f,.80f,0f),new Vector3(.12f,.20f,.09f),11);
+            }
             else
             {
                 Add(groups, "accent", accent).AddOcta(new Vector3(0f,1.84f,-.02f),new Vector3(.25f,.25f,.22f),5);
-                Add(groups, "metal", metal).AddOcta(new Vector3(-.17f,1.98f,0f),new Vector3(.06f,.17f,.06f),5);
-                Add(groups, "metal", metal).AddOcta(new Vector3(.17f,1.98f,0f),new Vector3(.06f,.17f,.06f),5);
+                Add(groups, "metal", metal).AddOcta(new Vector3(-.17f,1.87f,0f),new Vector3(.06f,.11f,.06f),5);
+                Add(groups, "metal", metal).AddOcta(new Vector3(.17f,1.87f,0f),new Vector3(.06f,.11f,.06f),5);
                 Add(groups, "metal", metal).AddCylinder(new Vector3(.54f,1.20f,0f),new Vector3(.77f,.91f,0f),.025f,11);
                 Add(groups, "metal", metal).AddCylinder(new Vector3(-.54f,1.20f,0f),new Vector3(-.77f,.91f,0f),.025f,8);
             }
@@ -552,6 +560,7 @@ namespace SandsOfLegends.EditorTools
             texture.Apply();
             File.WriteAllBytes(path, texture.EncodeToPNG());
             UnityEngine.Object.DestroyImmediate(texture);
+            ConfigureSprite(path);
         }
 
         private static void CreateUiFrame()
@@ -567,6 +576,23 @@ namespace SandsOfLegends.EditorTools
             }
             texture.SetPixels(pixels); texture.Apply(); File.WriteAllBytes(path,texture.EncodeToPNG());
             UnityEngine.Object.DestroyImmediate(texture);
+            ConfigureSprite(path);
+        }
+
+
+        private static void ConfigureSprite(string path)
+        {
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer == null) return;
+            importer.textureType = TextureImporterType.Sprite;
+            importer.textureCompression = TextureImporterCompression.Compressed;
+            TextureImporterPlatformSettings android = importer.GetPlatformTextureSettings("Android");
+            android.name = "Android";
+            android.overridden = true;
+            android.format = TextureImporterFormat.ASTC_6x6;
+            importer.SetPlatformTextureSettings(android);
+            importer.SaveAndReimport();
         }
 
         private static Material CreateMaterial(string id, Color color)
