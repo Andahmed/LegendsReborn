@@ -1,14 +1,13 @@
 // =============================================================================
 // FILE: Assets/Scripts/Presentation/PrototypeBattleController.cs
 // OWNER ROLE: Client Programmer - Combat
-// RESPONSIBILITY: Spawn registered humanoid hero/enemy prefabs into five formation slots and bind BattleView events, HP and speed controls.
-// WORK ON: Replace prototype Stage_001 roster with campaign stage selection and production battle HUD.
-// STATUS: 3D prefab integration prototype
+// RESPONSIBILITY: Supply hero and stage enemy prefabs, five formation slots, environment and HUD data to BattleView.
+// WORK ON: Replace Stage_001 prototype data with campaign stage selection and production battle HUD.
+// STATUS: 3D prefab battle integration prototype
 // =============================================================================
 using SandsOfLegends.Combat;
 using SandsOfLegends.Core;
 using SandsOfLegends.Meta;
-using SandsOfLegends.Presentation;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,8 +32,6 @@ namespace SandsOfLegends.Presentation
         public Button speed4Button;
 
         private BattleSim simulation;
-        private readonly HeroView[] playerViews = new HeroView[4];
-        private readonly HeroView[] enemyViews = new HeroView[4];
 
         private void OnEnable()
         {
@@ -51,6 +48,8 @@ namespace SandsOfLegends.Presentation
             SpawnStageEnvironment();
             var playerTeam = new UnitSpec[4];
             var enemyTeam = new UnitSpec[4];
+            var playerPrefabs = new GameObject[4];
+            var enemyPrefabs = new GameObject[4];
 
             for (int i = 0; i < 4; i++)
             {
@@ -58,6 +57,7 @@ namespace SandsOfLegends.Presentation
                     throw new System.InvalidOperationException("HeroDefinition or hero prefab is missing at slot " + i + ".");
 
                 playerTeam[i] = heroes[i].ToSpec();
+                playerPrefabs[i] = heroes[i].prefab;
                 UnitSpec source = playerTeam[i];
                 enemyTeam[i] = new UnitSpec
                 {
@@ -74,16 +74,17 @@ namespace SandsOfLegends.Presentation
                     Ultimate = source.Ultimate
                 };
 
-                playerViews[i] = SpawnHero(heroes[i].prefab, playerModels, i, 0);
-                GameObject enemyPrefab = stageDefinition != null &&
+                enemyPrefabs[i] = stageDefinition != null &&
                     stageDefinition.enemyPrefabs != null &&
                     i < stageDefinition.enemyPrefabs.Length &&
                     stageDefinition.enemyPrefabs[i] != null
                     ? stageDefinition.enemyPrefabs[i]
                     : heroes[i].prefab;
-                enemyViews[i] = SpawnHero(enemyPrefab, enemyModels, i, 1);
             }
 
+            battleView.ConfigurePresentation(playerPrefabs, enemyPrefabs, playerModels, enemyModels);
+            playerModels = battleView.PlayerModels;
+            enemyModels = battleView.EnemyModels;
             simulation = new BattleSim(playerTeam, enemyTeam, 20261111);
             battleView.Begin(simulation);
 
@@ -107,21 +108,6 @@ namespace SandsOfLegends.Presentation
             if (environment != null) Instantiate(environment, environmentRoot.position, Quaternion.identity, environmentRoot);
         }
 
-        private HeroView SpawnHero(GameObject prefab, Transform[] slots, int slot, int team)
-        {
-            if (slots == null || slot >= slots.Length || slots[slot] == null)
-                throw new System.InvalidOperationException("Missing formation slot for team " + team + ", slot " + slot + ".");
-            Transform slotTransform = slots[slot];
-            GameObject instance = Instantiate(prefab, slotTransform.position, Quaternion.identity, slotTransform);
-            instance.name = (team == 0 ? "Player_" : "Enemy_") + slot;
-            instance.transform.localPosition = Vector3.zero;
-            HeroView view = instance.GetComponent<HeroView>();
-            if (view == null) throw new System.InvalidOperationException("Character prefab is missing HeroView.");
-            view.Bind(team, slot);
-            slots[slot] = instance.transform;
-            return view;
-        }
-
         private void OnDisable()
         {
             if (battleView != null) battleView.EventPlayed -= HandleBattleEvent;
@@ -143,11 +129,6 @@ namespace SandsOfLegends.Presentation
 
         private void HandleBattleEvent(BattleEvent battleEvent)
         {
-            for (int i = 0; i < 4; i++)
-            {
-                if (playerViews[i] != null) playerViews[i].HandleBattleEvent(battleEvent);
-                if (enemyViews[i] != null) enemyViews[i].HandleBattleEvent(battleEvent);
-            }
             RefreshVisuals();
             if (simulation != null && simulation.Finished)
                 SetStatus(simulation.Winner == 0 ? "Victory" : "Defeat");
