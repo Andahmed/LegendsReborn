@@ -148,6 +148,7 @@ namespace SandsOfLegends.EditorTools
                 GameObject prefab = CreateCharacter(id, id, Armor[i], Accent[i], false);
                 string prefabPath = "Assets/Prefabs/Heroes/hero_" + id + ".prefab";
                 PrefabUtility.SaveAsPrefabAsset(prefab, prefabPath);
+                PrefabUtility.SaveAsPrefabAsset(prefab, Art + "/Characters/" + id + "/hero_" + id + ".prefab");
                 Avatar importedAvatar = ExportFbx(prefab, Art + "/Characters/" + id + "/hero_" + id + ".fbx", true);
                 ExportAnimationFbx(prefab, Art + "/Characters/" + id, importedAvatar);
                 UnityEngine.Object.DestroyImmediate(prefab);
