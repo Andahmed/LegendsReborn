@@ -113,12 +113,14 @@ namespace SandsOfLegends.UI
         private void BuildSideMenus()
         {
             RectTransform left = Box("Left Menu", safeAreaRoot, new Vector2(0,0.34f), new Vector2(0,0.34f), new Vector2(190,360), Vector2.zero, Color.clear);
+            left.pivot = new Vector2(0f,0.5f);
             AddNav(left,"HEROES",onHeroes,turquoise,72);
             AddNav(left,"FORMATION",onFormation,gold,72);
             AddNav(left,"QUESTS",onQuests,turquoise,72);
             AddNav(left,"EQUIPMENT",onEquipment,gold,72);
 
             RectTransform right = Box("Right Menu", safeAreaRoot, new Vector2(1,0.34f), new Vector2(1,0.34f), new Vector2(190,360), Vector2.zero, Color.clear);
+            right.pivot = new Vector2(1f,0.5f);
             AddNav(right,"SUMMON",onSummon,gold,72);
             AddNav(right,"ARENA",onArena,turquoise,72);
             AddNav(right,"ALLIANCE BOSS",onAllianceBoss,gold,72);
@@ -128,7 +130,7 @@ namespace SandsOfLegends.UI
         private void BuildIdleRewards()
         {
             RectTransform idle = Box("Idle Rewards Card", safeAreaRoot, new Vector2(0.24f,0.20f), new Vector2(0.76f,0.20f), new Vector2(0,142), Vector2.zero, panel);
-                        idleText = AddText("IDLE REWARDS  •  00:00:00", idle, 20, cream, TextAnchor.MiddleCenter, new Vector2(8,62), new Vector2(-8,-2));
+            idleText = AddText("IDLE REWARDS  •  00:00:00", idle, 20, cream, TextAnchor.MiddleCenter, new Vector2(8,62), new Vector2(-8,-2));
             idleAmountText = AddText("+0 GOLD  •  +0 XP", idle, 17, turquoise, TextAnchor.MiddleCenter, new Vector2(8,36), new Vector2(-8,-26));
             idleClaimButton = MakeButton("CLAIM REWARDS", idle, gold, 210, 48);
             idleClaimButton.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f,0);
