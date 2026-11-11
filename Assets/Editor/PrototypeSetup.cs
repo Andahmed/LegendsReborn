@@ -39,6 +39,7 @@ namespace SandsOfLegends.EditorTools
             EnsureFolder("Assets", "Scenes");
 
             HeroDefinition[] heroes = CreateHeroAssets();
+            ArtPrototypeSetup.GeneratePrototypeArt(heroes);
 
             if (!File.Exists(BootPath)) CreateBootScene();
             if (!File.Exists(HomePath)) CreateHomeScene();
@@ -159,8 +160,8 @@ namespace SandsOfLegends.EditorTools
             CreateLight();
             CreateEventSystem();
 
-            var playerModels = new Transform[4];
-            var enemyModels = new Transform[4];
+            var playerModels = new Transform[5];
+            var enemyModels = new Transform[5];
             var playerHealth = new Image[4];
             var enemyHealth = new Image[4];
             var playerLabels = new Text[4];
@@ -169,11 +170,12 @@ namespace SandsOfLegends.EditorTools
             Color playerColor = new Color(0.18f, 0.72f, 0.82f);
             Color enemyColor = new Color(0.82f, 0.38f, 0.28f);
 
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 5; i++)
             {
-                float y = 2.2f - i * 1.35f;
-                playerModels[i] = CreateHeroCube("Player_" + heroes[i].displayName, new Vector3(-4.2f, y, 0f), playerColor).transform;
-                enemyModels[i] = CreateHeroCube("Enemy_" + heroes[i].displayName, new Vector3(4.2f, y, 0f), enemyColor).transform;
+                float y = i < 2 ? 1.15f - i * 2.3f : 2.3f - (i - 2) * 1.15f;
+                float x = i < 2 ? 2.4f : 4.4f;
+                playerModels[i] = CreateHeroCube("PlayerSlot" + i, new Vector3(-x, y, 0f), playerColor).transform;
+                enemyModels[i] = CreateHeroCube("EnemySlot" + i, new Vector3(x, y, 0f), enemyColor).transform;
             }
 
             Canvas canvas = CreateCanvas("BattleCanvas");
