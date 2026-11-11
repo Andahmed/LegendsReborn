@@ -38,7 +38,10 @@ namespace SandsOfLegends.EditorTools
             EnsureFolder(DataRoot, "Skills");
             EnsureFolder("Assets", "Scenes");
 
+            EnsureFolder(DataRoot, "Stages");
             HeroDefinition[] heroes = CreateHeroAssets();
+            CharacterArtGenerator.Generate(heroes);
+            CreatePrototypeStage();
 
             if (!File.Exists(BootPath)) CreateBootScene();
             if (!File.Exists(HomePath)) CreateHomeScene();
@@ -129,6 +132,43 @@ namespace SandsOfLegends.EditorTools
             return skill;
         }
 
+
+        private static GameObject CreateBattleSlot(string name, Vector3 position)
+        {
+            GameObject slot = new GameObject(name);
+            slot.transform.position = position;
+            return slot;
+        }
+
+        private static void CreatePrototypeStage()
+        {
+            string path = DataRoot + "/Stages/Stage_001.asset";
+            StageDefinition stage = AssetDatabase.LoadAssetAtPath<StageDefinition>(path);
+            if (stage == null)
+            {
+                stage = ScriptableObject.CreateInstance<StageDefinition>();
+                AssetDatabase.CreateAsset(stage, path);
+            }
+            stage.stageNumber = 1;
+            GameObject enemy = AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/Art/Characters/Enemies/gloom_raider/enemy_gloom_raider.prefab");
+            stage.enemyPrefabs = new[] { enemy, enemy, enemy, enemy };
+            stage.environmentPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/Art/Environments/forest/env_forest.prefab");
+            EditorUtility.SetDirty(stage);
+            AssetDatabase.SaveAssets();
+        }
+
+        private static GameObject[] LoadBiomePrefabs()
+        {
+            string[] biomes = { "forest", "desert", "mountain", "sea", "ruins" };
+            var prefabs = new GameObject[biomes.Length];
+            for (int i = 0; i < biomes.Length; i++)
+                prefabs[i] = AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/Art/Environments/" + biomes[i] + "/env_" + biomes[i] + ".prefab");
+            return prefabs;
+        }
+
         private static void CreateBootScene()
         {
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
@@ -159,21 +199,20 @@ namespace SandsOfLegends.EditorTools
             CreateLight();
             CreateEventSystem();
 
-            var playerModels = new Transform[4];
-            var enemyModels = new Transform[4];
+            var playerModels = new Transform[5];
+            var enemyModels = new Transform[5];
             var playerHealth = new Image[4];
             var enemyHealth = new Image[4];
             var playerLabels = new Text[4];
             var enemyLabels = new Text[4];
 
-            Color playerColor = new Color(0.18f, 0.72f, 0.82f);
-            Color enemyColor = new Color(0.82f, 0.38f, 0.28f);
-
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 5; i++)
             {
-                float y = 2.2f - i * 1.35f;
-                playerModels[i] = CreateHeroCube("Player_" + heroes[i].displayName, new Vector3(-4.2f, y, 0f), playerColor).transform;
-                enemyModels[i] = CreateHeroCube("Enemy_" + heroes[i].displayName, new Vector3(4.2f, y, 0f), enemyColor).transform;
+                bool frontRow = i < 2;
+                float x = frontRow ? 2.35f : 4.25f;
+                float y = frontRow ? (i == 0 ? 0.85f : -0.85f) : (2.1f - (i - 2) * 2.1f);
+                playerModels[i] = CreateBattleSlot("PlayerSlot" + i, new Vector3(-x, y, 0f)).transform;
+                enemyModels[i] = CreateBattleSlot("EnemySlot" + i, new Vector3(x, y, 0f)).transform;
             }
 
             Canvas canvas = CreateCanvas("BattleCanvas");
@@ -205,6 +244,9 @@ namespace SandsOfLegends.EditorTools
             controller.enemyHealth = enemyHealth;
             controller.playerLabels = playerLabels;
             controller.enemyLabels = enemyLabels;
+            controller.stageDefinition = AssetDatabase.LoadAssetAtPath<StageDefinition>(DataRoot + "/Stages/Stage_001.asset");
+            controller.biomePrefabs = LoadBiomePrefabs();
+            controller.environmentRoot = new GameObject("BattleEnvironment").transform;
             controller.battleStatus = status;
             controller.speed1Button = speed1;
             controller.speed2Button = speed2;
