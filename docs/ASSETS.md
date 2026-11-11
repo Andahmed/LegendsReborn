@@ -24,7 +24,7 @@ Names use lowercase snake_case and type prefixes: hero_<id>, enemy_<id>, prop_<n
 | hero_wild | [ArtPrototypeSetup.cs](../Assets/Editor/ArtPrototypeSetup.cs) | Original procedural work; no third-party source | Wild prototype hero prefab |
 | hero_forest | [ArtPrototypeSetup.cs](../Assets/Editor/ArtPrototypeSetup.cs) | Original procedural work; no third-party source | Forest prototype hero prefab |
 | hero_shadow | [ArtPrototypeSetup.cs](../Assets/Editor/ArtPrototypeSetup.cs) | Original procedural work; no third-party source | Shadow prototype hero prefab |
-| vfx_fortress_skill, vfx_wild_skill, vfx_forest_skill, vfx_shadow_skill and their ultimate variants | [ArtPrototypeSetup.cs](../Assets/Editor/ArtPrototypeSetup.cs) | Original procedural work; no third-party source | Faction skill particles |
+| vfx_fortress_skill, vfx_fortress_ultimate, vfx_wild_skill, vfx_wild_ultimate, vfx_forest_skill, vfx_forest_ultimate, vfx_shadow_skill, vfx_shadow_ultimate | [ArtPrototypeSetup.cs](../Assets/Editor/ArtPrototypeSetup.cs) | Original procedural work; no third-party source | Faction skill and ultimate particles |
 | env_forest, env_desert, env_mountain, env_sea, env_ruins | [ArtPrototypeSetup.cs](../Assets/Editor/ArtPrototypeSetup.cs) | Original procedural work; no third-party source | Placeholder biome environment prefabs |
 
 These are low-poly primitive prototypes, not production FBX character assets. They do not claim to contain a Humanoid skeletal rig or authored Idle/Run/Attack/Skill/Ultimate/Hit/Death animation clips. Those remain required before production art acceptance.
