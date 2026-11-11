@@ -148,7 +148,7 @@ namespace SandsOfLegends.EditorTools
                 GameObject prefab = CreateCharacter(id, id, Armor[i], Accent[i], false);
                 string prefabPath = "Assets/Prefabs/Heroes/hero_" + id + ".prefab";
                 PrefabUtility.SaveAsPrefabAsset(prefab, prefabPath);
-                ExportFbx(prefab, Art + "/Characters/" + id + "/hero_" + id + ".fbx");
+                ExportFbx(prefab, Art + "/Characters/" + id + "/hero_" + id + ".fbx", true);
                 UnityEngine.Object.DestroyImmediate(prefab);
                 if (heroes != null)
                 {
@@ -179,7 +179,7 @@ namespace SandsOfLegends.EditorTools
             string enemyPath = "Assets/Art/Characters/Enemies/gloom_raider/enemy_gloom_raider.prefab";
             EnsureFolder(Art + "/Characters/Enemies", "gloom_raider");
             PrefabUtility.SaveAsPrefabAsset(enemy, enemyPath);
-            ExportFbx(enemy, Art + "/Characters/Enemies/gloom_raider/enemy_gloom_raider.fbx");
+            ExportFbx(enemy, Art + "/Characters/Enemies/gloom_raider/enemy_gloom_raider.fbx", true);
             UnityEngine.Object.DestroyImmediate(enemy);
 
             CreateBiome("forest", new Color(0.15f, 0.34f, 0.19f));
@@ -661,7 +661,7 @@ namespace SandsOfLegends.EditorTools
         }
 
 
-        private static void ExportFbx(GameObject source, string path)
+        private static void ExportFbx(GameObject source, string path, bool humanoid = false)
         {
             if (File.Exists(path))
             {
@@ -671,6 +671,14 @@ namespace SandsOfLegends.EditorTools
             string exportedPath = ModelExporter.ExportObject(absolutePath, source);
             if (string.IsNullOrEmpty(exportedPath) || !File.Exists(path))
                 throw new InvalidOperationException("FBX export failed: " + path);
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+            ModelImporter importer = AssetImporter.GetAtPath(path) as ModelImporter;
+            if (importer == null)
+                throw new InvalidOperationException("Unity did not create an FBX ModelImporter: " + path);
+            importer.animationType = humanoid ? ModelImporterAnimationType.Human : ModelImporterAnimationType.None;
+            importer.importAnimation = humanoid;
+            if (humanoid) importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
+            importer.SaveAndReimport();
         }
 
         private static void EnsureFolder(string parent, string name)
