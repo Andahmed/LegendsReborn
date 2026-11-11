@@ -1,40 +1,56 @@
-# HANDOFF - where the project stands (2026-11-11)
+# HANDOFF - implementation and verification status (2026-11-11)
 
-Working title: **Sands of Legends** (repo: LegendsReborn). Idle RPG for Android (Unity 2022.3.62f3).
-Plan source: [Idle_RPG_Project_Plan.pdf](Idle_RPG_Project_Plan.pdf) (Arabic, 18 pages; GDD summary below). Owner: Ahmed.
+Working title: **Sands of Legends**. Unity 2022.3.62f3, Android IL2CPP/ARM64 target.
 
-## Done
-- Repo scaffold: README, .gitignore, .gitattributes, folders, `Packages/manifest.json`, `ProjectSettings/ProjectVersion.txt`.
-- `Assets/Scripts/Combat` (engine-free, asmdef `noEngineReferences`):
-  - `Types.cs`: Faction/Role/Rarity/TargetType, `FactionChart` (+25% advantage), `SkillSpec`, `UnitSpec`, `BattleEvent`, `SeededRng`.
-  - `BattleSim.cs`: deterministic fixed-step (Dt 0.1s) auto-battle. 2 front + 3 back slots, front row targeted first,
-    timed skill, energy ultimate (auto or manual via `RequestUltimate`), crit via seeded RNG, 120s timeout = defender wins.
-- `Assets/Scripts/Core`: `HeroDefinition` / `SkillDefinition` ScriptableObjects -> `ToSpec()`.
-- `Assets/Tests/EditMode/BattleSimTests.cs`: 6 NUnit tests.
-- Combat logic was compiled and checked outside Unity with mono (all checks passed).
+## Implemented in the current MVP foundation branch
 
-## NOT verified yet
-- Project has never been opened in Unity. `HeroDefinition.cs`, tests and asmdefs are untested in the editor.
-- No `.meta` files committed; Unity will generate them on first open (commit them after).
-- No Unity Cloud Build / CI workflow yet (needs UNITY_LICENSE/EMAIL/PASSWORD secrets).
-- Balance numbers (damage formula `ATK*power*100/(100+DEF)`, energy gain 20/10) are placeholders.
+### Gameplay and data
+- 20 hero records in HeroCatalog with faction, role, rarity, combat stats, skill/ultimate data and source-model mapping.
+- Five starter heroes and a first-run profile with test currency, energy, gear and saved five-slot formation.
+- Roster level-up and star-up operations; duplicate summons convert into rarity-based shards.
+- 200 generated campaign stage definitions across five biomes, boss stages every ten stages and stage-scaled 5-unit enemy teams.
+- Deterministic 5v5 combat core remains engine-free. Battle flow now consumes campaign energy, plays BattleSim events, supports x1/x2/x4 and manual or automatic ultimates, awards win rewards and updates campaign progress.
+- Six equipment slots per hero; upgrades spend Gold and Gear Materials and gear levels add combat stats.
+- Save schema version 2 persists formation and equipment in addition to resources, roster, campaign, pity, energy and quests.
 
-## Next steps (suggested order, per GDD weeks 1-4)
-1. Open in Unity 2022.3.62f3, fix any compile errors, run EditMode tests, commit `.meta` files.
-2. Create 4 hero assets (one per faction: Fortress/Wild/Forest/Shadow) + skills under `Assets/Resources/Data`.
-3. Minimal battle scene: read `BattleSim.Events`, show units, HP bars, speed button x1/x2/x4.
-4. Campaign stage data (ScriptableObject) + auto-progress; save system (one save system only).
-5. Idle rewards (12h cap), then gacha/summon with pity (30 = Epic, 90 = Legendary; rates 40/35/20/5 are test values).
-6. Android build pipeline (Cloud Build or GitHub Actions), APK size budget.
+### Runtime UI and art pipeline
+- GameFlowController connects the Home HUD UnityEvents to Campaign, Heroes, Formation, Summon, Equipment, Backpack, Quests and feature-status screens.
+- Heroes, Campaign and Summon screen classes now expose validated gameplay operations; BattleHud controls speed/ultimates.
+- HeroView loads Quaternius FBX models when imported; combat feedback uses floating damage numbers.
+- HomeWorldStage no longer substitutes missing castle modules with cubes. It reports missing assets until the installer downloads/imports the modular meshes.
+- MVPArtInstaller downloads character and monster FBX source files into Resources folders.
+- MVPProjectInstaller generates Assets/Scenes/Home.unity, adds GameBootstrap + HomeScreen and registers the scene in Build Settings. BuildScript calls it before Android builds.
 
-## Design rules (from GDD - keep!)
-- Combat logic stays engine-free; view layer only reads events. No hero stats hardcoded - ScriptableObjects only.
-- Factions: Fortress > Wild > Forest > Shadow > Fortress; Divinity <-> Abyss (rare). Advantage = +25% damage.
-- Roles: Tank / Support / DPS. Speeds x1/x2/x4. Battle target 60-90s at x1.
-- **Legal:** do NOT copy names, heroes, art, audio or text from Legends Reborn: Last Battle / Magnum Quest. Mechanics only.
-- Lessons from the old repo (LegendsStyleRPG): one save system, one currency set, one UI system, keep APK small
-  (don't put unused art packs in `Resources/`), keep CI Unity version equal to ProjectVersion.txt.
+### Development backend
+- FastAPI guest account creation with opaque bearer token; only SHA-256 token hashes are stored.
+- SQLite profile storage and transactional server-side summons with cryptographic RNG, gem debit, pity, duplicate shards and per-pull audit rows.
+- Health, profile, summon-history, arena-status and boss-status routes.
+- Python unittest coverage and a GitHub Actions workflow for backend tests.
 
-## Old repo (separate)
-`Andahmed/LegendsStyleRPG` is the previous attempt. Local fixes (mirrored labels, camera focus, gravity, SafeArea) were
-prepared but intentionally NOT pushed by request; ChatGPT pushed similar changes to its own branches.
+## Setup
+
+1. Open with Unity 2022.3.62f3.
+2. Run **Sands → Setup MVP Home Scene**.
+3. Run **Legends Reborn → Art → Install Home Castle CC0 Models**.
+4. Run **Legends Reborn → Art → Install MVP Art**.
+5. Wait for asset import, then open Home.unity and press Play.
+6. From Server, install requirements, run uvicorn and python -m unittest discover -s tests -v.
+
+## Explicitly not complete or not verified
+
+- No Unity Editor compile, Play Mode run, Android APK, mobile touch or aspect-ratio test has been performed in this environment.
+- Unity will generate .meta files when it first imports the new scripts/FBX assets; they must be committed after editor import.
+- The home castle remains a modular assembly, not a bespoke final castle. Mesh pivots, materials, scale and camera framing need visual review.
+- The five approved hero archetypes map to the available Quaternius rigged character FBX models as temporary MVP models. Final bespoke hero models, animations and skill VFX are still outstanding.
+- Arabic font shaping/RTL presentation is not complete; the current runtime labels are English.
+- The Unity client summon screen still uses local preview RNG. It is not yet connected to the FastAPI guest/profile/summon endpoints.
+- Arena, world boss, alliance, shop billing, Battle Pass and live events remain feature-status screens or locked endpoints, not playable systems.
+- Individual stages are generated by a scaling formula; enemy lineup variety, encounter scripting, final reward/economy balance and all five biome art sets are not authored.
+- No server deployment, TLS, account recovery, anti-abuse controls or production database operations are included.
+
+## Design rules
+
+- Do not copy names, heroes, art, audio or text from Legends Reborn: Last Battle / Magnum Quest. Mechanics only.
+- Keep combat simulation independent from UnityEngine. UI and presentation consume battle events.
+- Keep one save system and one currency set. Server owns production summon RNG and currency validation.
+- Do not represent a local preview as a server-authoritative result or an untested build as ready for players.

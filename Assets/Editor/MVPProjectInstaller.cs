@@ -1,0 +1,46 @@
+using System.IO;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using SandsOfLegends.Bootstrap;
+using SandsOfLegends.UI;
+
+namespace SandsOfLegends.Editor
+{
+    public static class MVPProjectInstaller
+    {
+        public const string HomeScenePath = "Assets/Scenes/Home.unity";
+
+        [MenuItem("Sands/Setup MVP Home Scene")]
+        public static void SetupMenu()
+        {
+            EnsureMvpScene();
+            EditorUtility.DisplayDialog("Sands of Legends", "Home scene is ready. Install MVP Art from Legends Reborn > Art, then press Play.", "OK");
+        }
+
+        public static void EnsureMvpScene()
+        {
+            Directory.CreateDirectory("Assets/Scenes");
+            if (!File.Exists(HomeScenePath))
+            {
+                Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                GameObject systems = new GameObject("Game Systems");
+                systems.AddComponent<GameBootstrap>();
+                GameObject home = new GameObject("Home Screen");
+                home.AddComponent<HomeScreen>();
+                GameObject lightObject = new GameObject("Fallback Directional Light");
+                Light light = lightObject.AddComponent<Light>();
+                light.type = LightType.Directional;
+                light.intensity = 1.1f;
+                lightObject.transform.rotation = Quaternion.Euler(45f, -32f, 0f);
+                EditorSceneManager.SaveScene(scene, HomeScenePath);
+            }
+
+            EditorBuildSettings.scenes = new[]
+            {
+                new EditorBuildSettingsScene(HomeScenePath, true)
+            };
+        }
+    }
+}

@@ -1,33 +1,59 @@
 # Legends Reborn
 
-Unity mobile Idle RPG (Android), working title **Sands of Legends**. Clean rebuild.
+Unity mobile Idle RPG for Android. Working title: **Sands of Legends**.
 
-- Unity: **2022.3.62f3** (matches Unity Cloud Build)
-- Target: Android (IL2CPP, ARM64)
+- Unity Editor: 2022.3.62f3
+- Android target: IL2CPP / ARM64
+- Combat simulation: engine-free deterministic C#
+- Runtime UI: generated from code so the initial Home scene has no hand-wired UnityEvents
 
-## Structure
-```
-Assets/
-  Scripts/  Core | Characters | Combat | World | UI | Editor
-  Resources/  Scenes/  Art/
-Packages/manifest.json
-ProjectSettings/ProjectVersion.txt
-```
+## First launch in Unity
 
-## Rules
-- One save system, one currency set, one UI system (no parallel legacy copies).
-- Build must pass locally before pushing to `main`.
-- Large art packs go outside `Resources/` unless used at runtime.
+1. Open this repository with Unity 2022.3.62f3.
+2. Run **Sands → Setup MVP Home Scene**. This creates Assets/Scenes/Home.unity and registers it in Build Settings.
+3. Run **Legends Reborn → Art → Install Home Castle CC0 Models** for the modular courtyard.
+4. Run **Legends Reborn → Art → Install MVP Art** for the Quaternius hero and monster FBX models.
+5. Wait for the FBX import to complete, then open Home.unity and press Play.
 
-## Architecture (GDD 7.1)
-- `Scripts/Combat` - engine-free C# (asmdef `noEngineReferences`): `BattleSim` is a deterministic fixed-step auto-battle
-  (seeded RNG, 2 front + 3 back slots, faction cycle +25%, timed skills, energy ultimates). View layer only reads
-  `BattleSim.Events` and speeds up by calling `Step()` more often (x1/x2/x4).
-- `Scripts/Core` - ScriptableObjects (`HeroDefinition`, `SkillDefinition`) -> `UnitSpec`/`SkillSpec`. No hero stats in code.
-- `Tests/EditMode` - NUnit tests for combat.
+The Android build menu also creates/registers the Home scene before calling BuildPlayer. Android SDK/NDK, signing and device settings still need to be configured in the local Unity installation.
 
-## Factions
-Fortress > Wild > Forest > Shadow > Fortress. Divinity <-> Abyss (rare, mutual).
+## Current MVP systems
 
-## Status / handoff
-See [docs/HANDOFF.md](docs/HANDOFF.md) for what is done, what is unverified, and next steps.
+- Five starter heroes and a 20-hero catalog with faction, role, rarity, combat stats, skills and ultimates.
+- 200 generated campaign stages: five biomes × 40 stages, with boss encounters every ten stages.
+- 5v5 deterministic auto-battle, 2 front + 3 back positions, x1/x2/x4 speed and optional manual ultimates.
+- Battle presentation loads imported character/monster FBX models, shows combat numbers and updates the result/rewards.
+- Local save includes roster, five-slot formation, six equipment slots per hero, currencies, pity, energy, campaign and daily quests.
+- Home menu routes to Campaign, Heroes, Formation, Summon, Equipment, Backpack and feature-status screens.
+- Idle rewards capped at 12 hours; daily quest progress and claims.
+- FastAPI development backend with guest accounts, persistent SQLite profiles, server-side summon RNG and summon audit history.
+
+## Run the development server
+
+From the Server folder:
+
+~~~bash
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+python -m unittest discover -s tests -v
+~~~
+
+Implemented routes: GET /health, POST /auth/guest, GET /profile, POST /summon, GET /summon/history. Arena and weekly boss status routes explicitly report that those systems are still locked.
+
+The Unity client currently uses its local preview summon path; it is not yet connected to the server. Do not treat local client RNG as production-safe.
+
+## Architecture
+
+- Assets/Scripts/Combat: pure C# simulation and combat events.
+- Assets/Scripts/Core: hero and skill definitions/catalog.
+- Assets/Scripts/Meta: roster, economy, campaign, daily quests, idle rewards, gacha, equipment and save state.
+- Assets/Scripts/Presentation: actor models, battle events and floating damage numbers.
+- Assets/Scripts/UI: Home HUD and runtime screen/game-flow controller.
+- Assets/Editor: Home scene and art installers, plus Android build entry point.
+- Server: FastAPI + SQLite development backend.
+
+See docs/HANDOFF.md for implemented work, limitations and verification status.
+
+## Verification limits
+
+This repository update has not been opened in Unity Editor in this environment. Unity compilation, FBX import, Play Mode, touch/layout testing, Android APK generation and device testing remain mandatory before calling the MVP playable. Generated content and combat balance are development values, not final economy tuning.

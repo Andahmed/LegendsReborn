@@ -29,6 +29,11 @@ namespace SandsOfLegends.UI
             CameraSetup();
         }
 
+        private void OnEnable()
+        {
+            if (root != null) CameraSetup();
+        }
+
         private Material Mat(Color c, float metallic = 0f)
         {
             Shader shader = Shader.Find("Standard");
@@ -59,8 +64,7 @@ namespace SandsOfLegends.UI
             GameObject prefab = Resources.Load<GameObject>("HomeCastle/" + assetName);
             if (prefab == null)
             {
-                // Temporary visual fallback until the CC0 asset installer has been run in the Unity Editor.
-                Part(PrimitiveType.Cube, assetName + " Import Pending", position, targetSize, material, rotation);
+                Debug.LogWarning("Missing HomeCastle model: " + assetName + ". Run Legends Reborn > Art > Install MVP Art.");
                 return;
             }
 
@@ -92,12 +96,12 @@ namespace SandsOfLegends.UI
 
         private void Ground()
         {
-            Part(PrimitiveType.Cube, "Sandstone Courtyard", new Vector3(0, -.28f, 0), new Vector3(18, .5f, 22), sand);
+            Part(PrimitiveType.Plane, "Sandstone Courtyard", new Vector3(0, -.035f, 0), new Vector3(1.8f, 1f, 2.2f), sand);
             Part(PrimitiveType.Cylinder, "Hero Dais", new Vector3(0, .02f, -2.2f), new Vector3(3, .18f, 3), gold);
             Part(PrimitiveType.Cylinder, "Dais Top", new Vector3(0, .14f, -2.2f), new Vector3(2.72f, .12f, 2.72f), shadow);
             PlaceAsset("Floor_Modular", new Vector3(0, -.015f, 1.6f), new Vector3(13f, .16f, 7f), stone);
             for (int i = 0; i < 6; i++)
-                Part(PrimitiveType.Cube, "Courtyard Inlay", new Vector3(-6 + i * 2.4f, .01f, 1.4f), new Vector3(1.7f, .04f, .08f), gold);
+                Part(PrimitiveType.Cylinder, "Courtyard Inlay", new Vector3(-6 + i * 2.4f, .005f, 1.4f), new Vector3(.82f, .012f, .045f), gold);
         }
 
         private void Castle()
@@ -131,16 +135,26 @@ namespace SandsOfLegends.UI
 
         private void Hero()
         {
-            Part(PrimitiveType.Capsule, "Hero Body Placeholder", new Vector3(0, 1.22f, -2.2f), new Vector3(.78f, 1.1f, .48f), steel);
-            Part(PrimitiveType.Sphere, "Hero Head Placeholder", new Vector3(0, 2.58f, -2.2f), new Vector3(.48f, .55f, .46f), skin);
-            Part(PrimitiveType.Cube, "Chestplate", new Vector3(0, 1.55f, -2.12f), new Vector3(.9f, .72f, .18f), gold);
-            Part(PrimitiveType.Capsule, "Left Greave", new Vector3(-.27f, .42f, -2.2f), new Vector3(.27f, .7f, .3f), shadow);
-            Part(PrimitiveType.Capsule, "Right Greave", new Vector3(.27f, .42f, -2.2f), new Vector3(.27f, .7f, .3f), shadow);
-            Part(PrimitiveType.Cube, "Shield", new Vector3(-.82f, 1.25f, -2.1f), new Vector3(.62f, .92f, .16f), teal, new Vector3(0, 0, -12));
-            Part(PrimitiveType.Sphere, "Shield Crest", new Vector3(-.82f, 1.28f, -2f), new Vector3(.22f, .22f, .08f), gold);
-            Part(PrimitiveType.Cube, "Sword Blade", new Vector3(.8f, 1.58f, -2.1f), new Vector3(.13f, 1.05f, .12f), gold, new Vector3(0, 0, -12));
-            Part(PrimitiveType.Cube, "Sword Hilt", new Vector3(.9f, 1.02f, -2.1f), new Vector3(.4f, .12f, .15f), shadow, new Vector3(0, 0, -12));
-            Part(PrimitiveType.Capsule, "Cape", new Vector3(0, 1.35f, -2.48f), new Vector3(.7f, 1.1f, .12f), red);
+            GameObject prefab = Resources.Load<GameObject>("HomeHeroes/Warrior");
+            if (prefab == null)
+            {
+                Debug.LogWarning("Hero FBX is not installed yet. Run Legends Reborn > Art > Install MVP Art.");
+                return;
+            }
+
+            GameObject hero = Instantiate(prefab, root);
+            hero.name = "Home Hero - Warrior FBX";
+            hero.transform.localPosition = new Vector3(0, 0, -2.2f);
+            hero.transform.localRotation = Quaternion.Euler(0, 180, 0);
+            Renderer[] renderers = hero.GetComponentsInChildren<Renderer>(true);
+            if (renderers.Length > 0)
+            {
+                Bounds bounds = renderers[0].bounds;
+                for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
+                float height = Mathf.Max(.01f, bounds.size.y);
+                hero.transform.localScale = Vector3.one * (2.7f / height);
+                hero.transform.position += Vector3.up * .05f;
+            }
         }
 
         private void Torches()
@@ -163,6 +177,7 @@ namespace SandsOfLegends.UI
 
         private void CameraSetup()
         {
+            // Remove legacy greybox placeholders: the hero and castle must come from imported meshes.
             Camera cam = Camera.main;
             if (cam == null)
             {
