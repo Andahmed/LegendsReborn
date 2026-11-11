@@ -109,7 +109,7 @@ namespace SandsOfLegends.UI
 
         private void BuildSideNavigation()
         {
-            var left = Panel("Left Navigation", safeAreaRoot, new Vector2(0, 0.34f), new Vector2(0, 0.34f), new Vector2(0, 390), Vector2.zero, Color.clear);
+            var left = Panel("Left Navigation", safeAreaRoot, new Vector2(0, 0.34f), new Vector2(0.22f, 0.34f), new Vector2(0, 390), Vector2.zero, Color.clear);
             var leftLayout = left.gameObject.AddComponent<VerticalLayoutGroup>();
             leftLayout.spacing = 14;
             leftLayout.childControlWidth = true;
@@ -120,7 +120,7 @@ namespace SandsOfLegends.UI
             AddNavButton(left, "FORMATION", onFormation);
             AddNavButton(left, "QUESTS", onQuests);
 
-            var right = Panel("Right Navigation", safeAreaRoot, new Vector2(1, 0.34f), new Vector2(1, 0.34f), new Vector2(0, 270), Vector2.zero, Color.clear);
+            var right = Panel("Right Navigation", safeAreaRoot, new Vector2(0.78f, 0.34f), new Vector2(1, 0.34f), new Vector2(0, 270), Vector2.zero, Color.clear);
             var rightLayout = right.gameObject.AddComponent<VerticalLayoutGroup>();
             rightLayout.spacing = 14;
             rightLayout.childControlWidth = true;
@@ -140,14 +140,14 @@ namespace SandsOfLegends.UI
         private void BuildCampaignButton()
         {
             var area = Panel("Campaign Action Area", safeAreaRoot, new Vector2(0.08f, 0), new Vector2(0.92f, 0), new Vector2(0, 174), Vector2.zero, panelColor);
-            var vertical = area.gameObject.AddComponent<VerticalLayoutGroup>();
+            area.pivot = new Vector2(0.5f, 0f);\n            var vertical = area.gameObject.AddComponent<VerticalLayoutGroup>();
             vertical.padding = new RectOffset(18, 18, 12, 12);
             vertical.spacing = 4;
             vertical.childAlignment = TextAnchor.MiddleCenter;
             vertical.childControlWidth = true;
             vertical.childControlHeight = true;
             vertical.childForceExpandHeight = true;
-            _stage = MakeText("CAMPAIGN  •  STAGE 1", area, 24, goldColor, TextAnchor.MiddleCenter);
+            _stage = MakeText("CAMPAIGN  •  STAGE 1", area, 24, goldColor, TextAnchor.MiddleCenter);\n            _stage.gameObject.AddComponent<LayoutElement>().preferredHeight = 42;
             var enter = MakeButton("ENTER CAMPAIGN", area, goldColor, 0, 82);
             enter.GetComponent<LayoutElement>().flexibleWidth = 1;
             enter.onClick.AddListener(() => { if (onCampaign != null) onCampaign.Invoke(); });
