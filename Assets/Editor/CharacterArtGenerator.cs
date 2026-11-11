@@ -148,7 +148,8 @@ namespace SandsOfLegends.EditorTools
                 GameObject prefab = CreateCharacter(id, id, Armor[i], Accent[i], false);
                 string prefabPath = "Assets/Prefabs/Heroes/hero_" + id + ".prefab";
                 PrefabUtility.SaveAsPrefabAsset(prefab, prefabPath);
-                ExportFbx(prefab, Art + "/Characters/" + id + "/hero_" + id + ".fbx", true);
+                Avatar importedAvatar = ExportFbx(prefab, Art + "/Characters/" + id + "/hero_" + id + ".fbx", true);
+                ExportAnimationFbx(prefab, Art + "/Characters/" + id, importedAvatar);
                 UnityEngine.Object.DestroyImmediate(prefab);
                 if (heroes != null)
                 {
@@ -179,7 +180,8 @@ namespace SandsOfLegends.EditorTools
             string enemyPath = "Assets/Art/Characters/Enemies/gloom_raider/enemy_gloom_raider.prefab";
             EnsureFolder(Art + "/Characters/Enemies", "gloom_raider");
             PrefabUtility.SaveAsPrefabAsset(enemy, enemyPath);
-            ExportFbx(enemy, Art + "/Characters/Enemies/gloom_raider/enemy_gloom_raider.fbx", true);
+            Avatar enemyAvatar = ExportFbx(enemy, Art + "/Characters/Enemies/gloom_raider/enemy_gloom_raider.fbx", true);
+            ExportAnimationFbx(enemy, Art + "/Characters/Enemies/gloom_raider", enemyAvatar);
             UnityEngine.Object.DestroyImmediate(enemy);
 
             CreateBiome("forest", new Color(0.15f, 0.34f, 0.19f));
@@ -719,7 +721,7 @@ namespace SandsOfLegends.EditorTools
         }
 
 
-        private static void ExportFbx(GameObject source, string path, bool humanoid = false)
+        private static Avatar ExportFbx(GameObject source, string path, bool humanoid = false)
         {
             string absolutePath = Path.GetFullPath(Path.Combine(Directory.GetParent(Application.dataPath).FullName, path));
             if (File.Exists(absolutePath))
@@ -737,6 +739,79 @@ namespace SandsOfLegends.EditorTools
             importer.importAnimation = humanoid;
             if (humanoid) importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
             importer.SaveAndReimport();
+            if (!humanoid) return null;
+            UnityEngine.Object[] imported = AssetDatabase.LoadAllAssetsAtPath(path);
+            for (int i = 0; i < imported.Length; i++)
+            {
+                Avatar avatar = imported[i] as Avatar;
+                if (avatar != null && avatar.isValid && avatar.isHuman) return avatar;
+            }
+            throw new InvalidOperationException("FBX did not produce a valid Humanoid Avatar: " + path);
+        }
+
+        private static void ExportAnimationFbx(GameObject source, string folder, Avatar sourceAvatar)
+        {
+            if (sourceAvatar == null)
+                throw new InvalidOperationException("Animation FBX export requires the imported character Avatar.");
+            Animator animator = source.GetComponent<Animator>();
+            RuntimeAnimatorController originalController = animator.runtimeAnimatorController;
+            AnimationClip[] clips = originalController.animationClips;
+            string[] required = { "Idle", "Run", "Attack", "Skill", "Ultimate", "Hit", "Death" };
+            string tempControllerPath = folder + "/anims/__animation_export.controller";
+
+            for (int i = 0; i < required.Length; i++)
+            {
+                AnimationClip clip = null;
+                for (int c = 0; c < clips.Length; c++)
+                    if (clips[c] != null && clips[c].name == required[i]) { clip = clips[c]; break; }
+                if (clip == null)
+                    throw new InvalidOperationException("Missing animation clip for FBX export: " + required[i]);
+
+                if (File.Exists(tempControllerPath)) AssetDatabase.DeleteAsset(tempControllerPath);
+                AnimatorController temporary = AnimatorController.CreateAnimatorControllerAtPath(tempControllerPath);
+                AnimatorState state = temporary.layers[0].stateMachine.AddState(clip.name);
+                state.motion = clip;
+                temporary.layers[0].stateMachine.defaultState = state;
+                animator.runtimeAnimatorController = temporary;
+
+                string fbxPath = folder + "/anims/" + required[i].ToLowerInvariant() + ".fbx";
+                string absolutePath = Path.GetFullPath(Path.Combine(Directory.GetParent(Application.dataPath).FullName, fbxPath));
+                if (File.Exists(absolutePath))
+                {
+                    if (!AssetDatabase.DeleteAsset(fbxPath)) File.Delete(absolutePath);
+                }
+
+                try
+                {
+                    ExportModelOptions options = new ExportModelOptions
+                    {
+                        ModelAnimIncludeOption = Include.Anim,
+                        AnimationSource = source.transform,
+                        AnimationDest = source.transform,
+                        AnimateSkinnedMesh = true,
+                        ExportUnrendered = true,
+                        ExportFormat = ExportFormat.Binary
+                    };
+                    string exported = ModelExporter.ExportObject(absolutePath, source, options);
+                    if (string.IsNullOrEmpty(exported) || !File.Exists(absolutePath))
+                        throw new InvalidOperationException("Animation FBX export failed: " + fbxPath);
+
+                    AssetDatabase.ImportAsset(fbxPath, ImportAssetOptions.ForceUpdate);
+                    ModelImporter animationImporter = AssetImporter.GetAtPath(fbxPath) as ModelImporter;
+                    if (animationImporter == null)
+                        throw new InvalidOperationException("Unity did not import animation FBX: " + fbxPath);
+                    animationImporter.animationType = ModelImporterAnimationType.Human;
+                    animationImporter.avatarSetup = ModelImporterAvatarSetup.CopyFromOther;
+                    animationImporter.sourceAvatar = sourceAvatar;
+                    animationImporter.importAnimation = true;
+                    animationImporter.SaveAndReimport();
+                }
+                finally
+                {
+                    animator.runtimeAnimatorController = originalController;
+                    if (File.Exists(tempControllerPath)) AssetDatabase.DeleteAsset(tempControllerPath);
+                }
+            }
         }
 
         private static void EnsureFolder(string parent, string name)
