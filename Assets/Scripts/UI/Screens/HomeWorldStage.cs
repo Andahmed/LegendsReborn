@@ -17,7 +17,7 @@ namespace SandsOfLegends.UI
             root.SetParent(transform, false);
             PlaceCastle();
             PlaceNature();
-            PlaceHero();
+            PlaceHeroes();
             ConfigureCamera();
             CreateWarmLights();
         }
@@ -106,18 +106,35 @@ namespace SandsOfLegends.UI
             instance.transform.localPosition = position + Vector3.up * (-bounds.min.y * scaleY);
         }
 
-        private void PlaceHero()
+        private void PlaceHeroes()
         {
-            GameObject prefab = Resources.Load<GameObject>("HomeHeroes/Warrior");
+            string[] modelNames = { "Cleric", "Monk", "Ranger", "Rogue", "Warrior", "Wizard" };
+            Vector3[] positions =
+            {
+                new Vector3(-5.25f, 0f, -1.3f),
+                new Vector3(-3.15f, 0f, -1.85f),
+                new Vector3(-1.05f, 0f, -2.15f),
+                new Vector3(1.05f, 0f, -2.15f),
+                new Vector3(3.15f, 0f, -1.85f),
+                new Vector3(5.25f, 0f, -1.3f)
+            };
+
+            for (int i = 0; i < modelNames.Length; i++)
+                PlaceHero(modelNames[i], positions[i]);
+        }
+
+        private void PlaceHero(string modelName, Vector3 position)
+        {
+            GameObject prefab = Resources.Load<GameObject>("HomeHeroes/" + modelName);
             if (prefab == null)
             {
-                Debug.LogWarning("Hero FBX is not installed yet. Run Legends Reborn > Art > Install MVP Art.");
+                Debug.LogWarning("Missing HomeHeroes model: " + modelName + ". Merge the A1 asset PR or run the art installer.");
                 return;
             }
 
             GameObject hero = Instantiate(prefab, root);
-            hero.name = "Home Hero - Warrior";
-            hero.transform.localPosition = new Vector3(0f, 0f, -2.15f);
+            hero.name = "Home Hero - " + modelName;
+            hero.transform.localPosition = position;
             hero.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
 
             Renderer[] renderers = hero.GetComponentsInChildren<Renderer>(true);
@@ -127,7 +144,10 @@ namespace SandsOfLegends.UI
             float scale = 2.65f / Mathf.Max(.01f, bounds.size.y);
             hero.transform.localScale = Vector3.one * scale;
             // The generated dais top sits just below one world unit after the castle fit.
-            hero.transform.localPosition = new Vector3(0f, castleDaisTop - bounds.min.y * scale, -2.15f);
+            hero.transform.localPosition = new Vector3(
+                position.x,
+                castleDaisTop - bounds.min.y * scale,
+                position.z);
         }
 
         private void CreateWarmLights()
