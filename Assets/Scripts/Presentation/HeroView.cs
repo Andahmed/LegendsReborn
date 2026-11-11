@@ -313,7 +313,7 @@ namespace SandsOfLegends.Presentation
 
             if (dead)
             {
-                if (deathClip == null)
+                if (!graphReady || deathClip == null)
                 {
                     modelRoot.localPosition = basePosition + Vector3.down * .14f;
                     modelRoot.localRotation = Quaternion.Lerp(modelRoot.localRotation,
