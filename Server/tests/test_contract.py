@@ -17,7 +17,7 @@ def python_assignment(source, name):
 
 
 def csharp_int(source, name):
-    match = re.search(r"public\\s+const\\s+int\\s+" + re.escape(name) + r"\\s*=\\s*(\\d+)\\s*;", source)
+    match = re.search(r"public\s+const\s+int\s+" + re.escape(name) + r"\s*=\s*(\d+)\s*;", source)
     if not match:
         raise AssertionError("C# constant not found: " + name)
     return int(match.group(1))
@@ -33,7 +33,7 @@ class CrossLanguageSummonContractTests(unittest.TestCase):
 
     def test_hero_ids_and_rarities_match_server_pools(self):
         records = re.findall(
-            r'new\\s+HeroCardData\\s*\\{\\s*Id="([^"]+)",.*?Rarity=Rarity\\.(Common|Rare|Epic|Legendary)',
+            r'new\s+HeroCardData\s*\{\s*Id="([^"]+)",.*?Rarity=Rarity\.(Common|Rare|Epic|Legendary)',
             self.hero_catalog,
             re.DOTALL,
         )
@@ -54,7 +54,7 @@ class CrossLanguageSummonContractTests(unittest.TestCase):
 
     def test_starters_match_between_client_and_server(self):
         match = re.search(
-            r"StartingHeroes\\s*\\{\\s*get\\s*\\{\\s*return\\s+new\\[\\]\\s*\\{([^}]+)\\}",
+            r"StartingHeroes\s*\{\s*get\s*\{\s*return\s+new\[\]\s*\{([^}]+)\}",
             self.hero_catalog,
             re.DOTALL,
         )
@@ -79,7 +79,7 @@ class CrossLanguageSummonContractTests(unittest.TestCase):
         self.assertEqual(csharp_int(self.gacha, "GemCostTen"), python_assignment(self.server, "SUMMON_COST_TEN"))
 
         shard_cases = re.findall(
-            r"case\\s+Rarity\\.(Common|Rare|Epic|Legendary):\\s*return\\s+(\\d+)\\s*;",
+            r"case\s+Rarity\.(Common|Rare|Epic|Legendary):\s*return\s+(\d+)\s*;",
             self.progression,
         )
         client_shards = {
