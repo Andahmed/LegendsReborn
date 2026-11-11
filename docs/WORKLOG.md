@@ -6,6 +6,7 @@
 - PR #2: added `.github/workflows/android-apk.yml` using GameCI Unity Builder v4, Unity `2022.3.62f3`, Android target, `workflow_dispatch` and `pull_request`; APK artifact upload is configured.
 - PR #3: added `Sands > Setup Prototype`, runtime 4v4 battle presentation, prototype HeroDefinition/SkillDefinition generation, Boot/Home/Battle scene generation, Build Settings registration, and Boot-to-Home/Home-to-Battle prototype navigation.
 - PR #4: added the separate PlayMode test assembly and a 4v4 BattleSim completion smoke test.
+- Statically reviewed the five new C# files in PRs #3/#4 and the updated Editor build entry point for Unity 2022.3 API compatibility.
 - Updated the Android build entry point to create missing prototype assets/scenes and ensure the APK output folder exists before building.
 - Kept Combat and Meta engine-free; no combat rules or economy values changed. All code files added/changed include the required ownership headers.
 
