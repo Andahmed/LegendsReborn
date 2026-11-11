@@ -124,5 +124,117 @@ namespace SandsOfLegends.Tests
             Assert.IsFalse(q.TryClaim(2, w));
             Assert.AreEqual(DailyQuests.RewardGemsEach, w.Get(Currency.Gems));
         }
+
+        [Test]
+        public void Gacha_GuaranteedEpicResetsEpicPityAndAdvancesLegendaryPity()
+        {
+            var pool = new Dictionary<Rarity, List<string>>
+            {
+                { Rarity.Epic, new List<string> { "epic_only" } }
+            };
+            var pity = new PityState { SinceEpic = GachaSystem.EpicPity - 1, SinceLegendary = 8 };
+            PullResult result = GachaSystem.Pull(pool, pity, new SeededRng(31), new Roster());
+
+            Assert.AreEqual(Rarity.Epic, result.Rarity);
+            Assert.AreEqual(0, pity.SinceEpic);
+            Assert.AreEqual(9, pity.SinceLegendary);
+        }
+
+        [Test]
+        public void Gacha_GuaranteedLegendaryResetsBothPityCounters()
+        {
+            var pool = new Dictionary<Rarity, List<string>>
+            {
+                { Rarity.Legendary, new List<string> { "legendary_only" } }
+            };
+            var pity = new PityState { SinceEpic = 22, SinceLegendary = GachaSystem.LegendaryPity - 1 };
+            PullResult result = GachaSystem.Pull(pool, pity, new SeededRng(91), new Roster());
+
+            Assert.AreEqual(Rarity.Legendary, result.Rarity);
+            Assert.AreEqual(0, pity.SinceEpic);
+            Assert.AreEqual(0, pity.SinceLegendary);
+        }
+
+        [Test]
+        public void Gacha_SameSeedProducesSamePullSequenceAndPityState()
+        {
+            var firstPity = new PityState();
+            var secondPity = new PityState();
+            var firstRoster = new Roster();
+            var secondRoster = new Roster();
+            var firstRng = new SeededRng(20261112);
+            var secondRng = new SeededRng(20261112);
+
+            for (int i = 0; i < 100; i++)
+            {
+                PullResult first = GachaSystem.Pull(Pool(), firstPity, firstRng, firstRoster);
+                PullResult second = GachaSystem.Pull(Pool(), secondPity, secondRng, secondRoster);
+                Assert.AreEqual(first.Rarity, second.Rarity, "rarity at pull " + i);
+                Assert.AreEqual(first.HeroId, second.HeroId, "hero at pull " + i);
+                Assert.AreEqual(first.IsNew, second.IsNew, "duplicate state at pull " + i);
+                Assert.AreEqual(first.ShardsGained, second.ShardsGained, "shards at pull " + i);
+                Assert.AreEqual(firstPity.SinceEpic, secondPity.SinceEpic);
+                Assert.AreEqual(firstPity.SinceLegendary, secondPity.SinceLegendary);
+            }
+        }
+
+        [Test]
+        public void Campaign_BossStagesAndBiomeBoundariesAreExact()
+        {
+            for (int stage = 1; stage <= CampaignProgress.MaxStage; stage++)
+                Assert.AreEqual(stage % 10 == 0, CampaignProgress.IsBoss(stage), "boss flag at stage " + stage);
+
+            Assert.IsFalse(CampaignProgress.IsBoss(0));
+            Assert.IsFalse(CampaignProgress.IsBoss(201));
+            Assert.AreEqual(0, CampaignProgress.BiomeOf(1));
+            Assert.AreEqual(0, CampaignProgress.BiomeOf(40));
+            Assert.AreEqual(1, CampaignProgress.BiomeOf(41));
+            Assert.AreEqual(1, CampaignProgress.BiomeOf(80));
+            Assert.AreEqual(2, CampaignProgress.BiomeOf(81));
+            Assert.AreEqual(2, CampaignProgress.BiomeOf(120));
+            Assert.AreEqual(3, CampaignProgress.BiomeOf(121));
+            Assert.AreEqual(3, CampaignProgress.BiomeOf(160));
+            Assert.AreEqual(4, CampaignProgress.BiomeOf(161));
+            Assert.AreEqual(4, CampaignProgress.BiomeOf(200));
+        }
+
+        [Test]
+        public void Campaign_ProgressUnlocksSequentiallyThroughStage200Only()
+        {
+            var campaign = new CampaignProgress();
+            Assert.IsFalse(campaign.TryClear(0));
+            for (int stage = 1; stage <= CampaignProgress.MaxStage; stage++)
+            {
+                Assert.IsTrue(campaign.TryClear(stage), "stage " + stage);
+                Assert.AreEqual(stage, campaign.HighestCleared);
+            }
+            Assert.IsFalse(campaign.TryClear(200));
+            Assert.IsFalse(campaign.TryClear(201));
+            Assert.AreEqual(200, campaign.HighestCleared);
+        }
+
+        [Test]
+        public void DailyQuests_NewDayResetsProgressAndClaimsButSameDayDoesNot()
+        {
+            var quests = new DailyQuests();
+            var wallet = new Wallet();
+            quests.ResetIfNewDay("2026-11-11");
+            quests.Report("summon_1", 1);
+            Assert.IsTrue(quests.TryClaim(2, wallet));
+            Assert.AreEqual(DailyQuests.RewardGemsEach, wallet.Get(Currency.Gems));
+
+            quests.ResetIfNewDay("2026-11-11");
+            Assert.AreEqual(1, quests.Progress[2]);
+            Assert.IsTrue(quests.Claimed[2]);
+            Assert.IsFalse(quests.TryClaim(2, wallet));
+            Assert.AreEqual(DailyQuests.RewardGemsEach, wallet.Get(Currency.Gems));
+
+            quests.ResetIfNewDay("2026-11-12");
+            Assert.AreEqual(0, quests.Progress[2]);
+            Assert.IsFalse(quests.Claimed[2]);
+            Assert.IsFalse(quests.TryClaim(2, wallet));
+            Assert.AreEqual(DailyQuests.RewardGemsEach, wallet.Get(Currency.Gems));
+        }
+
     }
 }
