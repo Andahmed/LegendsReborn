@@ -1,20 +1,21 @@
 # Work Log (newest first)
 
-## 2026-11-11 - Five-slot team formation
+## 2026-11-11 - Five-slot team formation and battle data bridge
 **Done**
 - Created follow-up branch `feature/mvp-five-slot-formation` from the equipment foundation branch; PR #7 and `main` remain untouched.
 - Added an engine-free formation model with five fixed slots (0-1 front, 2-4 back).
 - Added ownership checks, duplicate prevention, slot replacement, move/swap and removal operations.
 - Persisted team slots in the single save model and added version 2 -> 3 migration; legacy version 1 saves still pass through the equipment migration before formation migration.
-- Added regression tests for 5-slot assignment, unique ownership, move/swap, removal, load sanitization and save round-trip.
+- Added a Core bridge that converts saved hero IDs and owned hero levels into an ordered five-slot `UnitSpec[]` for `BattleSim`.
+- Added regression tests for formation rules, save migration, slot order, level scaling and missing hero-definition handling.
 
 **Not verified**
 - Unity 2022.3.62f3 compilation and EditMode execution have not been run in this environment.
-- The Heroes screen does not yet expose formation controls, and battle setup does not yet convert saved hero IDs into ordered UnitSpecs.
+- The Heroes screen still does not expose formation controls, and Campaign battle launch is not yet wired to the new builder.
 - No combat stats, economy values, or synergy percentages were changed.
 
 **Next**
-1. Connect the formation to the Heroes screen and battle setup.
+1. Connect the formation to the Heroes screen and Campaign battle launch.
 2. Populate the MVP's 20 hero/skill definitions and authored stage data.
 3. Implement the remaining MVP modes and visual presentation after the full PDF acceptance criteria are checked.
 
@@ -27,7 +28,7 @@
 - Preserved the existing economy: no gear costs, stat growth, set-bonus percentages or upgrade prices were invented.
 
 **Not verified**
-- Unity 2022.3.62f3 compilation and EditMode execution are not available in this session.
+- Unity 2022.3.62f3 compilation and EditMode tests are not available in this session.
 - Full 18-page PDF text extraction remains blocked by the browser/PDF extraction timeout; this pass is based on the repository GDD and architecture map.
 - Equipment set bonuses, upgrade economy, item drops and UI are not implemented yet.
 
@@ -39,16 +40,16 @@
 ## 2026-11-11 - Foundations pass (Ahmed + Claude)
 **Done**
 - Added all foundation folders and files per the project plan (see ARCHITECTURE.md): Meta (economy, roster, gacha, idle, campaign, quests, save), Services, Bootstrap, Presentation, UI framework + 5 screen stubs, Localization, Editor build script, Server skeleton, docs.
-- Every source file now has a header: owner role, responsibility, what to work on, status.
-- Engine-free code (Combat + Meta) compiled and all tests run outside Unity with mono; 16 EditMode tests pass under mono (Combat + Meta).
+- Every source file now has a header: owner role, responsibility, work on, status.
+- Engine-free code (Combat + Meta) compiled and all tests run outside Unity with mono; 16 EditMode tests passed under mono (Combat + Meta).
 
 **Not verified**
-- Project never opened in Unity 2022.3.62f3 (MonoBehaviour/ScriptableObject/Editor files untested there).
-- No `.meta` files, no scenes (Boot/Home/Battle must be created in the editor).
+- Project never opened in Unity 2022.3.62f3; MonoBehaviour, ScriptableObject, Editor files and Unity test discovery remain untested.
+- No `.meta` files committed.
 
 **Next**
 1. Open in Unity, fix compile errors, run EditMode tests, commit `.meta`.
-2. Create Boot/Home/Battle scenes; 4 prototype heroes (one per faction) + skills as ScriptableObjects; battle scene using BattleView.
+2. Complete Boot/Home/Battle scenes, 4 prototype heroes (one per faction) + skills as ScriptableObjects.
 3. CI build (secrets needed: UNITY_LICENSE/EMAIL/PASSWORD).
 
 ## 2026-11-11 - Combat core + scaffold (Ahmed + Claude)
