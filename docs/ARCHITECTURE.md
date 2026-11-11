@@ -56,3 +56,12 @@ Server (`Server/`) can re-run `Combat` + `Meta` logic for authority/anti-cheat.
 | `Assets/Art/README.md` | Concept/UI Artist | Art folder map and pipeline: Characters, Environments, UI, VFX, Audio. Import rules and budgets. | Fill per the Style Guide. Characters: 20 heroes for MVP; first 3 via outsourcing studio (GDD 7.3). | Plan |
 | `Assets/Data/README.md` | Systems Designer | Data folder: ScriptableObject assets only. Heroes (20), Skills, Stages (200), Economy tables. | Create assets with Create > SandsOfLegends > Hero/Skill. Names: Hero_<id>, Skill_<id>. No stats in code. | Plan |
 | `Assets/Scenes/README.md` | Client Programmer - Systems | Scenes to create in the Unity editor: Boot, Home, Battle. | Boot has GameBootstrap; Home uses ScreenManager; Battle uses BattleView. | Plan |
+
+
+## Prototype setup additions
+| File | Owner role | Responsibility | Work on | Status |
+|---|---|---|---|---|
+| `Assets/Editor/PrototypeSetup.cs` | Client Programmer - Systems | Menu command `Sands > Setup Prototype`; creates missing faction hero/skill assets, Boot/Home/Battle scenes, and Build Settings entries without overwriting existing assets/scenes. | Replace placeholder scene visuals with approved production art. | Prototype implementation |
+| `Assets/Scripts/Presentation/PrototypeBattleController.cs` | Client Programmer - Combat | Runtime 4v4 prototype wiring: creates the simulation from four HeroDefinition assets, refreshes cube actors/HP bars, and handles x1/x2/x4 controls. | Replace cube actors with character prefabs and add event-driven animation/VFX. | Prototype implementation |
+| `Assets/Scripts/Bootstrap/PrototypeBootRouter.cs` | Client Programmer - Systems | Routes the Boot scene to Home after GameBootstrap initializes. | Replace the prototype handoff with production loading/login. | Prototype implementation |
+| `Assets/Scripts/Presentation/PrototypeHomeController.cs` | Client Programmer - UI | Wires the Home scene's Enter Battle button to the Battle scene. | Replace the temporary scene jump with production navigation/unlock rules. | Prototype implementation |
