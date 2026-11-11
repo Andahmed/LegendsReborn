@@ -132,10 +132,24 @@ namespace SandsOfLegends.EditorTools
                 TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
                 if (importer == null || importer.textureType != TextureImporterType.Sprite)
                     throw new Exception("Missing Sprite portrait: " + path);
+                ValidateAndroidAstc(importer, path);
+                string iconPath = "Assets/Prefabs/UI/faction_" + ids[i] + "_icon.png";
+                TextureImporter iconImporter = AssetImporter.GetAtPath(iconPath) as TextureImporter;
+                if (iconImporter == null || iconImporter.textureType != TextureImporterType.Sprite)
+                    throw new Exception("Missing faction icon Sprite: " + iconPath);
+                ValidateAndroidAstc(iconImporter, iconPath);
                 TextureImporterPlatformSettings android = importer.GetPlatformTextureSettings("Android");
                 if (!android.overridden || android.format != TextureImporterFormat.ASTC_6x6)
                     throw new Exception("Portrait must use ASTC 6x6 on Android: " + path);
             }
+        }
+
+
+        private static void ValidateAndroidAstc(TextureImporter importer, string path)
+        {
+            TextureImporterPlatformSettings settings = importer.GetPlatformTextureSettings("Android");
+            if (!settings.overridden || settings.format != TextureImporterFormat.ASTC_6x6)
+                throw new Exception("Texture must use ASTC 6x6 on Android: " + path);
         }
 
         private static int BudgetFor(string path)
