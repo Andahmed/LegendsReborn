@@ -45,7 +45,7 @@ namespace SandsOfLegends.EditorTools
 
             if (!File.Exists(BootPath)) CreateBootScene();
             if (!File.Exists(HomePath)) CreateHomeScene();
-            if (!File.Exists(BattlePath)) CreateBattleScene(heroes);
+            if (NeedsBattleSceneRebuild()) CreateBattleScene(heroes);
 
             var buildScenes = new List<EditorBuildSettingsScene>();
             AddOrEnableScene(buildScenes, BootPath);
@@ -190,6 +190,27 @@ namespace SandsOfLegends.EditorTools
             PrototypeHomeController homeController = canvas.gameObject.AddComponent<PrototypeHomeController>();
             homeController.battleButton = startBattle;
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), HomePath);
+        }
+
+
+        private static bool NeedsBattleSceneRebuild()
+        {
+            if (!File.Exists(BattlePath)) return true;
+            EditorSceneManager.OpenScene(BattlePath, OpenSceneMode.Single);
+            PrototypeBattleController controller = UnityEngine.Object.FindObjectOfType<PrototypeBattleController>();
+            if (controller == null || controller.playerModels == null || controller.playerModels.Length < 5 ||
+                controller.enemyModels == null || controller.enemyModels.Length < 5)
+                return true;
+
+            for (int i = 0; i < 5; i++)
+            {
+                if (controller.playerModels[i] == null || controller.enemyModels[i] == null)
+                    return true;
+                if (controller.playerModels[i].GetComponent<Renderer>() != null ||
+                    controller.enemyModels[i].GetComponent<Renderer>() != null)
+                    return true;
+            }
+            return false;
         }
 
         private static void CreateBattleScene(HeroDefinition[] heroes)
