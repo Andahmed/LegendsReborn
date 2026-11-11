@@ -2,6 +2,9 @@
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using System;
+using SandsOfLegends.Services;
 using SandsOfLegends.Bootstrap;
 using SandsOfLegends.Meta;
 
@@ -39,15 +42,20 @@ namespace SandsOfLegends.UI
         [SerializeField] private Color gold = new Color(0.96f, 0.75f, 0.32f, 1f);
         [SerializeField] private Color cream = new Color(1f, 0.94f, 0.79f, 1f);
 
-        private Text gemsText, goldText, energyText, stageText, powerText;
+        private Text gemsText, goldText, energyText, stageText, powerText, idleText, idleAmountText;
+        private Button idleClaimButton;
+        private float refreshTimer;
         private bool built;
 
         private void Start() { Build(); RefreshData(); }
+        private void Update() { if (!built) return; refreshTimer += Time.unscaledDeltaTime; if (refreshTimer >= 1f) { refreshTimer = 0f; RefreshData(); } }
         public override void OnShow() { base.OnShow(); Build(); RefreshData(); }
 
         private void Build()
         {
             if (built) return;
+            if (FindObjectOfType<HomeWorldStage>() == null) new GameObject("Home World Preview (procedural greybox)").AddComponent<HomeWorldStage>();
+            if (FindObjectOfType<EventSystem>() == null) new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
             if (canvas == null)
             {
                 GameObject c = new GameObject("Home HUD Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
@@ -104,13 +112,13 @@ namespace SandsOfLegends.UI
 
         private void BuildSideMenus()
         {
-            RectTransform left = Box("Left Menu", safeAreaRoot, new Vector2(0,0.34f), new Vector2(0.22f,0.34f), new Vector2(0,360), Vector2.zero, Color.clear);
+            RectTransform left = Box("Left Menu", safeAreaRoot, new Vector2(0,0.34f), new Vector2(0,0.34f), new Vector2(190,360), Vector2.zero, Color.clear);
             AddNav(left,"HEROES",onHeroes,turquoise,72);
             AddNav(left,"FORMATION",onFormation,gold,72);
             AddNav(left,"QUESTS",onQuests,turquoise,72);
             AddNav(left,"EQUIPMENT",onEquipment,gold,72);
 
-            RectTransform right = Box("Right Menu", safeAreaRoot, new Vector2(0.78f,0.34f), new Vector2(1,0.34f), new Vector2(0,360), Vector2.zero, Color.clear);
+            RectTransform right = Box("Right Menu", safeAreaRoot, new Vector2(1,0.34f), new Vector2(1,0.34f), new Vector2(190,360), Vector2.zero, Color.clear);
             AddNav(right,"SUMMON",onSummon,gold,72);
             AddNav(right,"ARENA",onArena,turquoise,72);
             AddNav(right,"ALLIANCE BOSS",onAllianceBoss,gold,72);
@@ -120,12 +128,13 @@ namespace SandsOfLegends.UI
         private void BuildIdleRewards()
         {
             RectTransform idle = Box("Idle Rewards Card", safeAreaRoot, new Vector2(0.24f,0.20f), new Vector2(0.76f,0.20f), new Vector2(0,142), Vector2.zero, panel);
-            AddText("IDLE REWARDS  •  08:24:16", idle, 22, cream, TextAnchor.MiddleCenter, new Vector2(8,48), new Vector2(-8,-2));
-            Button claim = MakeButton("CLAIM", idle, gold, 210, 54);
-            claim.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f,0);
-            claim.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f,0);
-            claim.GetComponent<RectTransform>().anchoredPosition = new Vector2(0,12);
-            claim.onClick.AddListener(() => onClaimIdle.Invoke());
+                        idleText = AddText("IDLE REWARDS  •  00:00:00", idle, 20, cream, TextAnchor.MiddleCenter, new Vector2(8,62), new Vector2(-8,-2));
+            idleAmountText = AddText("+0 GOLD  •  +0 XP", idle, 17, turquoise, TextAnchor.MiddleCenter, new Vector2(8,36), new Vector2(-8,-26));
+            idleClaimButton = MakeButton("CLAIM REWARDS", idle, gold, 210, 48);
+            idleClaimButton.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f,0);
+            idleClaimButton.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f,0);
+            idleClaimButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(0,9);
+            idleClaimButton.onClick.AddListener(ClaimIdleRewards);
         }
 
         private void BuildCampaign()
@@ -213,6 +222,8 @@ namespace SandsOfLegends.UI
             return button;
         }
 
+        private void ClaimIdleRewards() { if (GameBootstrap.Instance == null || GameBootstrap.Instance.State == null) return; GameBootstrap.Instance.State.ClaimIdle(TimeService.NowUnix); GameBootstrap.Instance.SaveNow(); RefreshData(); onClaimIdle.Invoke(); }
+
         private void RefreshData()
         {
             if (GameBootstrap.Instance==null || GameBootstrap.Instance.State==null) return;
@@ -221,6 +232,7 @@ namespace SandsOfLegends.UI
             if(goldText!=null) goldText.text="●  "+state.Wallet.Get(Currency.Gold).ToString("N0");
             if(energyText!=null) energyText.text="⚡  "+state.Energy.Value+"/"+EnergyState.Cap;
             if(stageText!=null) stageText.text="THE SEVEN SANDS  •  STAGE "+Mathf.Max(1,state.Campaign.HighestCleared+1);
+            if (idleText != null) { IdleRewards.Reward reward = IdleRewards.Calculate(state.IdleLastClaimUnix, TimeService.NowUnix, state.Campaign.HighestCleared); TimeSpan elapsed = TimeSpan.FromSeconds(reward.Seconds); idleText.text = "IDLE REWARDS  •  " + ((int)elapsed.TotalHours).ToString("00") + ":" + elapsed.Minutes.ToString("00") + ":" + elapsed.Seconds.ToString("00"); idleAmountText.text = "+" + reward.Gold.ToString("N0") + " GOLD  •  +" + reward.Exp.ToString("N0") + " XP"; if (idleClaimButton != null) idleClaimButton.interactable = reward.Seconds >= 60; }
         }
     }
 }
