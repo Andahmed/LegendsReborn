@@ -28,7 +28,7 @@ namespace SandsOfLegends.Presentation
         {
             team = teamIndex;
             slot = slotIndex;
-            transform.rotation = Quaternion.Euler(0f, team == 0 ? 0f : 180f, 0f);
+            transform.rotation = Quaternion.Euler(0f, team == 0 ? 90f : -90f, 0f);
         }
 
         public void HandleBattleEvent(BattleEvent battleEvent)
