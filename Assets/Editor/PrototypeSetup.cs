@@ -75,12 +75,12 @@ namespace SandsOfLegends.EditorTools
                 string key = factions[i].ToString();
                 SkillDefinition active = GetOrCreateSkill(
                     "Skill_" + key + "_Active", key + "_active", names[i] + " Technique",
-                    4.5f, 1.35f, TargetType.SingleEnemy, false);
+                    5f, 1.5f, TargetType.SingleEnemy, false);
 
                 bool heals = factions[i] == Faction.Forest;
                 SkillDefinition ultimate = GetOrCreateSkill(
                     "Skill_" + key + "_Ultimate", key + "_ultimate", names[i] + " Resolve",
-                    0f, 2.2f, heals ? TargetType.AllAllies : TargetType.AllEnemies, heals);
+                    5f, 1.5f, heals ? TargetType.AllAllies : TargetType.AllEnemies, heals);
 
                 string assetPath = HeroesRoot + "/Hero_" + key + ".asset";
                 HeroDefinition hero = AssetDatabase.LoadAssetAtPath<HeroDefinition>(assetPath);
