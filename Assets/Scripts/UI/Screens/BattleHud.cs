@@ -1,16 +1,33 @@
-// =============================================================================
-// FILE: Assets/Scripts/UI/Screens/BattleHud.cs
-// OWNER ROLE: Client Programmer - UI
-// RESPONSIBILITY: In-battle HUD: speed x1/x2/x4, ultimate buttons, team HP, skip.
-// WORK ON: Bind to BattleView/BattleSim.
-// STATUS: Stub
-// =============================================================================
-using UnityEngine;
+using SandsOfLegends.Combat;
+using SandsOfLegends.Presentation;
 
 namespace SandsOfLegends.UI
 {
+    /// <summary>Battle HUD controller. Visual buttons are created by GameFlowController at runtime.</summary>
     public sealed class BattleHud : UIScreen
     {
-        // TODO: see WORK ON in the header above.
+        private BattleSim simulation;
+        private BattleView view;
+
+        public void Bind(BattleSim sim, BattleView battleView)
+        {
+            simulation = sim;
+            view = battleView;
+        }
+
+        public void SetSpeed(int speed)
+        {
+            if (view != null) view.SetSpeed(speed);
+        }
+
+        public bool RequestUltimate(int slot)
+        {
+            return simulation != null && simulation.RequestUltimate(0, slot);
+        }
+
+        public void ToggleAutoUltimate()
+        {
+            if (simulation != null) simulation.AutoUltimate = !simulation.AutoUltimate;
+        }
     }
 }

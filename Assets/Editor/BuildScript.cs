@@ -7,6 +7,7 @@
 // =============================================================================
 using System;
 using System.Linq;
+using SandsOfLegends.Editor;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 
@@ -17,6 +18,7 @@ namespace SandsOfLegends.EditorTools
         [MenuItem("Sands/Build Android APK")]
         public static void BuildAndroid()
         {
+            MVPProjectInstaller.EnsureMvpScene();
             var scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray();
             var opts = new BuildPlayerOptions
             {

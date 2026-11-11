@@ -1,16 +1,27 @@
-// =============================================================================
-// FILE: Assets/Scripts/UI/Screens/SummonScreen.cs
-// OWNER ROLE: Client Programmer - UI
-// RESPONSIBILITY: Gacha UI: single/x10 pull, pity counters, official rates screen, results animation.
-// WORK ON: Call GachaSystem (later the server); show pity.
-// STATUS: Stub
-// =============================================================================
-using UnityEngine;
+using System.Collections.Generic;
+using SandsOfLegends.Combat;
+using SandsOfLegends.Core;
+using SandsOfLegends.Meta;
 
 namespace SandsOfLegends.UI
 {
+    /// <summary>Client preview pull. Live releases must route this intent through the server API.</summary>
     public sealed class SummonScreen : UIScreen
     {
-        // TODO: see WORK ON in the header above.
+        public static bool TryPull(GameState state, int count, int seed, out PullResult[] results)
+        {
+            results = new PullResult[0];
+            if (state == null || (count != 1 && count != 10)) return false;
+            long cost = count == 10 ? GachaSystem.GemCostTen : GachaSystem.GemCostSingle;
+            if (!state.Wallet.TrySpend(Currency.Gems, cost)) return false;
+
+            Dictionary<Rarity, List<string>> pool = HeroCatalog.BuildGachaPool();
+            SeededRng rng = new SeededRng(seed);
+            results = new PullResult[count];
+            for (int i = 0; i < count; i++)
+                results[i] = GachaSystem.Pull(pool, state.Pity, rng, state.Roster);
+            state.Quests.Report("summon_1", count);
+            return true;
+        }
     }
 }

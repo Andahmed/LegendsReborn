@@ -1,10 +1,4 @@
-// =============================================================================
-// FILE: Assets/Scripts/Meta/Save/SaveData.cs
-// OWNER ROLE: Client Programmer - Systems
-// RESPONSIBILITY: Versioned save model (JsonUtility-friendly POCO) + migrations. ONE save system for the whole game.
-// WORK ON: Bump Version and add a migration step for every new/changed field. Later: cloud save (server) uses the same model.
-// STATUS: Implemented
-// =============================================================================
+// Versioned JSON save model. Increment CurrentVersion and add migrations when fields change.
 using System;
 using System.Collections.Generic;
 
@@ -13,9 +7,11 @@ namespace SandsOfLegends.Meta
     [Serializable]
     public sealed class SaveData
     {
-        public int Version = 1;
+        public int Version = 2;
         public long Gems, Gold, Exp, GearMaterials;
         public List<HeroInstance> Heroes = new List<HeroInstance>();
+        public string[] Formation = new string[5];
+        public List<EquipmentInstance> Equipment = new List<EquipmentInstance>();
         public int PitySinceEpic, PitySinceLegendary;
         public int Energy;
         public long EnergyTickUnix;
@@ -29,16 +25,17 @@ namespace SandsOfLegends.Meta
 
     public static class SaveMigrations
     {
-        public const int CurrentVersion = 1;
+        public const int CurrentVersion = 2;
 
         public static SaveData Migrate(SaveData d)
         {
             if (d == null) return null;
             if (d.Heroes == null) d.Heroes = new List<HeroInstance>();
+            if (d.Formation == null || d.Formation.Length != 5) d.Formation = new string[5];
+            if (d.Equipment == null) d.Equipment = new List<EquipmentInstance>();
             if (d.QuestProgress == null || d.QuestProgress.Length != 5) d.QuestProgress = new int[5];
             if (d.QuestClaimed == null || d.QuestClaimed.Length != 5) d.QuestClaimed = new bool[5];
             if (d.QuestDay == null) d.QuestDay = "";
-            // if (d.Version < 2) { ...upgrade...; d.Version = 2; }
             d.Version = CurrentVersion;
             return d;
         }

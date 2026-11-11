@@ -22,6 +22,13 @@ sysinfo.txt
 *.aab
 *.unitypackage
 crashlytics-build.properties
+
+# Development backend data
+/Server/data/
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+
 # OS
 .DS_Store
 Thumbs.db

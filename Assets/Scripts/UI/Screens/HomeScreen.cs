@@ -54,7 +54,7 @@ namespace SandsOfLegends.UI
         private void Build()
         {
             if (built) return;
-            if (FindObjectOfType<HomeWorldStage>() == null) new GameObject("Home World Preview (procedural greybox)").AddComponent<HomeWorldStage>();
+            if (FindObjectOfType<HomeWorldStage>() == null) new GameObject("Home World Castle Stage").AddComponent<HomeWorldStage>();
             if (FindObjectOfType<EventSystem>() == null) new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
             if (canvas == null)
             {
