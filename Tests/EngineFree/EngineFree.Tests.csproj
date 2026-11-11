@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="../../Assets/Scripts/Combat/**/*.cs" />
+    <Compile Include="../../Assets/Scripts/Meta/**/*.cs" />
+    <Compile Include="../../Assets/Scripts/Core/HeroCatalog.cs" />
+    <Compile Include="../../Assets/Tests/EditMode/BattleSimTests.cs" />
+    <Compile Include="../../Assets/Tests/EditMode/MetaTests.cs" />
+    <Compile Include="../../Assets/Tests/EditMode/MvpContentTests.cs" />
+  </ItemGroup>
+</Project>

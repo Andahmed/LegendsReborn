@@ -2,6 +2,12 @@
 
 ## 2026-11-12 - B4 server/API contract (GPT Lane B)
 - Added server-side MVP summon/API contract and HTTP tests; GitHub Actions Server Tests run #35 passed (10 tests, 0 failures). Production deployment and Unity integration not verified.
+## 2026-11-12 - A0 Unity font crash guard
+**Done:** Replaced direct Arial loading with LegacyRuntime.ttf plus guarded Arial fallback in GameFlowController and HomeScreen; assigned the TextMesh font and font material in DamageNumbers.
+**Not verified:** لم يتم التحقق في Unity؛ CI/Android workflow was not run in this environment.
+
+## 2026-11-12 - B0 Engine-Free CI (GPT Lane B)
+- Engine-Free Tests workflow added; GitHub Actions run #3 passed (22 tests, 0 failures). Unity Editor/Play Mode/Android build not run.
 
 ## 2026-11-11 - Foundations pass (Ahmed + Claude)
 **Done**
