@@ -180,7 +180,15 @@ namespace SandsOfLegends.UI
             Transform actualParent = parent == panel && contentRoot != null ? contentRoot : parent;
             go.transform.SetParent(actualParent, false);
             Text text = go.GetComponent<Text>();
-            text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            Font font = null;
+            try { font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); }
+            catch (ArgumentException) { }
+            if (font == null)
+            {
+                try { font = Resources.GetBuiltinResource<Font>("Arial.ttf"); }
+                catch (ArgumentException) { }
+            }
+            text.font = font;
             text.text = value;
             text.fontSize = size;
             text.fontStyle = FontStyle.Bold;
