@@ -1,10 +1,4 @@
-// =============================================================================
-// FILE: Assets/Scripts/UI/Screens/HomeScreen.cs
-// OWNER ROLE: Client Programmer - UI
-// RESPONSIBILITY: Mobile-first main hub HUD and navigation over the 3D home-world scene.
-// WORK ON: Bind navigation events to unlocked screens; connect live server-backed player data.
-// STATUS: Foundation - runtime UI scaffold
-// =============================================================================
+// Mobile-first fantasy home hub HUD. Scene art is supplied by the Home scene behind this canvas.
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -19,216 +13,202 @@ namespace SandsOfLegends.UI
         [SerializeField] private Canvas canvas;
         [SerializeField] private RectTransform safeAreaRoot;
 
-        [Header("Navigation Events")]
-        public UnityEvent onCampaign;
-        public UnityEvent onHeroes;
-        public UnityEvent onSummon;
-        public UnityEvent onQuests;
-        public UnityEvent onShop;
-        public UnityEvent onFormation;
+        [Header("Primary navigation")]
+        public UnityEvent onCampaign = new UnityEvent();
+        public UnityEvent onHeroes = new UnityEvent();
+        public UnityEvent onFormation = new UnityEvent();
+        public UnityEvent onEquipment = new UnityEvent();
+        public UnityEvent onQuests = new UnityEvent();
+        public UnityEvent onBackpack = new UnityEvent();
+        public UnityEvent onAllies = new UnityEvent();
+        public UnityEvent onMore = new UnityEvent();
+        public UnityEvent onSummon = new UnityEvent();
+        public UnityEvent onArena = new UnityEvent();
+        public UnityEvent onShop = new UnityEvent();
+        public UnityEvent onEvents = new UnityEvent();
+        public UnityEvent onDailyLogin = new UnityEvent();
+        public UnityEvent onBattlePass = new UnityEvent();
+        public UnityEvent onMonthlyCard = new UnityEvent();
+        public UnityEvent onAllianceBoss = new UnityEvent();
+        public UnityEvent onClaimIdle = new UnityEvent();
 
-        [Header("Palette")]
-        [SerializeField] private Color panelColor = new Color(0.035f, 0.075f, 0.09f, 0.88f);
-        [SerializeField] private Color accentColor = new Color(0.12f, 0.72f, 0.70f, 1f);
-        [SerializeField] private Color goldColor = new Color(0.92f, 0.70f, 0.30f, 1f);
+        [Header("Visual palette")]
+        [SerializeField] private Color deep = new Color(0.025f, 0.065f, 0.085f, 0.94f);
+        [SerializeField] private Color panel = new Color(0.035f, 0.11f, 0.13f, 0.91f);
+        [SerializeField] private Color turquoise = new Color(0.12f, 0.72f, 0.69f, 1f);
+        [SerializeField] private Color gold = new Color(0.96f, 0.75f, 0.32f, 1f);
+        [SerializeField] private Color cream = new Color(1f, 0.94f, 0.79f, 1f);
 
-        private Text _gems;
-        private Text _gold;
-        private Text _energy;
-        private Text _stage;
-        private bool _built;
+        private Text gemsText, goldText, energyText, stageText, powerText;
+        private bool built;
 
-        private void Start()
+        private void Start() { Build(); RefreshData(); }
+        public override void OnShow() { base.OnShow(); Build(); RefreshData(); }
+
+        private void Build()
         {
-            BuildIfNeeded();
-            RefreshPlayerData();
-        }
-
-        public override void OnShow()
-        {
-            base.OnShow();
-            BuildIfNeeded();
-            RefreshPlayerData();
-        }
-
-        private void BuildIfNeeded()
-        {
-            if (_built) return;
+            if (built) return;
             if (canvas == null)
             {
-                var canvasObject = new GameObject("Home HUD Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
-                canvas = canvasObject.GetComponent<Canvas>();
+                GameObject c = new GameObject("Home HUD Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+                canvas = c.GetComponent<Canvas>();
                 canvas.renderMode = RenderMode.ScreenSpaceOverlay;
                 canvas.sortingOrder = 20;
-                var scaler = canvasObject.GetComponent<CanvasScaler>();
+                CanvasScaler scaler = c.GetComponent<CanvasScaler>();
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                 scaler.referenceResolution = new Vector2(1080, 1920);
-                scaler.matchWidthOrHeight = 0.5f;
+                scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+                scaler.matchWidthOrHeight = 0.45f;
             }
-
             if (safeAreaRoot == null)
             {
-                var rootObject = new GameObject("Safe Area", typeof(RectTransform));
-                safeAreaRoot = rootObject.GetComponent<RectTransform>();
+                GameObject root = new GameObject("Safe Area", typeof(RectTransform));
+                safeAreaRoot = root.GetComponent<RectTransform>();
                 safeAreaRoot.SetParent(canvas.transform, false);
-                safeAreaRoot.anchorMin = Vector2.zero;
-                safeAreaRoot.anchorMax = Vector2.one;
-                safeAreaRoot.offsetMin = new Vector2(28, 28);
-                safeAreaRoot.offsetMax = new Vector2(-28, -28);
+                safeAreaRoot.anchorMin = Vector2.zero; safeAreaRoot.anchorMax = Vector2.one;
+                safeAreaRoot.offsetMin = new Vector2(22, 24); safeAreaRoot.offsetMax = new Vector2(-22, -24);
             }
 
-            BuildTopBar();
-            BuildSideNavigation();
-            BuildCampaignButton();
-            BuildWorldTitle();
-            _built = true;
+            BuildProfileAndResources();
+            BuildEventRail();
+            BuildSideMenus();
+            BuildIdleRewards();
+            BuildCampaign();
+            BuildBottomNavigation();
+            built = true;
         }
 
-        private void BuildTopBar()
+        private void BuildProfileAndResources()
         {
-            var bar = Panel("Top Resource Bar", safeAreaRoot, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, 112), Vector2.zero, panelColor);
-            var layout = bar.gameObject.AddComponent<HorizontalLayoutGroup>();
-            layout.padding = new RectOffset(18, 18, 10, 10);
-            layout.spacing = 14;
-            layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.childControlWidth = true;
-            layout.childControlHeight = true;
-            layout.childForceExpandWidth = true;
-            layout.childForceExpandHeight = true;
-            _gems = ResourceLabel(bar, "GEMS", goldColor);
-            _gold = ResourceLabel(bar, "GOLD", goldColor);
-            _energy = ResourceLabel(bar, "ENERGY", accentColor);
+            RectTransform profile = Box("Player Profile", safeAreaRoot, new Vector2(0,1), new Vector2(0.43f,1), new Vector2(0,116), new Vector2(0,-4), panel);
+            AddText("PLAYER  •  LEVEL 1", profile, 25, cream, TextAnchor.MiddleLeft, new Vector2(18,0), new Vector2(-12,0));
+            powerText = AddText("POWER  1,250", profile, 20, gold, TextAnchor.LowerLeft, new Vector2(18,8), new Vector2(-12,0));
+
+            RectTransform resources = Box("Resource Strip", safeAreaRoot, new Vector2(0.45f,1), new Vector2(1,1), new Vector2(0,116), new Vector2(0,-4), deep);
+            gemsText = AddText("◆  0", resources, 23, cream, TextAnchor.MiddleCenter, new Vector2(0,0), new Vector2(0,0));
+            gemsText.rectTransform.anchorMin = new Vector2(0,0); gemsText.rectTransform.anchorMax = new Vector2(0.34f,1);
+            goldText = AddText("●  0", resources, 23, gold, TextAnchor.MiddleCenter, Vector2.zero, Vector2.zero);
+            goldText.rectTransform.anchorMin = new Vector2(0.34f,0); goldText.rectTransform.anchorMax = new Vector2(0.68f,1);
+            energyText = AddText("⚡  0/100", resources, 22, turquoise, TextAnchor.MiddleCenter, Vector2.zero, Vector2.zero);
+            energyText.rectTransform.anchorMin = new Vector2(0.68f,0); energyText.rectTransform.anchorMax = new Vector2(1,1);
         }
 
-        private Text ResourceLabel(Transform parent, string label, Color color)
+        private void BuildEventRail()
         {
-            var text = MakeText(label + "  --", parent, 24, color, TextAnchor.MiddleCenter);
-            text.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
-            return text;
+            RectTransform rail = Box("Limited Events Rail", safeAreaRoot, new Vector2(0,0.69f), new Vector2(0.22f,0.69f), new Vector2(0,420), new Vector2(0,0), Color.clear);
+            AddNav(rail,"EVENTS",onEvents, gold, 68);
+            AddNav(rail,"DAILY LOGIN",onDailyLogin,turquoise,68);
+            AddNav(rail,"BATTLE PASS",onBattlePass,gold,68);
+            AddNav(rail,"MONTHLY CARD",onMonthlyCard,turquoise,68);
         }
 
-        private void BuildSideNavigation()
+        private void BuildSideMenus()
         {
-            var left = Panel("Left Navigation", safeAreaRoot, new Vector2(0, 0.34f), new Vector2(0.22f, 0.34f), new Vector2(0, 390), Vector2.zero, Color.clear);
-            var leftLayout = left.gameObject.AddComponent<VerticalLayoutGroup>();
-            leftLayout.spacing = 14;
-            leftLayout.childControlWidth = true;
-            leftLayout.childControlHeight = true;
-            leftLayout.childForceExpandHeight = false;
-            leftLayout.childForceExpandWidth = true;
-            AddNavButton(left, "HEROES", onHeroes);
-            AddNavButton(left, "FORMATION", onFormation);
-            AddNavButton(left, "QUESTS", onQuests);
+            RectTransform left = Box("Left Menu", safeAreaRoot, new Vector2(0,0.34f), new Vector2(0.22f,0.34f), new Vector2(0,360), Vector2.zero, Color.clear);
+            AddNav(left,"HEROES",onHeroes,turquoise,72);
+            AddNav(left,"FORMATION",onFormation,gold,72);
+            AddNav(left,"QUESTS",onQuests,turquoise,72);
+            AddNav(left,"EQUIPMENT",onEquipment,gold,72);
 
-            var right = Panel("Right Navigation", safeAreaRoot, new Vector2(0.78f, 0.34f), new Vector2(1, 0.34f), new Vector2(0, 270), Vector2.zero, Color.clear);
-            var rightLayout = right.gameObject.AddComponent<VerticalLayoutGroup>();
-            rightLayout.spacing = 14;
-            rightLayout.childControlWidth = true;
-            rightLayout.childControlHeight = true;
-            rightLayout.childForceExpandHeight = false;
-            rightLayout.childForceExpandWidth = true;
-            AddNavButton(right, "SUMMON", onSummon);
-            AddNavButton(right, "SHOP", onShop);
+            RectTransform right = Box("Right Menu", safeAreaRoot, new Vector2(0.78f,0.34f), new Vector2(1,0.34f), new Vector2(0,360), Vector2.zero, Color.clear);
+            AddNav(right,"SUMMON",onSummon,gold,72);
+            AddNav(right,"ARENA",onArena,turquoise,72);
+            AddNav(right,"ALLIANCE BOSS",onAllianceBoss,gold,72);
+            AddNav(right,"SHOP",onShop,turquoise,72);
         }
 
-        private void AddNavButton(Transform parent, string label, UnityEvent action)
+        private void BuildIdleRewards()
         {
-            var button = MakeButton(label, parent, accentColor, 190, 76);
-            button.onClick.AddListener(() => { if (action != null) action.Invoke(); });
+            RectTransform idle = Box("Idle Rewards Card", safeAreaRoot, new Vector2(0.24f,0.20f), new Vector2(0.76f,0.20f), new Vector2(0,142), Vector2.zero, panel);
+            AddText("IDLE REWARDS  •  08:24:16", idle, 22, cream, TextAnchor.MiddleCenter, new Vector2(8,48), new Vector2(-8,-2));
+            Button claim = MakeButton("CLAIM", idle, gold, 210, 54);
+            claim.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f,0);
+            claim.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f,0);
+            claim.GetComponent<RectTransform>().anchoredPosition = new Vector2(0,12);
+            claim.onClick.AddListener(() => onClaimIdle.Invoke());
         }
 
-        private void BuildCampaignButton()
+        private void BuildCampaign()
         {
-            var area = Panel("Campaign Action Area", safeAreaRoot, new Vector2(0.08f, 0), new Vector2(0.92f, 0), new Vector2(0, 174), Vector2.zero, panelColor);
-            area.pivot = new Vector2(0.5f, 0f);\n            var vertical = area.gameObject.AddComponent<VerticalLayoutGroup>();
-            vertical.padding = new RectOffset(18, 18, 12, 12);
-            vertical.spacing = 4;
-            vertical.childAlignment = TextAnchor.MiddleCenter;
-            vertical.childControlWidth = true;
-            vertical.childControlHeight = true;
-            vertical.childForceExpandHeight = true;
-            _stage = MakeText("CAMPAIGN  •  STAGE 1", area, 24, goldColor, TextAnchor.MiddleCenter);\n            _stage.gameObject.AddComponent<LayoutElement>().preferredHeight = 42;
-            var enter = MakeButton("ENTER CAMPAIGN", area, goldColor, 0, 82);
-            enter.GetComponent<LayoutElement>().flexibleWidth = 1;
-            enter.onClick.AddListener(() => { if (onCampaign != null) onCampaign.Invoke(); });
+            RectTransform area = Box("Campaign CTA", safeAreaRoot, new Vector2(0.24f,0.105f), new Vector2(0.76f,0.105f), new Vector2(0,128), Vector2.zero, deep);
+            stageText = AddText("THE SEVEN SANDS  •  STAGE 1", area, 22, cream, TextAnchor.MiddleCenter, new Vector2(8,54), new Vector2(-8,0));
+            Button enter = MakeButton("⚔  CAMPAIGN", area, gold, 0, 68);
+            RectTransform er = enter.GetComponent<RectTransform>();
+            er.anchorMin = new Vector2(0.08f,0); er.anchorMax = new Vector2(0.92f,0);
+            er.anchoredPosition = new Vector2(0,12); er.sizeDelta = new Vector2(0,66);
+            enter.onClick.AddListener(() => onCampaign.Invoke());
         }
 
-        private void BuildWorldTitle()
+        private void BuildBottomNavigation()
         {
-            var title = MakeText("THE SEVEN SANDS", safeAreaRoot, 34, Color.white, TextAnchor.MiddleCenter);
-            var rect = title.rectTransform;
-            rect.anchorMin = new Vector2(0.16f, 0.68f);
-            rect.anchorMax = new Vector2(0.84f, 0.76f);
-            rect.offsetMin = Vector2.zero;
-            rect.offsetMax = Vector2.zero;
-            title.fontStyle = FontStyle.Bold;
-            title.characterSpacing = 3;
+            RectTransform nav = Box("Bottom Navigation", safeAreaRoot, new Vector2(0,0), new Vector2(1,0), new Vector2(0,116), new Vector2(0,0), deep);
+            string[] labels = { "HOME", "HEROES", "BAG", "GUILD", "ARENA", "MORE" };
+            UnityEvent[] actions = { null, onHeroes, onBackpack, onAllies, onArena, onMore };
+            for (int i=0;i<labels.Length;i++)
+            {
+                int index=i;
+                Button b = MakeButton(labels[i],nav,i==0?gold:turquoise,0,82);
+                RectTransform r=b.GetComponent<RectTransform>();
+                r.anchorMin=new Vector2(i/6f,0.12f); r.anchorMax=new Vector2((i+1)/6f,0.88f);
+                r.offsetMin=new Vector2(4,0); r.offsetMax=new Vector2(-4,0);
+                if (actions[index]!=null) b.onClick.AddListener(()=>actions[index].Invoke());
+                else b.interactable=false;
+            }
         }
 
-        private void RefreshPlayerData()
+        private void AddNav(RectTransform parent,string label,UnityEvent action,Color accent,float height)
         {
-            if (_gems == null || GameBootstrap.Instance == null || GameBootstrap.Instance.State == null) return;
-            GameState state = GameBootstrap.Instance.State;
-            _gems.text = "GEMS  " + state.Wallet.Get(Currency.Gems).ToString("N0");
-            _gold.text = "GOLD  " + state.Wallet.Get(Currency.Gold).ToString("N0");
-            _energy.text = "ENERGY  " + state.Energy.Value + "/" + EnergyState.Cap;
-            if (_stage != null) _stage.text = "CAMPAIGN  •  STAGE " + Mathf.Max(1, state.Campaign.HighestCleared + 1);
+            Button b=MakeButton(label,parent,accent,0,height);
+            b.onClick.AddListener(()=>action.Invoke());
         }
 
-        private RectTransform Panel(string objectName, Transform parent, Vector2 anchorMin, Vector2 anchorMax, Vector2 size, Vector2 position, Color color)
+        private RectTransform Box(string name,Transform parent,Vector2 min,Vector2 max,Vector2 size,Vector2 pos,Color color)
         {
-            var go = new GameObject(objectName, typeof(RectTransform), typeof(Image));
-            go.transform.SetParent(parent, false);
-            var rect = go.GetComponent<RectTransform>();
-            rect.anchorMin = anchorMin;
-            rect.anchorMax = anchorMax;
-            rect.sizeDelta = size;
-            rect.anchoredPosition = position;
-            var image = go.GetComponent<Image>();
-            image.color = color;
-            image.raycastTarget = color.a > 0.01f;
-            return rect;
+            GameObject go=new GameObject(name,typeof(RectTransform),typeof(Image));
+            go.transform.SetParent(parent,false);
+            RectTransform r=go.GetComponent<RectTransform>();
+            r.anchorMin=min; r.anchorMax=max; r.sizeDelta=size; r.anchoredPosition=pos;
+            Image image=go.GetComponent<Image>(); image.color=color; image.raycastTarget=color.a>0.01f;
+            return r;
         }
 
-        private Text MakeText(string value, Transform parent, int size, Color color, TextAnchor alignment)
+        private Text AddText(string value,Transform parent,int size,Color color,TextAnchor align,Vector2 minOffset,Vector2 maxOffset)
         {
-            var go = new GameObject(value + " Text", typeof(RectTransform), typeof(Text));
-            go.transform.SetParent(parent, false);
-            var text = go.GetComponent<Text>();
-            text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-            text.text = value;
-            text.fontSize = size;
-            text.color = color;
-            text.alignment = alignment;
-            text.horizontalOverflow = HorizontalWrapMode.Overflow;
-            text.verticalOverflow = VerticalWrapMode.Overflow;
-            text.raycastTarget = false;
-            return text;
+            GameObject go=new GameObject(value+" Label",typeof(RectTransform),typeof(Text));
+            go.transform.SetParent(parent,false);
+            Text t=go.GetComponent<Text>();
+            t.font=Resources.GetBuiltinResource<Font>("Arial.ttf"); t.text=value; t.fontSize=size;
+            t.color=color; t.alignment=align; t.fontStyle=FontStyle.Bold;
+            t.horizontalOverflow=HorizontalWrapMode.Overflow; t.verticalOverflow=VerticalWrapMode.Overflow;
+            t.raycastTarget=false;
+            RectTransform r=t.rectTransform; r.anchorMin=Vector2.zero; r.anchorMax=Vector2.one;
+            r.offsetMin=minOffset; r.offsetMax=maxOffset;
+            return t;
         }
 
-        private Button MakeButton(string label, Transform parent, Color color, float width, float height)
+        private Button MakeButton(string label,Transform parent,Color accent,float width,float height)
         {
-            var go = new GameObject(label + " Button", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
-            go.transform.SetParent(parent, false);
-            var image = go.GetComponent<Image>();
-            image.color = new Color(panelColor.r, panelColor.g, panelColor.b, 0.96f);
-            var button = go.GetComponent<Button>();
-            var colors = button.colors;
-            colors.normalColor = image.color;
-            colors.highlightedColor = new Color(color.r, color.g, color.b, 0.22f);
-            colors.pressedColor = new Color(color.r, color.g, color.b, 0.42f);
-            button.colors = colors;
-            var layout = go.GetComponent<LayoutElement>();
-            layout.minWidth = width;
-            layout.minHeight = height;
-            layout.preferredHeight = height;
-            var labelText = MakeText(label, go.transform, 22, color, TextAnchor.MiddleCenter);
-            var rect = labelText.rectTransform;
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            rect.offsetMin = new Vector2(8, 4);
-            rect.offsetMax = new Vector2(-8, -4);
+            GameObject go=new GameObject(label+" Button",typeof(RectTransform),typeof(Image),typeof(Button),typeof(LayoutElement));
+            go.transform.SetParent(parent,false);
+            Image image=go.GetComponent<Image>(); image.color=new Color(deep.r,deep.g,deep.b,0.97f);
+            Button button=go.GetComponent<Button>();
+            ColorBlock cb=button.colors; cb.normalColor=image.color;
+            cb.highlightedColor=new Color(accent.r,accent.g,accent.b,0.34f);
+            cb.pressedColor=new Color(accent.r,accent.g,accent.b,0.58f); button.colors=cb;
+            LayoutElement le=go.GetComponent<LayoutElement>(); le.minHeight=height; le.preferredHeight=height;
+            if(width>0) le.minWidth=width;
+            Text labelText=AddText(label,go.transform,19,accent,TextAnchor.MiddleCenter,new Vector2(5,3),new Vector2(-5,-3));
             return button;
+        }
+
+        private void RefreshData()
+        {
+            if (GameBootstrap.Instance==null || GameBootstrap.Instance.State==null) return;
+            GameState state=GameBootstrap.Instance.State;
+            if(gemsText!=null) gemsText.text="◆  "+state.Wallet.Get(Currency.Gems).ToString("N0");
+            if(goldText!=null) goldText.text="●  "+state.Wallet.Get(Currency.Gold).ToString("N0");
+            if(energyText!=null) energyText.text="⚡  "+state.Energy.Value+"/"+EnergyState.Cap;
+            if(stageText!=null) stageText.text="THE SEVEN SANDS  •  STAGE "+Mathf.Max(1,state.Campaign.HighestCleared+1);
         }
     }
 }
