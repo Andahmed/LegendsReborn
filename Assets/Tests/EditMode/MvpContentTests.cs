@@ -54,6 +54,25 @@ namespace SandsOfLegends.Tests
         }
 
         [Test]
+        public void AssigningAnAlreadySelectedHeroSwapsFormationSlots()
+        {
+            GameState state = GameState.NewGame(1000);
+            string[] starters = HeroCatalog.StartingHeroes;
+            for (int i = 0; i < starters.Length; i++)
+            {
+                int shards;
+                state.Roster.AddHeroOrShards(starters[i], HeroCatalog.Get(starters[i]).Rarity, out shards);
+                state.Roster.SetFormation(i, starters[i]);
+            }
+
+            state.Roster.SetFormation(1, starters[0]);
+            string[] formation = state.Roster.GetFormation();
+            Assert.AreEqual(starters[1], formation[0]);
+            Assert.AreEqual(starters[0], formation[1]);
+            CollectionAssert.AllItemsAreUnique(formation);
+        }
+
+        [Test]
         public void HeroStarUpAndAscensionConsumeShardsAndMaterials()
         {
             GameState state = GameState.NewGame(1000);

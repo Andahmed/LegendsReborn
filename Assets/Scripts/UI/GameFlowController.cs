@@ -34,6 +34,7 @@ namespace SandsOfLegends.UI
         private readonly Dictionary<string, HeroView> actors = new Dictionary<string, HeroView>();
         private readonly Dictionary<string, Sprite> portraitCache = new Dictionary<string, Sprite>();
         private int activeStage;
+        private string selectedEquipmentHeroId;
         private bool bound;
         private bool battleResolved;
 
@@ -437,11 +438,30 @@ namespace SandsOfLegends.UI
         {
             if (State == null) return;
             ReturnToMenuWorld();
-            CreatePanel("EQUIPMENT", "Six equipment slots. Upgrades consume Gold and Gear Materials.", true);
+            CreatePanel("EQUIPMENT", "Choose any owned hero, then upgrade their six gear slots.", true);
             if (State.Roster.Heroes.Count == 0) { AddInfo("Recruit a hero first.", 64); return; }
-            HeroInstance hero = State.Roster.Heroes[0];
+
+            if (string.IsNullOrEmpty(selectedEquipmentHeroId) ||
+                State.Roster.Find(selectedEquipmentHeroId) == null)
+                selectedEquipmentHeroId = State.Roster.Heroes[0].HeroId;
+
+            AddInfo("SELECT HERO  •  " + State.Roster.Heroes.Count + " OWNED", 48);
+            for (int i = 0; i < State.Roster.Heroes.Count; i++)
+            {
+                string candidateId = State.Roster.Heroes[i].HeroId;
+                HeroCardData candidateCard = HeroCatalog.Get(candidateId);
+                string candidateName = candidateCard != null ? candidateCard.DisplayName : candidateId;
+                bool selected = candidateId == selectedEquipmentHeroId;
+                AddButton(panel, (selected ? "✓  " : "") + candidateName,
+                    () => SelectEquipmentHero(candidateId), 52, selected ? gold : teal);
+            }
+
+            HeroInstance hero = State.Roster.Find(selectedEquipmentHeroId);
+            if (hero == null) return;
             HeroCardData card = HeroCatalog.Get(hero.HeroId);
-            AddInfo((card != null ? card.DisplayName : hero.HeroId) + "  •  Gear level increases stats in the next battle.", 80);
+            AddInfo((card != null ? card.DisplayName : hero.HeroId) +
+                "  •  Six slots  •  Gear adds combat stats", 68);
+
             for (int i = 0; i < 6; i++)
             {
                 EquipSlot slot = (EquipSlot)i;
@@ -455,6 +475,13 @@ namespace SandsOfLegends.UI
                 AddButton(panel, label + "\nUPGRADE", () => UpgradeEquipment(hero.HeroId, slot), 78, teal);
             }
             Save();
+        }
+
+        private void SelectEquipmentHero(string heroId)
+        {
+            if (State == null || State.Roster.Find(heroId) == null) return;
+            selectedEquipmentHeroId = heroId;
+            OpenEquipment();
         }
 
         private void UpgradeEquipment(string heroId, EquipSlot slot)
