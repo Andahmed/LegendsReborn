@@ -1,5 +1,8 @@
 # Work Log (newest first)
 
+## 2026-11-12 - B5 meta edge-case fixes (GPT Lane B)
+- Added ClaimIdle, null-array SaveMigrations, level-up/ascend rollback, EnergyState boundary, Wallet saturation, and equipment-cap regression tests. Engine-Free C# CI evidence is pending.
+
 ## 2026-11-11 - Foundations pass (Ahmed + Claude)
 **Done**
 - Added all foundation folders and files per the project plan (see ARCHITECTURE.md): Meta (economy, roster, gacha, idle, campaign, quests, save), Services, Bootstrap, Presentation, UI framework + 5 screen stubs, Localization, Editor build script, Server skeleton, docs.
