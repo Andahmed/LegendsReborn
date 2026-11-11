@@ -36,6 +36,106 @@ namespace SandsOfLegends.Tests
             Assert.IsTrue(CampaignContent.Get(200).IsBoss);
         }
 
+
+        [Test]
+        public void CampaignBiomeLineups_AreDifferent()
+        {
+            string previousSignature = null;
+            for (int biome = 0; biome < CampaignProgress.Biomes; biome++)
+            {
+                int stage = biome * CampaignProgress.StagesPerBiome + 1;
+                UnitSpec[] enemies = CampaignContent.BuildEnemies(stage);
+                string signature = "";
+                for (int i = 0; i < enemies.Length; i++)
+                    signature += enemies[i].Name + "|" + enemies[i].Faction + "|" + enemies[i].Role + ";";
+                Assert.AreNotEqual(previousSignature, signature, "Biome " + biome + " must have a distinct lineup");
+                previousSignature = signature;
+            }
+        }
+
+        [Test]
+        public void CampaignEnemyPower_DoesNotDecreaseInsideAnyBiome()
+        {
+            for (int biome = 0; biome < CampaignProgress.Biomes; biome++)
+            {
+                int first = biome * CampaignProgress.StagesPerBiome + 1;
+                long previousPower = -1;
+                for (int offset = 0; offset < CampaignProgress.StagesPerBiome; offset++)
+                {
+                    UnitSpec[] enemies = CampaignContent.BuildEnemies(first + offset);
+                    long power = 0;
+                    for (int i = 0; i < enemies.Length; i++)
+                        power += enemies[i].Hp + enemies[i].Atk + enemies[i].Def;
+                    Assert.GreaterOrEqual(power, previousPower, "Enemy power dropped at stage " + (first + offset));
+                    previousPower = power;
+                }
+            }
+        }
+
+        [Test]
+        public void CampaignEnemies_HaveSkillsAndAreDeterministic()
+        {
+            for (int stage = 1; stage <= CampaignProgress.MaxStage; stage++)
+            {
+                UnitSpec[] first = CampaignContent.BuildEnemies(stage);
+                UnitSpec[] second = CampaignContent.BuildEnemies(stage);
+                Assert.AreEqual(5, first.Length);
+                for (int i = 0; i < first.Length; i++)
+                {
+                    Assert.IsTrue(first[i].Id.StartsWith("enemy_"));
+                    Assert.IsNotNull(first[i].Skill, first[i].Id + " skill");
+                    Assert.AreEqual(first[i].Id, second[i].Id);
+                    Assert.AreEqual(first[i].Name, second[i].Name);
+                    Assert.AreEqual(first[i].Faction, second[i].Faction);
+                    Assert.AreEqual(first[i].Role, second[i].Role);
+                    Assert.AreEqual(first[i].Hp, second[i].Hp);
+                    Assert.AreEqual(first[i].Atk, second[i].Atk);
+                    Assert.AreEqual(first[i].Def, second[i].Def);
+                    Assert.AreEqual(first[i].Skill.Id, second[i].Skill.Id);
+                    Assert.AreEqual(first[i].Skill.Power, second[i].Skill.Power);
+                }
+                bool boss = CampaignProgress.IsBoss(stage);
+                Assert.AreEqual(boss, first[4].Ultimate != null, "Boss ultimate at stage " + stage);
+                if (boss)
+                {
+                    Assert.AreEqual(TargetType.AllEnemies, first[4].Ultimate.Target);
+                    Assert.IsFalse(first[4].Ultimate.IsHeal);
+                }
+            }
+        }
+
+        [Test]
+        public void StarterTeam_WinsStageOneForAtLeastNinetyPercentOfSeeds()
+        {
+            var starters = new UnitSpec[HeroCatalog.StartingHeroes.Length];
+            for (int i = 0; i < starters.Length; i++)
+                starters[i] = HeroCatalog.BuildUnit(HeroCatalog.StartingHeroes[i], 1);
+
+            int wins = 0;
+            for (int seed = 1; seed <= 50; seed++)
+            {
+                var battle = new BattleSim(starters, CampaignContent.BuildEnemies(1), seed);
+                battle.Run();
+                if (battle.Winner == 0) wins++;
+            }
+            Assert.GreaterOrEqual(wins, 45, "Stage 1 must be winnable in at least 90% of seeds 1..50");
+        }
+
+        [Test]
+        public void StarterTeam_LosesStageTwoHundredForEverySeed()
+        {
+            var starters = new UnitSpec[HeroCatalog.StartingHeroes.Length];
+            for (int i = 0; i < starters.Length; i++)
+                starters[i] = HeroCatalog.BuildUnit(HeroCatalog.StartingHeroes[i], 1);
+
+            for (int seed = 1; seed <= 50; seed++)
+            {
+                var battle = new BattleSim(starters, CampaignContent.BuildEnemies(200), seed);
+                battle.Run();
+                Assert.AreEqual(1, battle.Winner, "Stage 200 should defeat the starter team for seed " + seed);
+            }
+        }
+
         [Test]
         public void StarterFormationSurvivesSaveRoundTrip()
         {
