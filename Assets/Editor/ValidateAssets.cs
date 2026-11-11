@@ -40,7 +40,7 @@ namespace SandsOfLegends.EditorTools
                 HeroDefinition hero = AssetDatabase.LoadAssetAtPath<HeroDefinition>(path);
                 if (hero == null || hero.prefab == null)
                     throw new Exception("Hero has no prefab reference: " + path);
-                if (!register.Contains(hero.id.Replace("hero_", "hero_")))
+                if (string.IsNullOrEmpty(hero.id) || !register.Contains(hero.id))
                     throw new Exception("Hero is missing from docs/ASSETS.md: " + hero.id);
                 if (hero.prefab.GetComponent<Animator>() == null || hero.prefab.GetComponent<HeroView>() == null)
                     throw new Exception("Hero prefab must contain Animator and HeroView: " + AssetDatabase.GetAssetPath(hero.prefab));
