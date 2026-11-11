@@ -255,19 +255,6 @@ namespace SandsOfLegends.EditorTools
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), BattlePath);
         }
 
-        private static GameObject CreateHeroCube(string name, Vector3 position, Color color)
-        {
-            GameObject actor = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            actor.name = name;
-            actor.transform.position = position;
-            actor.transform.localScale = new Vector3(1.15f, 1.15f, 1.15f);
-            var renderer = actor.GetComponent<Renderer>();
-            var material = new Material(Shader.Find("Standard"));
-            material.color = color;
-            renderer.sharedMaterial = material;
-            return actor;
-        }
-
         private static Camera CreateCamera()
         {
             var cameraObject = new GameObject("Main Camera");
