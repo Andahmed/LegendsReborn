@@ -158,6 +158,17 @@ namespace SandsOfLegends.EditorTools
                     }
                 }
                 CreatePortrait(id, Armor[i], Accent[i]);
+                CreateFactionIcon(id, Accent[i]);
+                if (heroes != null)
+                {
+                    for (int h = 0; h < heroes.Length; h++)
+                    {
+                        if (heroes[h] == null || heroes[h].id != "hero_" + id) continue;
+                        heroes[h].portrait = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Prefabs/UI/hero_" + id + "_portrait.png");
+                        heroes[h].factionIcon = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Prefabs/UI/faction_" + id + "_icon.png");
+                        EditorUtility.SetDirty(heroes[h]);
+                    }
+                }
             }
 
             CreateFactionVfx("raider", UIStyle.FactionColor(Faction.Shadow));
@@ -558,6 +569,30 @@ namespace SandsOfLegends.EditorTools
                 if (y > 40 && y < 92 && Mathf.Abs(x - 64) < 22) c = Color.Lerp(c, new Color(.72f,.48f,.32f), .7f);
                 if (y > 83 && y < 115 && Mathf.Abs(x - 64) < 34) c = Color.Lerp(c, accent, .8f);
                 pixels[y * size + x] = c;
+            }
+            texture.SetPixels(pixels);
+            texture.Apply();
+            File.WriteAllBytes(path, texture.EncodeToPNG());
+            UnityEngine.Object.DestroyImmediate(texture);
+            ConfigureSprite(path);
+        }
+
+
+        private static void CreateFactionIcon(string id, Color color)
+        {
+            string path = "Assets/Prefabs/UI/faction_" + id + "_icon.png";
+            if (File.Exists(path)) return;
+            const int size = 64;
+            Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[size * size];
+            Vector2 center = new Vector2(31.5f, 31.5f);
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float distance = Vector2.Distance(new Vector2(x, y), center);
+                bool ring = distance > 24f && distance < 29f;
+                bool mark = Mathf.Abs(x - 31.5f) < 4f || Mathf.Abs(y - 31.5f) < 4f;
+                pixels[y * size + x] = ring || (mark && distance < 20f) ? color : new Color(0f,0f,0f,0f);
             }
             texture.SetPixels(pixels);
             texture.Apply();
