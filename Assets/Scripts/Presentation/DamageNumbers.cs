@@ -9,6 +9,17 @@ namespace SandsOfLegends.Presentation
             GameObject go = new GameObject("Floating Combat Number");
             go.transform.position = position + Vector3.up * 1.8f;
             TextMesh label = go.AddComponent<TextMesh>();
+            Font font = null;
+            try { font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); }
+            catch (System.ArgumentException) { }
+            if (font == null)
+            {
+                try { font = Resources.GetBuiltinResource<Font>("Arial.ttf"); }
+                catch (System.ArgumentException) { }
+            }
+            label.font = font;
+            MeshRenderer meshRenderer = go.GetComponent<MeshRenderer>();
+            if (label.font != null && meshRenderer != null) meshRenderer.sharedMaterial = label.font.material;
             label.text = (heal ? "+" : "-") + amount.ToString("N0");
             label.fontSize = critical ? 72 : 56;
             label.characterSize = .075f;

@@ -1,5 +1,9 @@
 # Work Log (newest first)
 
+## 2026-11-12 - A0 Unity font crash guard
+**Done:** Replaced direct Arial loading with LegacyRuntime.ttf plus guarded Arial fallback in GameFlowController and HomeScreen; assigned the TextMesh font and font material in DamageNumbers.
+**Not verified:** لم يتم التحقق في Unity؛ CI/Android workflow was not run in this environment.
+
 ## 2026-11-12 - B0 Engine-Free CI (GPT Lane B)
 - Engine-Free Tests workflow added; GitHub Actions run #3 passed (22 tests, 0 failures). Unity Editor/Play Mode/Android build not run.
 
