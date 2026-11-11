@@ -614,14 +614,40 @@ namespace SandsOfLegends.EditorTools
         private static void CreatePropPrefab(string path, string name, Color color)
         {
             if (AssetDatabase.LoadAssetAtPath<GameObject>(path) != null) AssetDatabase.DeleteAsset(path);
-            GameObject go = new GameObject(name);
-            GameObject meshObject = GameObject.CreatePrimitive(name.Contains("crystal") ? PrimitiveType.Sphere : PrimitiveType.Cube);
-            meshObject.name = "mesh";
-            meshObject.transform.SetParent(go.transform, false);
-            UnityEngine.Object.DestroyImmediate(meshObject.GetComponent<Collider>());
-            meshObject.GetComponent<Renderer>().sharedMaterial = CreateMaterial(name, color);
-            PrefabUtility.SaveAsPrefabAsset(go, path);
-            UnityEngine.Object.DestroyImmediate(go);
+            GameObject root = new GameObject(name);
+            Material material = CreateMaterial(name, color);
+            if (name == "prop_ancient_gate")
+            {
+                CreateEnvironmentPart(root.transform, PrimitiveType.Cube, "left_gate_post",
+                    new Vector3(-.72f,.95f,0f), new Vector3(.28f,1.9f,.36f), material, Quaternion.identity);
+                CreateEnvironmentPart(root.transform, PrimitiveType.Cube, "right_gate_post",
+                    new Vector3(.72f,.95f,0f), new Vector3(.28f,1.9f,.36f), material, Quaternion.identity);
+                CreateEnvironmentPart(root.transform, PrimitiveType.Cube, "gate_lintel",
+                    new Vector3(0f,1.92f,0f), new Vector3(1.75f,.28f,.42f), material, Quaternion.identity);
+                CreateEnvironmentPart(root.transform, PrimitiveType.Cube, "gate_keystone",
+                    new Vector3(0f,2.13f,0f), new Vector3(.42f,.24f,.48f), CreateMaterial(name + "_accent", UIStyle.Gold), Quaternion.identity);
+            }
+            else
+            {
+                MeshPart crystal = new MeshPart();
+                crystal.AddOcta(Vector3.zero, new Vector3(.38f,.78f,.34f), 0);
+                string meshPath = Path.GetDirectoryName(path) + "/" + name + "_mesh.asset";
+                if (File.Exists(meshPath)) AssetDatabase.DeleteAsset(meshPath);
+                Mesh mesh = crystal.BuildStatic(name + "_mesh");
+                AssetDatabase.CreateAsset(mesh, meshPath);
+                GameObject crystalObject = new GameObject("crystal_mesh");
+                crystalObject.transform.SetParent(root.transform, false);
+                crystalObject.transform.localPosition = new Vector3(0f,1.05f,0f);
+                MeshFilter filter = crystalObject.AddComponent<MeshFilter>();
+                filter.sharedMesh = mesh;
+                MeshRenderer renderer = crystalObject.AddComponent<MeshRenderer>();
+                renderer.sharedMaterial = material;
+                CreateEnvironmentPart(root.transform, PrimitiveType.Cube, "crystal_base",
+                    new Vector3(0f,.12f,0f), new Vector3(.62f,.24f,.62f), CreateMaterial(name + "_base", new Color(.20f,.24f,.27f)), Quaternion.identity);
+            }
+            PrefabUtility.SaveAsPrefabAsset(root, path);
+            ExportFbx(root, Path.ChangeExtension(path, ".fbx"));
+            UnityEngine.Object.DestroyImmediate(root);
         }
 
         private static void CreatePortrait(string id, Color background, Color accent)
