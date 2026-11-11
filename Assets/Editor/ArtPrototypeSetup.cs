@@ -100,10 +100,10 @@ namespace SandsOfLegends.EditorTools
             visual.transform.SetParent(root.transform, false);
             AddPrimitive(visual.transform, PrimitiveType.Capsule, "body", new Vector3(0f, 0.98f, 0f), new Vector3(0.48f, 0.78f, 0.34f), material);
             AddPrimitive(visual.transform, PrimitiveType.Sphere, "head", new Vector3(0f, 1.62f, 0f), new Vector3(0.34f, 0.34f, 0.34f), material);
-            AddPrimitive(visual.transform, PrimitiveType.Capsule, "left_arm", new Vector3(-0.36f, 0.98f, 0f), new Vector3(0.19f, 0.35f, 0.19f), material);
+            AddPrimitive(visual.transform, PrimitiveType.Capsule, "left_arm", new Vector3(-0.36f, 0.98f, 0f), new Vector3(0.19f, 0.58f, 0.19f), material);
             AddPrimitive(visual.transform, PrimitiveType.Capsule, "right_arm", new Vector3(0.36f, 0.98f, 0f), new Vector3(0.19f, 0.58f, 0.19f), material);
-            AddPrimitive(visual.transform, PrimitiveType.Capsule, "left_leg", new Vector3(-0.14f, 0.34f, 0f), new Vector3(0.19f, 0.58f, 0.19f), material);
-            AddPrimitive(visual.transform, PrimitiveType.Capsule, "right_leg", new Vector3(0.14f, 0.34f, 0f), new Vector3(0.19f, 0.58f, 0.19f), material);
+            AddPrimitive(visual.transform, PrimitiveType.Capsule, "left_leg", new Vector3(-0.14f, 0.35f, 0f), new Vector3(0.19f, 0.35f, 0.19f), material);
+            AddPrimitive(visual.transform, PrimitiveType.Capsule, "right_leg", new Vector3(0.14f, 0.35f, 0f), new Vector3(0.19f, 0.35f, 0.19f), material);
 
             GameObject hpAnchor = new GameObject("hp_bar_anchor");
             hpAnchor.transform.SetParent(root.transform, false);
