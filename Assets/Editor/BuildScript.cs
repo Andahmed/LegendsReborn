@@ -1,6 +1,6 @@
 // =============================================================================
 // FILE: Assets/Editor/BuildScript.cs
-// ROLE: Android APK build entry point used by the Editor menu and GameCI.
+// ROLE: Android APK build entry point used by the Editor menu, Unity Cloud Build Automation, and GameCI.
 // =============================================================================
 using System;
 using System.IO;
@@ -14,7 +14,13 @@ namespace SandsOfLegends.EditorTools
 {
     public static class BuildScript
     {
+        private const string AndroidOutputPath = "Builds/SandsOfLegends.apk";
+
         [MenuItem("Sands/Build Android APK")]
+        /// <summary>
+        /// Unity Cloud Build Automation custom build method. Configure the Unity Cloud target for Android,
+        /// then invoke SandsOfLegends.EditorTools.BuildScript.BuildAndroid.
+        /// </summary>
         public static void BuildAndroid()
         {
             ConfigureAndroid();
@@ -32,7 +38,7 @@ namespace SandsOfLegends.EditorTools
             var options = new BuildPlayerOptions
             {
                 scenes = scenes,
-                locationPathName = "Builds/SandsOfLegends.apk",
+                locationPathName = AndroidOutputPath,
                 target = BuildTarget.Android,
                 options = BuildOptions.None
             };
