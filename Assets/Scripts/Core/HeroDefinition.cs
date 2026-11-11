@@ -55,6 +55,9 @@ namespace SandsOfLegends.Core
         [Header("Per-level growth (multiplier per level above 1)")]
         [Range(0f, 0.5f)] public float growth = 0.08f;
 
+        [Header("Battle presentation")]
+        public GameObject prefab;
+
         [Header("Skills")]
         public SkillDefinition skill;
         public SkillDefinition ultimate;
