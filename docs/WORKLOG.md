@@ -1,5 +1,7 @@
 # Work Log (newest first)
 
+## 2026-11-12 - B2 team synergy (GPT Lane B)
+- Added five-unit faction synergy and regression/determinism tests for BattleSim. Engine-Free C# CI evidence is pending.
 ## 2026-11-12 - A0 Unity font crash guard
 **Done:** Replaced direct Arial loading with LegacyRuntime.ttf plus guarded Arial fallback in GameFlowController and HomeScreen; assigned the TextMesh font and font material in DamageNumbers.
 **Not verified:** لم يتم التحقق في Unity؛ CI/Android workflow was not run in this environment.

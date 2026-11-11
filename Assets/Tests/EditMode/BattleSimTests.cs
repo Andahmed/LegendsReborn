@@ -42,6 +42,102 @@ namespace SandsOfLegends.Tests
             Assert.AreEqual(s1.Time, s2.Time, 1e-5f);
         }
 
+
+        [Test]
+        public void TeamSynergy_ThreePlusTwoAddsFifteenPercentHpOnly()
+        {
+            var a = new[]
+            {
+                U("a0", Faction.Fortress), U("a1", Faction.Fortress), U("a2", Faction.Fortress),
+                U("a3", Faction.Wild), U("a4", Faction.Wild)
+            };
+            var b = new[]
+            {
+                U("b0", Faction.Forest), U("b1", Faction.Forest),
+                U("b2", Faction.Shadow), U("b3", Faction.Shadow), U("b4", Faction.Abyss)
+            };
+            var battle = new BattleSim(a, b, 17);
+
+            Assert.AreEqual(TeamSynergyKind.ThreePlusTwo, battle.SynergyA.Kind);
+            Assert.AreEqual(1.15f, battle.SynergyA.HpMultiplier, 1e-5f);
+            Assert.AreEqual(1f, battle.SynergyA.AtkMultiplier, 1e-5f);
+            Assert.AreEqual(1150, battle.Get(0, 0).MaxHp);
+            Assert.AreEqual(100, battle.Get(0, 0).EffectiveAtk);
+            Assert.AreEqual(TeamSynergyKind.None, battle.SynergyB.Kind);
+        }
+
+        [Test]
+        public void TeamSynergy_MonoFactionAddsTwentyFivePercentHpAndAttack()
+        {
+            var a = new[]
+            {
+                U("a0", Faction.Forest), U("a1", Faction.Forest), U("a2", Faction.Forest),
+                U("a3", Faction.Forest), U("a4", Faction.Forest)
+            };
+            var b = new[]
+            {
+                U("b0", Faction.Fortress), U("b1", Faction.Wild),
+                U("b2", Faction.Forest), U("b3", Faction.Shadow), U("b4", Faction.Abyss)
+            };
+            var battle = new BattleSim(a, b, 18);
+
+            Assert.AreEqual(TeamSynergyKind.MonoFaction, battle.SynergyA.Kind);
+            Assert.AreEqual(1.25f, battle.SynergyA.HpMultiplier, 1e-5f);
+            Assert.AreEqual(1.25f, battle.SynergyA.AtkMultiplier, 1e-5f);
+            Assert.AreEqual(1250, battle.Get(0, 0).MaxHp);
+            Assert.AreEqual(125, battle.Get(0, 0).EffectiveAtk);
+            Assert.AreEqual(TeamSynergyKind.None, battle.SynergyB.Kind);
+        }
+
+        [Test]
+        public void TeamSynergy_OtherCompositionsAndFourUnitTeamsHaveNoBonus()
+        {
+            var mixed = new[]
+            {
+                U("a0", Faction.Forest), U("a1", Faction.Forest),
+                U("a2", Faction.Shadow), U("a3", Faction.Shadow), U("a4", Faction.Abyss)
+            };
+            var four = new[]
+            {
+                U("b0", Faction.Forest), U("b1", Faction.Forest),
+                U("b2", Faction.Shadow), U("b3", Faction.Shadow)
+            };
+            var battle = new BattleSim(mixed, four, 19);
+            Assert.AreEqual(TeamSynergyKind.None, battle.SynergyA.Kind);
+            Assert.AreEqual(TeamSynergyKind.None, battle.SynergyB.Kind);
+            Assert.AreEqual(1000, battle.Get(0, 0).MaxHp);
+            Assert.AreEqual(100, battle.Get(0, 0).EffectiveAtk);
+        }
+
+        [Test]
+        public void TeamSynergy_DoesNotMutateUnitSpecsAndBattleRemainsDeterministic()
+        {
+            var a = new[]
+            {
+                U("a0", Faction.Fortress), U("a1", Faction.Fortress), U("a2", Faction.Fortress),
+                U("a3", Faction.Wild), U("a4", Faction.Wild)
+            };
+            var b = new[]
+            {
+                U("b0", Faction.Forest), U("b1", Faction.Forest),
+                U("b2", Faction.Shadow), U("b3", Faction.Shadow), U("b4", Faction.Abyss)
+            };
+            var first = new BattleSim(a, b, 2026); first.Run();
+            var second = new BattleSim(a, b, 2026); second.Run();
+            Assert.AreEqual(1000, a[0].Hp);
+            Assert.AreEqual(100, a[0].Atk);
+            Assert.AreEqual(first.Winner, second.Winner);
+            Assert.AreEqual(first.Events.Count, second.Events.Count);
+            Assert.AreEqual(first.Time, second.Time, 1e-5f);
+            for (int i = 0; i < first.Events.Count; i++)
+            {
+                Assert.AreEqual(first.Events[i].Type, second.Events[i].Type);
+                Assert.AreEqual(first.Events[i].Amount, second.Events[i].Amount);
+                Assert.AreEqual(first.Events[i].SourceTeam, second.Events[i].SourceTeam);
+                Assert.AreEqual(first.Events[i].TargetTeam, second.Events[i].TargetTeam);
+            }
+        }
+
         [Test]
         public void StrongerTeam_Wins()
         {
