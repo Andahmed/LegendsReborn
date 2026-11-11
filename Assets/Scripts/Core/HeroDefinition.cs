@@ -57,6 +57,8 @@ namespace SandsOfLegends.Core
 
         [Header("Battle presentation")]
         public GameObject prefab;
+        public Sprite portrait;
+        public Sprite factionIcon;
 
         [Header("Skills")]
         public SkillDefinition skill;
