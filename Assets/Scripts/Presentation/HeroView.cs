@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using SandsOfLegends.Combat;
 
 namespace SandsOfLegends.Presentation
@@ -14,6 +15,10 @@ namespace SandsOfLegends.Presentation
         private float attackLunge;
         private float hitShake;
         private bool dead;
+        private int maxHp;
+        private int currentHp;
+        private Image healthFill;
+        private Transform healthBarRoot;
 
         public int Team { get; private set; }
         public int Slot { get; private set; }
@@ -22,6 +27,9 @@ namespace SandsOfLegends.Presentation
         {
             Team = team;
             Slot = slot;
+            maxHp = Mathf.Max(1, spec.Hp);
+            currentHp = maxHp;
+            CreateHealthBar();
             string folder = monster ? "BattleMonsters/" : "HomeHeroes/";
             GameObject prefab = Resources.Load<GameObject>(folder + modelId);
             if (prefab != null)
@@ -68,6 +76,8 @@ namespace SandsOfLegends.Presentation
             bool isTarget = battleEvent.TargetTeam == Team && battleEvent.TargetSlot == Slot;
             bool isSource = battleEvent.SourceTeam == Team && battleEvent.SourceSlot == Slot;
 
+            if (isTarget) ApplyHealthEvent(battleEvent);
+
             if (isTarget && battleEvent.Type == BattleEventType.Death)
             {
                 dead = true;
@@ -102,6 +112,65 @@ namespace SandsOfLegends.Presentation
             }
         }
 
+        private void CreateHealthBar()
+        {
+            GameObject canvasObject = new GameObject("HP Bar", typeof(RectTransform), typeof(Canvas));
+            canvasObject.transform.SetParent(transform, false);
+            healthBarRoot = canvasObject.transform;
+            healthBarRoot.localPosition = new Vector3(0f, 2.9f, 0f);
+            healthBarRoot.localScale = Vector3.one * .01f;
+
+            Canvas canvas = canvasObject.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.WorldSpace;
+            canvas.overrideSorting = true;
+            canvas.sortingOrder = 20;
+            RectTransform canvasRect = canvasObject.GetComponent<RectTransform>();
+            canvasRect.sizeDelta = new Vector2(120f, 12f);
+
+            GameObject backgroundObject = new GameObject("HP Background", typeof(RectTransform), typeof(Image));
+            backgroundObject.transform.SetParent(canvasObject.transform, false);
+            RectTransform backgroundRect = backgroundObject.GetComponent<RectTransform>();
+            backgroundRect.anchorMin = Vector2.zero;
+            backgroundRect.anchorMax = Vector2.one;
+            backgroundRect.offsetMin = Vector2.zero;
+            backgroundRect.offsetMax = Vector2.zero;
+            Image background = backgroundObject.GetComponent<Image>();
+            background.color = new Color(0f, 0f, 0f, .78f);
+
+            GameObject fillObject = new GameObject("HP Fill", typeof(RectTransform), typeof(Image));
+            fillObject.transform.SetParent(backgroundObject.transform, false);
+            RectTransform fillRect = fillObject.GetComponent<RectTransform>();
+            fillRect.anchorMin = Vector2.zero;
+            fillRect.anchorMax = Vector2.one;
+            fillRect.offsetMin = new Vector2(2f, 2f);
+            fillRect.offsetMax = new Vector2(-2f, -2f);
+            healthFill = fillObject.GetComponent<Image>();
+            healthFill.type = Image.Type.Filled;
+            healthFill.fillMethod = Image.FillMethod.Horizontal;
+            healthFill.fillOrigin = 0;
+            healthFill.color = Team == 0 ? new Color(.18f, .82f, .62f) : new Color(.92f, .28f, .24f);
+            UpdateHealthBar();
+        }
+
+        private void ApplyHealthEvent(BattleEvent battleEvent)
+        {
+            if (battleEvent.Type == BattleEventType.Death)
+                currentHp = 0;
+            else if (battleEvent.Type == BattleEventType.Heal)
+                currentHp = Mathf.Min(maxHp, currentHp + Mathf.Max(0, battleEvent.Amount));
+            else if (battleEvent.Type == BattleEventType.Attack ||
+                battleEvent.Type == BattleEventType.Skill ||
+                battleEvent.Type == BattleEventType.Ultimate)
+                currentHp = Mathf.Max(0, currentHp - Mathf.Max(0, battleEvent.Amount));
+            UpdateHealthBar();
+        }
+
+        private void UpdateHealthBar()
+        {
+            if (healthFill != null)
+                healthFill.fillAmount = Mathf.Clamp01((float)currentHp / Mathf.Max(1, maxHp));
+        }
+
         private bool HasParameter(string parameterName)
         {
             if (animator == null) return false;
@@ -115,6 +184,8 @@ namespace SandsOfLegends.Presentation
         private void Update()
         {
             if (modelRoot == null) return;
+            if (healthBarRoot != null && Camera.main != null)
+                healthBarRoot.forward = Camera.main.transform.forward;
             float bob = Mathf.Sin(Time.time * 2.2f + Slot) * .035f;
             motion = Mathf.MoveTowards(motion, 0f, Time.deltaTime);
             attackLunge = Mathf.MoveTowards(attackLunge, 0f, Time.deltaTime * 3.4f);
