@@ -32,14 +32,23 @@ namespace SandsOfLegends.Presentation
         public Button speed4Button;
 
         private BattleSim simulation;
+        private bool subscribed;
 
         private void OnEnable()
         {
-            if (battleView != null) battleView.EventPlayed += HandleBattleEvent;
+            SubscribeToBattleView();
+        }
+
+        private void SubscribeToBattleView()
+        {
+            if (subscribed || battleView == null) return;
+            battleView.EventPlayed += HandleBattleEvent;
+            subscribed = true;
         }
 
         private void Start()
         {
+            SubscribeToBattleView();
             if (heroes == null || heroes.Length < 4)
                 throw new System.InvalidOperationException("Prototype battle needs four HeroDefinition assets.");
             if (battleView == null)
@@ -110,7 +119,8 @@ namespace SandsOfLegends.Presentation
 
         private void OnDisable()
         {
-            if (battleView != null) battleView.EventPlayed -= HandleBattleEvent;
+            if (subscribed && battleView != null) battleView.EventPlayed -= HandleBattleEvent;
+            subscribed = false;
             if (speed1Button != null) speed1Button.onClick.RemoveListener(SetSpeed1);
             if (speed2Button != null) speed2Button.onClick.RemoveListener(SetSpeed2);
             if (speed4Button != null) speed4Button.onClick.RemoveListener(SetSpeed4);
