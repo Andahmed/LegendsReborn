@@ -93,10 +93,13 @@ namespace SandsOfLegends.UI
             Bounds bounds = renderers[0].bounds;
             for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
             Vector3 size = bounds.size;
+            float scaleY = size.y > .0001f ? targetSize.y / size.y : 1f;
             instance.transform.localScale = new Vector3(
                 size.x > .0001f ? targetSize.x / size.x : 1f,
-                size.y > .0001f ? targetSize.y / size.y : 1f,
+                scaleY,
                 size.z > .0001f ? targetSize.z / size.z : 1f);
+            // Align the bottom of the imported mesh with the courtyard instead of assuming its pivot is at the feet.
+            instance.transform.localPosition = position + Vector3.up * (-bounds.min.y * scaleY);
         }
 
         private void PlaceHero()
@@ -110,14 +113,17 @@ namespace SandsOfLegends.UI
 
             GameObject hero = Instantiate(prefab, root);
             hero.name = "Home Hero - Warrior";
-            hero.transform.localPosition = new Vector3(0f, .72f, -2.15f);
+            hero.transform.localPosition = new Vector3(0f, 0f, -2.15f);
             hero.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
 
             Renderer[] renderers = hero.GetComponentsInChildren<Renderer>(true);
             if (renderers.Length == 0) return;
             Bounds bounds = renderers[0].bounds;
             for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
-            hero.transform.localScale = Vector3.one * (2.65f / Mathf.Max(.01f, bounds.size.y));
+            float scale = 2.65f / Mathf.Max(.01f, bounds.size.y);
+            hero.transform.localScale = Vector3.one * scale;
+            // The generated dais top sits just below one world unit after the castle fit.
+            hero.transform.localPosition = new Vector3(0f, .93f - bounds.min.y * scale, -2.15f);
         }
 
         private void CreateWarmLights()

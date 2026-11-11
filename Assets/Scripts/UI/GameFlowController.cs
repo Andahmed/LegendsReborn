@@ -403,7 +403,11 @@ namespace SandsOfLegends.UI
             }
             Save();
             CreatePanel("SUMMON RESULTS", "Pulls complete. Pity counters have been saved.", true);
-            AddInfo(string.Join("\n", results.ToArray()), Mathf.Min(520, 56f * results.Count + 36f));
+            for (int i = 0; i < pulls.Length; i++)
+            {
+                AddHeroPortrait(pulls[i].HeroId);
+                AddInfo(results[i], 54);
+            }
             AddInfo("EPIC PITY  " + State.Pity.SinceEpic + " / " + GachaSystem.EpicPity +
                 "     LEGENDARY PITY  " + State.Pity.SinceLegendary + " / " + GachaSystem.LegendaryPity, 70);
             AddButton(panel, "OPEN HERO ROSTER", OpenHeroes, 70, teal);

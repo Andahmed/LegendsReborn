@@ -3,13 +3,18 @@ using SandsOfLegends.Combat;
 
 namespace SandsOfLegends.Presentation
 {
+    /// <summary>3D character presentation with forward attack lunges, hit reactions and defeat fall.</summary>
     public sealed class HeroView : MonoBehaviour
     {
         private Transform modelRoot;
         private Animator animator;
         private Vector3 baseScale;
+        private Vector3 basePosition;
         private float motion;
+        private float attackLunge;
+        private float hitShake;
         private bool dead;
+
         public int Team { get; private set; }
         public int Slot { get; private set; }
 
@@ -38,7 +43,7 @@ namespace SandsOfLegends.Presentation
             }
             else
             {
-                // Temporary low-poly fallback only. Install the source FBX models to replace it.
+                // Temporary fallback is retained for local tests until the humanoid FBX importer runs.
                 GameObject body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
                 body.name = "Model Missing - Temporary Silhouette";
                 body.transform.SetParent(transform, false);
@@ -52,30 +57,43 @@ namespace SandsOfLegends.Presentation
                 Destroy(body.GetComponent<Collider>());
                 modelRoot = body.transform;
             }
+
             baseScale = modelRoot != null ? modelRoot.localScale : Vector3.one;
+            basePosition = modelRoot != null ? modelRoot.localPosition : Vector3.zero;
             transform.localRotation = Quaternion.Euler(0f, team == 0 ? 0f : 180f, 0f);
         }
 
         public void PlayEvent(BattleEvent battleEvent)
         {
-            if (battleEvent.TargetTeam == Team && battleEvent.TargetSlot == Slot && battleEvent.Type == BattleEventType.Death)
+            bool isTarget = battleEvent.TargetTeam == Team && battleEvent.TargetSlot == Slot;
+            bool isSource = battleEvent.SourceTeam == Team && battleEvent.SourceSlot == Slot;
+
+            if (isTarget && battleEvent.Type == BattleEventType.Death)
             {
                 dead = true;
                 motion = .35f;
+                attackLunge = 0f;
+                hitShake = .1f;
                 return;
             }
-            if (battleEvent.TargetTeam == Team && battleEvent.TargetSlot == Slot &&
-                (battleEvent.Type == BattleEventType.Attack || battleEvent.Type == BattleEventType.Skill ||
-                 battleEvent.Type == BattleEventType.Ultimate || battleEvent.Type == BattleEventType.Heal))
+
+            if (isTarget && (battleEvent.Type == BattleEventType.Attack ||
+                battleEvent.Type == BattleEventType.Skill ||
+                battleEvent.Type == BattleEventType.Ultimate ||
+                battleEvent.Type == BattleEventType.Heal))
             {
                 motion = .22f;
-                if (battleEvent.Type == BattleEventType.Death) dead = true;
+                hitShake = battleEvent.Type == BattleEventType.Ultimate ? .20f : .12f;
             }
-            if (battleEvent.SourceTeam == Team && battleEvent.SourceSlot == Slot &&
-                (battleEvent.Type == BattleEventType.Attack || battleEvent.Type == BattleEventType.Skill ||
-                 battleEvent.Type == BattleEventType.Ultimate))
+
+            if (isSource && (battleEvent.Type == BattleEventType.Attack ||
+                battleEvent.Type == BattleEventType.Skill ||
+                battleEvent.Type == BattleEventType.Ultimate))
             {
                 motion = .16f;
+                attackLunge = battleEvent.Type == BattleEventType.Ultimate ? .95f :
+                    (battleEvent.Type == BattleEventType.Skill ? .68f : .46f);
+
                 if (animator != null && animator.runtimeAnimatorController != null)
                 {
                     if (HasParameter("Attack")) animator.SetTrigger("Attack");
@@ -89,7 +107,8 @@ namespace SandsOfLegends.Presentation
             if (animator == null) return false;
             AnimatorControllerParameter[] parameters = animator.parameters;
             for (int i = 0; i < parameters.Length; i++)
-                if (parameters[i].name == parameterName && parameters[i].type == AnimatorControllerParameterType.Trigger) return true;
+                if (parameters[i].name == parameterName &&
+                    parameters[i].type == AnimatorControllerParameterType.Trigger) return true;
             return false;
         }
 
@@ -97,11 +116,25 @@ namespace SandsOfLegends.Presentation
         {
             if (modelRoot == null) return;
             float bob = Mathf.Sin(Time.time * 2.2f + Slot) * .035f;
-            if (motion > 0f) motion = Mathf.MoveTowards(motion, 0f, Time.deltaTime);
+            motion = Mathf.MoveTowards(motion, 0f, Time.deltaTime);
+            attackLunge = Mathf.MoveTowards(attackLunge, 0f, Time.deltaTime * 3.4f);
+            hitShake = Mathf.MoveTowards(hitShake, 0f, Time.deltaTime * 3.8f);
+
             float pulse = 1f + motion * 1.4f;
             modelRoot.localScale = baseScale * pulse;
-            if (!dead) modelRoot.localPosition = new Vector3(0f, bob, 0f);
-            else modelRoot.localRotation = Quaternion.Euler(0f, 0f, 72f);
+
+            if (dead)
+            {
+                modelRoot.localPosition = basePosition + Vector3.down * .14f;
+                modelRoot.localRotation = Quaternion.Lerp(modelRoot.localRotation,
+                    Quaternion.Euler(0f, 0f, 72f), Time.deltaTime * 5f);
+                return;
+            }
+
+            float shake = Mathf.Sin(Time.time * 42f + Slot) * hitShake;
+            modelRoot.localPosition = basePosition + new Vector3(shake, bob, attackLunge);
+            modelRoot.localRotation = Quaternion.Lerp(modelRoot.localRotation,
+                Quaternion.identity, Time.deltaTime * 8f);
         }
     }
 }
