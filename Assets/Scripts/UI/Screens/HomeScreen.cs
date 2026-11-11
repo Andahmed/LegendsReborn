@@ -200,7 +200,15 @@ namespace SandsOfLegends.UI
             GameObject go=new GameObject(value+" Label",typeof(RectTransform),typeof(Text));
             go.transform.SetParent(parent,false);
             Text t=go.GetComponent<Text>();
-            t.font=Resources.GetBuiltinResource<Font>("Arial.ttf"); t.text=value; t.fontSize=size;
+            Font font=null;
+            try { font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); }
+            catch (ArgumentException) { }
+            if (font==null)
+            {
+                try { font=Resources.GetBuiltinResource<Font>("Arial.ttf"); }
+                catch (ArgumentException) { }
+            }
+            t.font=font; t.text=value; t.fontSize=size;
             t.color=color; t.alignment=align; t.fontStyle=FontStyle.Bold;
             t.horizontalOverflow=HorizontalWrapMode.Overflow; t.verticalOverflow=VerticalWrapMode.Overflow;
             t.raycastTarget=false;
