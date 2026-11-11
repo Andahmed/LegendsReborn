@@ -427,6 +427,9 @@ namespace SandsOfLegends.EditorTools
             clip.name = name;
             clip.frameRate = 30f;
             clip.wrapMode = loop ? WrapMode.Loop : WrapMode.Once;
+            AnimationClipSettings clipSettings = AnimationUtility.GetAnimationClipSettings(clip);
+            clipSettings.loopTime = loop;
+            AnimationUtility.SetAnimationClipSettings(clip, clipSettings);
             float[] times = { 0f, .5f, 1f };
             if (name == "Idle")
                 SetPositionY(clip, root.transform, bones[1], times, new[] { .88f, .90f, .88f });
