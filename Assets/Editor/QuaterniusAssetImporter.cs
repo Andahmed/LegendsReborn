@@ -62,7 +62,7 @@ namespace SandsOfLegends.Editor
                 if (string.IsNullOrEmpty(root)) return;
             }
 
-            int copied = downloadedHeroes;
+            int copied = 0;
             int present = 0;
             List<string> missing = new List<string>();
             try
@@ -114,7 +114,7 @@ namespace SandsOfLegends.Editor
                     "- https://quaternius.itch.io/lowpoly-modular-dungeon-pack\n");
 
                 AssetDatabase.Refresh();
-                string summary = "Already present: " + present + "\nCopied from selected Quaternius source: " + copied;
+                string summary = "Hero FBX downloaded/verified: " + downloadedHeroes + "\nAlready present: " + present + "\nCopied from selected Quaternius source: " + copied;
                 if (missing.Count > 0)
                 {
                     summary += "\n\nMissing source files (" + missing.Count + "):\n" + string.Join("\n", missing.ToArray());
