@@ -1,0 +1,21 @@
+{
+    "name": "SandsOfLegends.Tests.PlayMode",
+    "rootNamespace": "SandsOfLegends.Tests",
+    "references": [
+        "UnityEngine.TestRunner",
+        "SandsOfLegends.Combat"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
