@@ -11,9 +11,11 @@ Unity mobile Idle RPG for Android. Working title: **Sands of Legends**.
 
 1. Open this repository with Unity 2022.3.62f3.
 2. Run **Sands → Setup MVP Home Scene**. This creates Assets/Scenes/Home.unity and registers it in Build Settings.
-3. The repository already contains 21 Quaternius CC0 FBX files for the modular castle, four monster types and six nature props; Unity imports them automatically.
-4. For the six humanoid character rigs, run **Legends Reborn → Art → Install MVP Art** and select the local Free3D folder from the legacy LegendsStyleRPG checkout. This copies the character FBXs into Resources/HomeHeroes; the importer no longer downloads from a private raw GitHub URL.
-5. Wait for the FBX import to complete, then open Home.unity and press Play.
+3. The Home castle is assembled from the 11 Quaternius Modular Dungeon CC0 FBX modules bundled in Assets/Resources/HomeCastle.
+4. Run **Legends Reborn → Art → Install MVP Art** only if models are missing. The installer checks files already in this repository first and asks for a Quaternius source folder only when required files are absent.
+5. Wait for FBX import to complete, then open Home.unity and press Play.
+
+The HomeWorldStage assembles the courtyard, gate, walls, towers, banners, stairs, torches and nature props from imported FBX meshes. It has no primitive-cube castle fallback. Missing required FBX assets produce explicit errors instead of silently substituting greybox geometry.
 
 The Android build menu also creates/registers the Home scene before calling BuildPlayer. Android SDK/NDK, signing and device settings still need to be configured in the local Unity installation.
 
@@ -22,10 +24,9 @@ The Android build menu also creates/registers the Home scene before calling Buil
 - Five starter heroes and a 20-hero catalog with faction, role, rarity, combat stats, skills and ultimates.
 - 200 generated campaign stages: five biomes × 40 stages, with boss encounters every ten stages.
 - 5v5 deterministic auto-battle, 2 front + 3 back positions, x1/x2/x4 speed and optional manual ultimates.
-- Battle presentation loads imported character/monster FBX models, shows combat numbers and updates the result/rewards. Four monster FBXs and 17 environment FBXs are included; humanoid rigs are imported from the local legacy Free3D folder.
-- Local save includes roster, five-slot formation, six equipment slots per hero, currencies, pity, energy, campaign and daily quests. Heroes have level, star-up and ascension progression.
-- The five approved starter-hero portrait PNGs are bundled and shown in the roster; these are 2D portraits, not rigged 3D character models.
-- Home menu routes to Campaign, Heroes, Formation, Summon, Equipment, Backpack and feature-status screens. Screen content uses a touch-scroll viewport for long rosters and battle controls.
+- Battle presentation loads imported character/monster FBX models, shows combat numbers and updates the result/rewards.
+- Local save includes roster, five-slot formation, six equipment slots per hero, currencies, pity, energy, campaign and daily quests.
+- Home menu routes to Campaign, Heroes, Formation, Summon, Equipment, Backpack and feature-status screens.
 - Idle rewards capped at 12 hours; daily quest progress and claims.
 - FastAPI development backend with guest accounts, persistent SQLite profiles, server-side summon RNG and summon audit history.
 
@@ -57,4 +58,4 @@ See docs/HANDOFF.md for implemented work, limitations and verification status.
 
 ## Verification limits
 
-This repository update has not been opened in Unity Editor in this environment. Unity compilation, FBX import, Play Mode, touch/layout testing, Android APK generation and device testing remain mandatory before calling the MVP playable. Generated content and combat balance are development values, not final economy tuning.
+This change has not been opened in Unity Editor in this environment. Unity compilation, FBX import, materials, pivots, camera framing, Play Mode, touch/layout testing, Android APK generation and device testing remain mandatory before calling the MVP playable. The Home castle is a modular FBX assembly, not a bespoke sculpted single-mesh castle. Generated content and combat balance are development values, not final economy tuning.

@@ -1,20 +1,33 @@
 # Work Log (newest first)
 
-## 2026-11-11 - Foundations pass (Ahmed + Claude)
+## 2026-11-11 - Replace generated castle geometry with bundled CC0 FBX assembly
 **Done**
-- Added all foundation folders and files per the project plan (see ARCHITECTURE.md): Meta (economy, roster, gacha, idle, campaign, quests, save), Services, Bootstrap, Presentation, UI framework + 5 screen stubs, Localization, Editor build script, Server skeleton, docs.
-- Every source file now has a header: owner role, responsibility, what to work on, status.
-- Engine-free code (Combat + Meta) compiled and all tests run outside Unity with mono; 16 EditMode tests pass under mono (Combat + Meta).
+- Reworked Assets/Scripts/UI/Screens/HomeWorldStage.cs to assemble the home courtyard and castle from the repository's Quaternius CC0 FBX modules: Floor_Modular, Arch_Door, Wall_Modular, Decorative_Wall, Column, Column2, Banner, Banner_wall, Arch, Stairs_Modular and Torch.
+- Removed the procedural/primitive castle path from the runtime scene. Missing FBX assets now emit explicit errors; no cube or capsule castle fallback is created.
+- Removed the setup-time dependency on the procedural castle mesh generator.
+- Updated the Quaternius installer so it checks bundled assets before prompting for a source folder and no longer searches or names another project checkout.
+- Updated README and HANDOFF to describe the actual FBX-based assembly and the correct installer menu.
+
+**Verified**
+- GitHub Actions Server Tests completed successfully: 5 tests ran, all passed.
+- Static checks on the PR branch confirm HomeWorldStage has no primitive cube/capsule creation and no procedural castle generator reference.
+- Static checks confirm the setup menu no longer calls the procedural generator and the asset importer no longer searches another repository.
 
 **Not verified**
-- Project never opened in Unity 2022.3.62f3 (MonoBehaviour/ScriptableObject/Editor files untested there).
-- No `.meta` files, no scenes (Boot/Home/Battle must be created in the editor).
+- Unity Editor compilation, FBX import, materials, pivots, camera framing, Play Mode, mobile layout and Android APK were not run in this environment.
+- Android APK workflow completed successfully but skipped the actual build because UNITY_LICENSE, UNITY_EMAIL and UNITY_PASSWORD are not configured.
+- FBX module names and files are listed by the repository asset-readiness audit; the final placement still requires visual review in Unity.
 
 **Next**
-1. Open in Unity, fix compile errors, run EditMode tests, commit `.meta`.
-2. Create Boot/Home/Battle scenes; add GameBootstrap to Boot.
-3. 4 prototype heroes (one per faction) + skills as ScriptableObjects; battle scene using BattleView.
-4. CI build (secrets needed: UNITY_LICENSE/EMAIL/PASSWORD).
+1. Open Unity 2022.3.62f3 and run the Home scene setup.
+2. Run Install MVP Art only if the audit reports missing model files.
+3. Inspect the castle from the mobile camera and adjust module scale/position based on actual imported bounds.
+4. Run Unity EditMode/PlayMode tests and Android build after local Unity setup.
 
-## 2026-11-11 - Combat core + scaffold (Ahmed + Claude)
-- Repo created, scaffold pushed; deterministic `BattleSim`, hero/skill ScriptableObjects, 6 tests; HANDOFF.md and the plan PDF added.
+## 2026-11-11 - Foundations pass (Ahmed + Claude)
+**Done**
+- Added the gameplay foundation, runtime UI, art pipeline, server skeleton and project documentation.
+- Engine-free code and tests were reported as passing under mono in the original work log; this is not a Unity Editor verification.
+
+**Not verified**
+- Project compilation, scene generation, Play Mode, Android APK and device tests remain unverified.

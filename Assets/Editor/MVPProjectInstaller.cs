@@ -16,12 +16,13 @@ namespace SandsOfLegends.Editor
         public static void SetupMenu()
         {
             EnsureMvpScene();
-            EditorUtility.DisplayDialog("Sands of Legends", "Home scene is ready. Install MVP Art from Legends Reborn > Art, then press Play.", "OK");
+            EditorUtility.DisplayDialog("Sands of Legends",
+                "Home scene is ready. The castle uses the bundled CC0 FBX modules. " +
+                "If any models are missing, run Legends Reborn > Art > Install MVP Art, then press Play.", "OK");
         }
 
         public static void EnsureMvpScene()
         {
-            HomeCastleMeshGenerator.GenerateIfMissing();
             Directory.CreateDirectory("Assets/Scenes");
             if (!File.Exists(HomeScenePath))
             {
