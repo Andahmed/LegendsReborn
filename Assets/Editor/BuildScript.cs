@@ -19,6 +19,7 @@ namespace SandsOfLegends.EditorTools
         public static void BuildAndroid()
         {
             PrototypeSetup.SetupPrototype();
+            ValidateAssets.ValidateAssetsOrThrow();
             Directory.CreateDirectory("Builds");
             var scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray();
             var opts = new BuildPlayerOptions
