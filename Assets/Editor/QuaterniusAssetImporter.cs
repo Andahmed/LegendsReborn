@@ -37,14 +37,18 @@ namespace SandsOfLegends.Editor
         [MenuItem("Legends Reborn/Art/Install All CC0 3D Models")]
         public static void InstallAll()
         {
-            string root = FindLocalRoot();
-            if (string.IsNullOrEmpty(root))
+            int alreadyPresent = CountPresentFiles();
+            int required = CountRequiredFiles();
+            string root = null;
+
+            // Do not ask for an external source folder when all model files are already in this repository.
+            if (alreadyPresent < required)
             {
                 root = EditorUtility.OpenFolderPanel(
-                    "Select the Free3D folder inside LegendsStyleRPG/GameClient/Assets/Resources/GameArt",
+                    "Select the parent folder containing the extracted Quaternius pack folders",
                     Application.dataPath, "");
+                if (string.IsNullOrEmpty(root)) return;
             }
-            if (string.IsNullOrEmpty(root)) return;
 
             int copied = 0;
             int present = 0;
@@ -54,8 +58,11 @@ namespace SandsOfLegends.Editor
                 for (int p = 0; p < Packs.Length; p++)
                 {
                     Pack pack = Packs[p];
-                    string sourceFolder = Path.Combine(root, pack.Folder, "FBX");
                     Directory.CreateDirectory(pack.Destination);
+                    string sourceFolder = string.IsNullOrEmpty(root)
+                        ? string.Empty
+                        : Path.Combine(root, pack.Folder, "FBX");
+
                     for (int i = 0; i < pack.Files.Length; i++)
                     {
                         string file = pack.Files[i] + ".fbx";
@@ -67,21 +74,20 @@ namespace SandsOfLegends.Editor
                         }
 
                         string source = Path.Combine(sourceFolder, file);
-                        if (!File.Exists(source) || new FileInfo(source).Length <= 2048)
+                        if (string.IsNullOrEmpty(root) || !File.Exists(source) || new FileInfo(source).Length <= 2048)
                         {
                             missing.Add(pack.Folder + "/FBX/" + file);
                             continue;
                         }
+
                         File.Copy(source, target, true);
                         copied++;
                     }
 
                     File.WriteAllText(Path.Combine(pack.Destination, "SOURCE.txt"),
                         "Quaternius " + pack.Folder + " pack.\n" +
-                        "Original archive: https://github.com/Andahmed/LegendsStyleRPG\n" +
-                        "Source folder: GameClient/Assets/Resources/GameArt/Free3D/" + pack.Folder + "/FBX\n" +
-                        "License reference: https://quaternius.com/license.html\n" +
-                        "The project asset inventory records this pack as CC0. Keep this notice with the imported files.\n");
+                        "Official license reference: https://quaternius.com/license.html\n" +
+                        "Keep this notice with the imported files.\n");
                 }
 
                 Directory.CreateDirectory("ArtSource/ThirdParty");
@@ -89,21 +95,18 @@ namespace SandsOfLegends.Editor
                     "Quaternius third-party 3D assets\n" +
                     "===============================\n\n" +
                     "Packs used: RPG Characters, Animated Monsters, Modular Dungeon and Nature.\n" +
-                    "Project asset inventory identifies the Quaternius packs as CC0. License reference:\n" +
-                    "https://quaternius.com/license.html\n\n" +
+                    "License reference: https://quaternius.com/license.html\n\n" +
                     "Official pack pages:\n" +
                     "- https://quaternius.itch.io/lowpoly-animated-monsters\n" +
                     "- https://quaternius.itch.io/150-lowpoly-nature-models\n" +
-                    "- https://quaternius.itch.io/lowpoly-modular-dungeon-pack\n\n" +
-                    "Source archive: https://github.com/Andahmed/LegendsStyleRPG\n" +
-                    "The character and environment FBX files are used as game assets, not redistributed as a standalone asset pack.\n");
+                    "- https://quaternius.itch.io/lowpoly-modular-dungeon-pack\n");
 
                 AssetDatabase.Refresh();
-                string summary = "Already present: " + present + "\nCopied from local source: " + copied;
+                string summary = "Already present: " + present + "\nCopied from selected Quaternius source: " + copied;
                 if (missing.Count > 0)
                 {
                     summary += "\n\nMissing source files (" + missing.Count + "):\n" + string.Join("\n", missing.ToArray());
-                    summary += "\n\nChoose the Free3D parent folder, not an individual FBX folder.";
+                    summary += "\n\nSelect the folder containing the Quaternius pack folders, not an individual FBX folder.";
                 }
                 else summary += "\n\nAll requested FBX files are available in Assets/Resources.";
                 EditorUtility.DisplayDialog("Quaternius 3D Models", summary, "OK");
@@ -115,18 +118,23 @@ namespace SandsOfLegends.Editor
             }
         }
 
-        private static string FindLocalRoot()
+        private static int CountPresentFiles()
         {
-            string projectRoot = Directory.GetParent(Application.dataPath).FullName;
-            string[] candidates =
+            int count = 0;
+            for (int p = 0; p < Packs.Length; p++)
+            for (int i = 0; i < Packs[p].Files.Length; i++)
             {
-                Path.GetFullPath(Path.Combine(projectRoot, "..", "LegendsStyleRPG", "GameClient", "Assets", "Resources", "GameArt", "Free3D")),
-                Path.GetFullPath(Path.Combine(projectRoot, "..", "..", "LegendsStyleRPG", "GameClient", "Assets", "Resources", "GameArt", "Free3D"))
-            };
-            for (int i = 0; i < candidates.Length; i++)
-                if (Directory.Exists(Path.Combine(candidates[i], "Quaternius_RPGCharacters", "FBX")))
-                    return candidates[i];
-            return null;
+                string path = Path.Combine(Packs[p].Destination, Packs[p].Files[i] + ".fbx");
+                if (File.Exists(path) && new FileInfo(path).Length > 2048) count++;
+            }
+            return count;
+        }
+
+        private static int CountRequiredFiles()
+        {
+            int count = 0;
+            for (int p = 0; p < Packs.Length; p++) count += Packs[p].Files.Length;
+            return count;
         }
     }
 }
