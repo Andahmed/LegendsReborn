@@ -1,7 +1,9 @@
 ## 2026-11-11 - Public hero FBX transfer and exact animation playback
 **Done**
 - Added an Editor import path that downloads the six Quaternius humanoid FBXs from the public legacy source into `Assets/Resources/HomeHeroes/`, validates the binary FBX signature/size, and writes source attribution.
+- Adapted the legacy QuaterniusFbxImporter settings to this project's Resources folders (`Assets/Editor/QuaterniusFbxImporter.cs`); it imports Generic animation and creates Avatars.
 - Updated HeroView to load clips per model, match exact clip leaf names, support looping walk/fly clips, return one-shot actions to idle, hold the death final pose, and remove the primitive capsule fallback.
+- Source references inspected: `GameClient/Assets/Editor/QuaterniusFbxImporter.cs` and `GameClient/Assets/Scripts/Art/QuaterniusAssetLibrary.cs` in the public legacy repository; no legacy gameplay systems were copied.
 - Preserved the existing castle, monster and nature assets from the active repository; no legacy gameplay/catalog systems were copied.
 
 **Not verified**
