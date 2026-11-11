@@ -5,7 +5,7 @@ using SandsOfLegends.Meta;
 
 namespace SandsOfLegends.UI
 {
-    /// <summary>Client preview pull. Live releases must route this intent through the server API.</summary>
+    /// <summary>Preview/test-only local pull. Live UI must use SummonService and never call this method.</summary>
     public sealed class SummonScreen : UIScreen
     {
         public static bool TryPull(GameState state, int count, int seed, out PullResult[] results)
