@@ -131,6 +131,7 @@ namespace SandsOfLegends.EditorTools
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var bootstrap = new GameObject("GameBootstrap");
             bootstrap.AddComponent<GameBootstrap>();
+            bootstrap.AddComponent<PrototypeBootRouter>();
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), BootPath);
         }
 
@@ -138,9 +139,13 @@ namespace SandsOfLegends.EditorTools
         {
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             CreateCamera();
+            CreateEventSystem();
             Canvas canvas = CreateCanvas("HomeCanvas");
-            CreateText(canvas.transform, "Title", "SANDS OF LEGENDS", 34, new Vector2(0f, 110f), new Vector2(700f, 90f), TextAnchor.MiddleCenter);
-            CreateText(canvas.transform, "Subtitle", "Prototype Home - Campaign / Heroes / Summon", 20, new Vector2(0f, 35f), new Vector2(800f, 55f), TextAnchor.MiddleCenter);
+            CreateText(canvas.transform, "Title", "SANDS OF LEGENDS", 34, new Vector2(0f, 150f), new Vector2(700f, 90f), TextAnchor.MiddleCenter);
+            CreateText(canvas.transform, "Subtitle", "Prototype Home - Campaign / Heroes / Summon", 20, new Vector2(0f, 75f), new Vector2(800f, 55f), TextAnchor.MiddleCenter);
+            Button startBattle = CreateButton(canvas.transform, "EnterBattle", "Enter Battle", new Vector2(0f, -35f));
+            PrototypeHomeController homeController = canvas.gameObject.AddComponent<PrototypeHomeController>();
+            homeController.battleButton = startBattle;
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), HomePath);
         }
 
