@@ -36,7 +36,7 @@ namespace SandsOfLegends.Editor
                 new[] { "Bush_1", "Cactus_1", "Grass", "PalmTree_1", "PalmTree_2", "Rock_1" })
         };
 
-        [MenuItem("Legends Reborn/Art/Install All CC0 3D Models")]
+        [MenuItem("Legends Reborn/Art/Install Quaternius 3D Models")]
         public static void InstallAll()
         {
             bool acceptCurrentQuaterniusLicense = EditorUtility.DisplayDialog(
@@ -103,8 +103,8 @@ namespace SandsOfLegends.Editor
                 }
 
                 Directory.CreateDirectory("ArtSource/ThirdParty");
-                File.WriteAllText("ArtSource/ThirdParty/Quaternius_CC0_NOTICE.md",
-                    "Quaternius third-party 3D assets\n" +
+                File.WriteAllText("ArtSource/ThirdParty/Quaternius_LICENSE_NOTICE.md",
+                    "Quaternius third-party 3D assets — license notice\n" +
                     "===============================\n\n" +
                     "Packs used: RPG Characters, Animated Monsters, Modular Dungeon and Nature.\n" +
                     "License reference: https://quaternius.com/license.html\n\n" +
