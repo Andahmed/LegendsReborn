@@ -1,5 +1,18 @@
 # Work Log (newest first)
 
+## 2026-11-11 - Approved hero portrait import pipeline
+**Done**
+- Connected the existing five-portrait runtime loader to the editor asset installation flow.
+- The CC0 asset installer now copies `hero_warrior.png`, `hero_paladin.png`, `hero_berserker.png`, `hero_healer.png` and `hero_sharpshooter.png` from `ArtSource/Heroes/images/` into `Assets/Resources/HeroPortraits/`.
+- Missing portrait source files are reported in the installer summary instead of being silently ignored.
+- Updated README with the exact Unity menu and portrait source/destination paths.
+
+**Verification**
+- Static source inspection confirms the Heroes screen already loads `Resources/HeroPortraits/hero_<id>`.
+- Static source inspection confirms the importer copies the five approved filenames to that matching Resources path.
+- The actual PNG files are not currently present at the expected source path on this GitHub branch, so image bytes have not yet been imported or visually checked.
+- Unity Editor import, sprite rendering, Play Mode and Android build remain unverified.
+
 ## 2026-11-11 - Replace generated castle geometry with bundled CC0 FBX assembly
 **Done**
 - Reworked Assets/Scripts/UI/Screens/HomeWorldStage.cs to assemble the home courtyard and castle from the repository's Quaternius CC0 FBX modules: Floor_Modular, Arch_Door, Wall_Modular, Decorative_Wall, Column, Column2, Banner, Banner_wall, Arch, Stairs_Modular and Torch.
