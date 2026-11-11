@@ -721,13 +721,13 @@ namespace SandsOfLegends.EditorTools
 
         private static void ExportFbx(GameObject source, string path, bool humanoid = false)
         {
-            if (File.Exists(path))
+            string absolutePath = Path.GetFullPath(Path.Combine(Directory.GetParent(Application.dataPath).FullName, path));
+            if (File.Exists(absolutePath))
             {
-                if (!AssetDatabase.DeleteAsset(path)) File.Delete(path);
+                if (!AssetDatabase.DeleteAsset(path)) File.Delete(absolutePath);
             }
-            string absolutePath = Path.GetFullPath(path);
             string exportedPath = ModelExporter.ExportObject(absolutePath, source);
-            if (string.IsNullOrEmpty(exportedPath) || !File.Exists(path))
+            if (string.IsNullOrEmpty(exportedPath) || !File.Exists(absolutePath))
                 throw new InvalidOperationException("FBX export failed: " + path);
             AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
             ModelImporter importer = AssetImporter.GetAtPath(path) as ModelImporter;
