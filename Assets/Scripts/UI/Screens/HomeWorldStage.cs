@@ -97,7 +97,7 @@ namespace SandsOfLegends.UI
             cam.fieldOfView=42f; cam.nearClipPlane=.1f; cam.farClipPlane=100f;
             cam.clearFlags=CameraClearFlags.SolidColor; cam.backgroundColor=new Color(.055f,.12f,.15f);
             RenderSettings.ambientLight=new Color(.48f,.49f,.46f);
-            if(FindObjectOfType<Light>()==null){GameObject sun=new GameObject("Home Directional Light"); Light l=sun.AddComponent<Light>(); l.type=LightType.Directional; l.intensity=1.15f; sun.transform.rotation=Quaternion.Euler(42,-28,0);}
+            Light[] lights = FindObjectsOfType<Light>(); bool hasDirectional = false; for (int i=0;i<lights.Length;i++) if (lights[i].type == LightType.Directional) hasDirectional = true; if(!hasDirectional){GameObject sun=new GameObject("Home Directional Light"); Light l=sun.AddComponent<Light>(); l.type=LightType.Directional; l.intensity=1.15f; sun.transform.rotation=Quaternion.Euler(42,-28,0);}
         }
     }
 }
