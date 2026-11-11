@@ -1,5 +1,8 @@
 # Work Log (newest first)
 
+## 2026-11-12 - B1 biome enemies and skills (GPT Lane B)
+- Added biome-specific enemy templates, skills, boss ultimates, and seed-based starter-balance assertions for stage 1 and stage 200. Engine-Free C# CI evidence is pending.
+
 ## 2026-11-11 - Foundations pass (Ahmed + Claude)
 **Done**
 - Added all foundation folders and files per the project plan (see ARCHITECTURE.md): Meta (economy, roster, gacha, idle, campaign, quests, save), Services, Bootstrap, Presentation, UI framework + 5 screen stubs, Localization, Editor build script, Server skeleton, docs.
