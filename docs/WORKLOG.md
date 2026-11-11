@@ -1,19 +1,5 @@
 # Work Log (newest first)
 
-## 2026-11-11 - Android APK CI workflow (ChatGPT)
-**Changed**
-- Added `.github/workflows/android-apk.yml`: GameCI Unity Builder v4, Unity `2022.3.62f3`, Android target, manual `workflow_dispatch` and `pull_request` triggers.
-- Workflow calls `SandsOfLegends.EditorTools.BuildScript.BuildAndroid` and uploads `Builds/SandsOfLegends.apk` as a 14-day artifact.
-
-**Not verified / uncertainty**
-- Workflow has not run yet. Ahmed must add repository Actions secrets: `UNITY_LICENSE`, `UNITY_EMAIL`, and `UNITY_PASSWORD`.
-- This PR is based on main, where the Boot/Home/Battle scenes have not yet been created; an APK build may fail until the separate prototype-setup PR adds build scenes.
-- Unity licensing and GameCI container compatibility are not verified in this session.
-
-**Next**
-1. Add the three repository secrets in Settings > Secrets and variables > Actions.
-2. Merge the prototype setup PR when reviewed, then run this workflow manually and inspect the APK artifact.
-
 ## 2026-11-11 - Foundations pass (Ahmed + Claude)
 **Done**
 - Added all foundation folders and files per the project plan (see ARCHITECTURE.md): Meta (economy, roster, gacha, idle, campaign, quests, save), Services, Bootstrap, Presentation, UI framework + 5 screen stubs, Localization, Editor build script, Server skeleton, docs.
