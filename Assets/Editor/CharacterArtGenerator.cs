@@ -160,6 +160,7 @@ namespace SandsOfLegends.EditorTools
                 CreatePortrait(id, Armor[i], Accent[i]);
             }
 
+            CreateFactionVfx("raider", UIStyle.FactionColor(Faction.Shadow));
             GameObject enemy = CreateCharacter("gloom_raider", "raider", new Color(0.18f, 0.17f, 0.20f),
                 new Color(0.78f, 0.18f, 0.12f), true);
             string enemyPath = "Assets/Art/Characters/Enemies/gloom_raider/enemy_gloom_raider.prefab";
@@ -269,7 +270,9 @@ namespace SandsOfLegends.EditorTools
             Animator animator = root.AddComponent<Animator>();
             Avatar avatar = BuildHumanoidAvatar(root, bones);
             avatar.name = id + "_humanoid_avatar";
-            AssetDatabase.CreateAsset(avatar, folder + "/" + id + "_avatar.asset");
+            string avatarPath = folder + "/" + id + "_avatar.asset";
+            if (File.Exists(avatarPath)) AssetDatabase.DeleteAsset(avatarPath);
+            AssetDatabase.CreateAsset(avatar, avatarPath);
             animator.avatar = avatar;
             animator.runtimeAnimatorController = CreateAnimatorController(root, bones, folder, id);
             HeroView view = root.AddComponent<HeroView>();
