@@ -1,3 +1,10 @@
+// =============================================================================
+// FILE: Assets/Scripts/Combat/Types.cs
+// OWNER ROLE: Client Programmer - Combat
+// RESPONSIBILITY: Combat data types: Faction/Role/Rarity enums, FactionChart (+25% advantage), SkillSpec, UnitSpec, BattleEvent, SeededRng.
+// WORK ON: Add new enums/fields only with a GDD change. Tune FactionChart.AdvantageBonus. Keep this file free of UnityEngine.
+// STATUS: Implemented
+// =============================================================================
 using System.Collections.Generic;
 
 namespace SandsOfLegends.Combat

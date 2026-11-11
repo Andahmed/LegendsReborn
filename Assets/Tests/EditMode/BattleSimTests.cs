@@ -1,3 +1,10 @@
+// =============================================================================
+// FILE: Assets/Tests/EditMode/BattleSimTests.cs
+// OWNER ROLE: QA Engineer
+// RESPONSIBILITY: EditMode tests for combat: faction cycle, determinism, front-row targeting, timeout, ultimate/heal.
+// WORK ON: Add a test for every combat rule added to BattleSim.
+// STATUS: Implemented
+// =============================================================================
 using NUnit.Framework;
 using SandsOfLegends.Combat;
 

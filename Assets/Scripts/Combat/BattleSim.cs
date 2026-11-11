@@ -1,3 +1,10 @@
+// =============================================================================
+// FILE: Assets/Scripts/Combat/BattleSim.cs
+// OWNER ROLE: Client Programmer - Combat
+// RESPONSIBILITY: Deterministic fixed-step auto-battle (2 front + 3 back, timed skills, energy ultimates, crit, 120s timeout).
+// WORK ON: Add buffs/debuffs/shields/DoT, team synergy (3+2 factions = +15% HP, mono-faction = +25% ATK), balance the damage formula, per-skill targeting rules. Must stay deterministic and engine-free.
+// STATUS: Implemented (placeholder balance)
+// =============================================================================
 using System;
 using System.Collections.Generic;
 

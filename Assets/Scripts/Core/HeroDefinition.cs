@@ -1,3 +1,10 @@
+// =============================================================================
+// FILE: Assets/Scripts/Core/HeroDefinition.cs
+// OWNER ROLE: Systems Designer
+// RESPONSIBILITY: ScriptableObjects HeroDefinition/SkillDefinition: designer-editable hero and skill data converted to UnitSpec/SkillSpec.
+// WORK ON: Fill 20 hero cards for MVP (stats, skills, faction, role, rarity). Add lore/portrait/prefab references when art arrives.
+// STATUS: Implemented
+// =============================================================================
 using SandsOfLegends.Combat;
 using UnityEngine;
 

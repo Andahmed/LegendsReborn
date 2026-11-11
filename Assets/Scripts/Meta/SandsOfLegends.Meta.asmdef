@@ -1,0 +1,14 @@
+{
+    "name": "SandsOfLegends.Meta",
+    "rootNamespace": "SandsOfLegends.Meta",
+    "references": [ "SandsOfLegends.Combat" ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
