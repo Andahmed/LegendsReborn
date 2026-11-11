@@ -8,7 +8,7 @@ using UnityEngine;
 namespace SandsOfLegends.Editor
 {
     /// <summary>
-    /// Creates a local inventory of MVP assets. It does not claim Unity compile or runtime tests passed.
+    /// Inventories required MVP assets without claiming compilation or runtime success.
     /// </summary>
     public static class MvpReadinessAudit
     {
@@ -25,24 +25,24 @@ namespace SandsOfLegends.Editor
         {
             List<Check> checks = new List<Check>();
             AddFile(checks, "Generated Home scene", "Assets/Scenes/Home.unity", "Run Sands > Setup MVP Home Scene.");
-            AddPrefab(checks, "Original castle Mesh prefab", "Assets/Resources/HomeCastle/LegendsRebornCastle.prefab", "Run Sands > Setup MVP Home Scene to generate the original castle Mesh.");
+            AddFile(checks, "Home world FBX assembly script", "Assets/Scripts/UI/Screens/HomeWorldStage.cs", "Restore the HomeWorldStage source.");
             AddFile(checks, "Android build entry point", "Assets/Editor/BuildScript.cs", "The GameCI build method is missing.");
 
             string[] castle = { "Arch", "Arch_Door", "Wall_Modular", "Decorative_Wall", "Column", "Column2", "Banner", "Banner_wall", "Torch", "Stairs_Modular", "Floor_Modular" };
             for (int i = 0; i < castle.Length; i++)
-                AddModel(checks, "Castle part: " + castle[i], "Assets/Resources/HomeCastle/" + castle[i] + ".fbx", "Pull main and let Unity import the FBX.");
+                AddModel(checks, "Castle FBX: " + castle[i], "Assets/Resources/HomeCastle/" + castle[i] + ".fbx", "Run Legends Reborn > Art > Install Home Castle CC0 Models.");
 
             string[] monsters = { "Bat", "Dragon", "Skeleton", "Slime" };
             for (int i = 0; i < monsters.Length; i++)
-                AddModel(checks, "Battle monster: " + monsters[i], "Assets/Resources/BattleMonsters/" + monsters[i] + ".fbx", "Pull main and let Unity import the FBX.");
+                AddModel(checks, "Battle monster: " + monsters[i], "Assets/Resources/BattleMonsters/" + monsters[i] + ".fbx", "Run Legends Reborn > Art > Install MVP Art.");
 
             string[] nature = { "Bush_1", "Cactus_1", "Grass", "PalmTree_1", "PalmTree_2", "Rock_1" };
             for (int i = 0; i < nature.Length; i++)
-                AddModel(checks, "Nature prop: " + nature[i], "Assets/Resources/HomeNature/" + nature[i] + ".fbx", "Pull main and let Unity import the FBX.");
+                AddModel(checks, "Nature FBX: " + nature[i], "Assets/Resources/HomeNature/" + nature[i] + ".fbx", "Run Legends Reborn > Art > Install MVP Art.");
 
             string[] heroes = { "Warrior", "Cleric", "Monk", "Ranger", "Rogue", "Wizard" };
             for (int i = 0; i < heroes.Length; i++)
-                AddModel(checks, "Humanoid rig: " + heroes[i], "Assets/Resources/HomeHeroes/" + heroes[i] + ".fbx", "Run Legends Reborn > Art > Install MVP Art and select the legacy Free3D folder.");
+                AddModel(checks, "Humanoid rig FBX: " + heroes[i], "Assets/Resources/HomeHeroes/" + heroes[i] + ".fbx", "Run Legends Reborn > Art > Install MVP Art.");
 
             string[] portraits = { "warrior", "paladin", "berserker", "healer", "sharpshooter" };
             for (int i = 0; i < portraits.Length; i++)
@@ -92,11 +92,6 @@ namespace SandsOfLegends.Editor
         }
 
         private static void AddModel(List<Check> checks, string name, string path, string detail)
-        {
-            checks.Add(new Check { Name = name, Path = path, Present = File.Exists(path) && AssetDatabase.LoadAssetAtPath<GameObject>(path) != null, Detail = detail });
-        }
-
-        private static void AddPrefab(List<Check> checks, string name, string path, string detail)
         {
             checks.Add(new Check { Name = name, Path = path, Present = File.Exists(path) && AssetDatabase.LoadAssetAtPath<GameObject>(path) != null, Detail = detail });
         }
