@@ -4,7 +4,8 @@
 **Changed**
 - PR #1: reviewed all 35 tracked C# files and assembly definitions; added Unity Test Framework `1.1.33` for the existing EditMode test assembly.
 - PR #2: added `.github/workflows/android-apk.yml` using GameCI Unity Builder v4, Unity `2022.3.62f3`, Android target, `workflow_dispatch` and `pull_request`; APK artifact upload is configured.
-- PR #3: added `Sands > Setup Prototype`, runtime 4v4 battle presentation, prototype HeroDefinition/SkillDefinition generation, Boot/Home/Battle scene generation, Build Settings registration, Boot-to-Home and Home-to-Battle prototype navigation, and a PlayMode 4v4 completion smoke test.
+- PR #3: added `Sands > Setup Prototype`, runtime 4v4 battle presentation, prototype HeroDefinition/SkillDefinition generation, Boot/Home/Battle scene generation, Build Settings registration, and Boot-to-Home/Home-to-Battle prototype navigation.
+- PR #4: added the separate PlayMode test assembly and a 4v4 BattleSim completion smoke test.
 - Updated the Android build entry point to create missing prototype assets/scenes and ensure the APK output folder exists before building.
 - Kept Combat and Meta engine-free; no combat rules or economy values changed. All code files added/changed include the required ownership headers.
 
