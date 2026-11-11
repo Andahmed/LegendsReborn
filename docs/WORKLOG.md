@@ -11,6 +11,7 @@
 
 **Not verified / uncertainty**
 - No Unity Editor compile or Test Runner was executed in this session. Source inspection is not a Unity compile result.
+- Read `docs/GDD.md`; the 605 KB `docs/Idle_RPG_Project_Plan.pdf` exists, but GitHub's PDF viewer returned `Unable to render code block` and the raw download failed, so its 18 pages could not be extracted.
 - The prototype setup menu has not been executed; generated Unity assets/scenes, serialized references, and visual appearance are not yet observed.
 - The PlayMode test and GameCI Android workflow have not run. Add repository Actions secrets `UNITY_LICENSE`, `UNITY_EMAIL`, and `UNITY_PASSWORD` before CI can authenticate.
 
