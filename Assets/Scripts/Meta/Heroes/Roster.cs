@@ -1,9 +1,9 @@
 // =============================================================================
 // FILE: Assets/Scripts/Meta/Heroes/Roster.cs
 // OWNER ROLE: Client Programmer - Systems
-// RESPONSIBILITY: The player's hero collection + shared 'Spirit Source' level ceiling (new heroes are raised to ceiling-5, GDD 4.2).
-// WORK ON: Add hero level-up/star-up/ascend operations (spend Wallet), team loadout (5 slots, front/back).
-// STATUS: Implemented (collection + ceiling only)
+// RESPONSIBILITY: Hero collection, shared Spirit Source ceiling and equipment loadouts.
+// WORK ON: Add economy-approved level/star/ascension operations and five-slot team formation.
+// STATUS: Collection, ceiling and six-slot equip/unequip rules implemented.
 // =============================================================================
 using System;
 using System.Collections.Generic;
@@ -18,25 +18,25 @@ namespace SandsOfLegends.Meta
         public HeroInstance Find(string heroId)
         {
             for (int i = 0; i < Heroes.Count; i++)
-                if (Heroes[i].HeroId == heroId) return Heroes[i];
+                if (Heroes[i] != null && Heroes[i].HeroId == heroId) return Heroes[i];
             return null;
         }
 
-        /// <summary>Shared level ceiling = highest level among owned heroes.</summary>
         public int SpiritCeiling
         {
             get
             {
                 int m = 1;
-                for (int i = 0; i < Heroes.Count; i++) m = Math.Max(m, Heroes[i].Level);
+                for (int i = 0; i < Heroes.Count; i++)
+                    if (Heroes[i] != null) m = Math.Max(m, Heroes[i].Level);
                 return m;
             }
         }
 
-        /// <summary>Adds a new hero (at ceiling-5) or converts a duplicate into shards. Returns true if new.</summary>
         public bool AddHeroOrShards(string heroId, Rarity rarity, out int shardsGained)
         {
             shardsGained = 0;
+            if (string.IsNullOrEmpty(heroId)) return false;
             var h = Find(heroId);
             if (h != null)
             {
@@ -46,6 +46,18 @@ namespace SandsOfLegends.Meta
             }
             Heroes.Add(new HeroInstance { HeroId = heroId, Level = Math.Max(1, SpiritCeiling - 5) });
             return true;
+        }
+
+        public bool TryEquip(string heroId, EquipmentItem item, out EquipmentItem replaced)
+        {
+            replaced = null;
+            return EquipmentRules.TryEquip(Find(heroId), item, out replaced);
+        }
+
+        public bool TryUnequip(string heroId, EquipSlot slot, out EquipmentItem removed)
+        {
+            removed = null;
+            return EquipmentRules.TryUnequip(Find(heroId), slot, out removed);
         }
     }
 }

@@ -1,11 +1,12 @@
 // =============================================================================
 // FILE: Assets/Scripts/Meta/Heroes/HeroInstance.cs
 // OWNER ROLE: Client Programmer - Systems
-// RESPONSIBILITY: Owned hero state (level, stars, ascension, shards) + Progression curves.
-// WORK ON: Replace placeholder curves with Economy Designer's tables (Data/Economy). Add equipment slots (6) per hero.
-// STATUS: Implemented (placeholder curves)
+// RESPONSIBILITY: Owned hero state, progression and equipped item references.
+// WORK ON: Replace placeholder progression curves with Economy Designer tables; implement approved level/star costs.
+// STATUS: Implemented (placeholder curves); equipment slots persisted.
 // =============================================================================
 using System;
+using System.Collections.Generic;
 using SandsOfLegends.Combat;
 
 namespace SandsOfLegends.Meta
@@ -15,18 +16,19 @@ namespace SandsOfLegends.Meta
     {
         public string HeroId;
         public int Level = 1;
-        public int Stars;        // 0..5
-        public int Ascension;    // 0..4
-        public int Shards;       // hero-specific shards for stars
+        public int Stars;
+        public int Ascension;
+        public int Shards;
+        public List<EquipmentItem> Equipment = new List<EquipmentItem>();
     }
 
-    /// <summary>Progression curves (placeholders - the real numbers come from the economy ledger).</summary>
+    /// <summary>Progression curves remain placeholders until the economy ledger is approved.</summary>
     public static class Progression
     {
         public const int MaxStars = 5;
         public const int MaxAscension = 4;
 
-        public static int LevelCap(int ascension) { return 20 + 20 * ascension; }        // 20,40,60,80,100
+        public static int LevelCap(int ascension) { return 20 + 20 * ascension; }
         public static int ExpToNext(int level) { return 100 + 40 * level + 5 * level * level; }
         public static int ShardsForNextStar(int currentStars) { return 10 * (currentStars + 1); }
 

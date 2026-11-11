@@ -1,9 +1,9 @@
 // =============================================================================
 // FILE: Assets/Scripts/Meta/Save/SaveData.cs
 // OWNER ROLE: Client Programmer - Systems
-// RESPONSIBILITY: Versioned save model (JsonUtility-friendly POCO) + migrations. ONE save system for the whole game.
-// WORK ON: Bump Version and add a migration step for every new/changed field. Later: cloud save (server) uses the same model.
-// STATUS: Implemented
+// RESPONSIBILITY: Versioned JsonUtility-friendly save model and migrations; one save system.
+// WORK ON: Add an explicit migration whenever persisted gameplay fields change.
+// STATUS: Version 2; equipment collections migrate safely from version 1.
 // =============================================================================
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ namespace SandsOfLegends.Meta
     [Serializable]
     public sealed class SaveData
     {
-        public int Version = 1;
+        public int Version = 2;
         public long Gems, Gold, Exp, GearMaterials;
         public List<HeroInstance> Heroes = new List<HeroInstance>();
         public int PitySinceEpic, PitySinceLegendary;
@@ -29,7 +29,7 @@ namespace SandsOfLegends.Meta
 
     public static class SaveMigrations
     {
-        public const int CurrentVersion = 1;
+        public const int CurrentVersion = 2;
 
         public static SaveData Migrate(SaveData d)
         {
@@ -38,7 +38,20 @@ namespace SandsOfLegends.Meta
             if (d.QuestProgress == null || d.QuestProgress.Length != 5) d.QuestProgress = new int[5];
             if (d.QuestClaimed == null || d.QuestClaimed.Length != 5) d.QuestClaimed = new bool[5];
             if (d.QuestDay == null) d.QuestDay = "";
-            // if (d.Version < 2) { ...upgrade...; d.Version = 2; }
+
+            if (d.Version < 2)
+            {
+                for (int i = 0; i < d.Heroes.Count; i++)
+                    if (d.Heroes[i] != null && d.Heroes[i].Equipment == null)
+                        d.Heroes[i].Equipment = new List<EquipmentItem>();
+                d.Version = 2;
+            }
+
+            // Defensive normalization also covers partially written/newer saves.
+            for (int i = 0; i < d.Heroes.Count; i++)
+                if (d.Heroes[i] != null && d.Heroes[i].Equipment == null)
+                    d.Heroes[i].Equipment = new List<EquipmentItem>();
+
             d.Version = CurrentVersion;
             return d;
         }
