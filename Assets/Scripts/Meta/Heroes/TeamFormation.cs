@@ -16,7 +16,7 @@ namespace SandsOfLegends.Meta
         public const int FrontSlotCount = 2;
 
         // Slot order is authoritative: 0-1 front row, 2-4 back row.
-        public string[] HeroIds = new string[SlotCount];
+        private string[] _heroIds = new string[SlotCount];
 
         public static bool IsValidSlot(int slot)
         {
@@ -32,7 +32,7 @@ namespace SandsOfLegends.Meta
         {
             if (!IsValidSlot(slot)) return null;
             EnsureStorage();
-            return HeroIds[slot];
+            return _heroIds[slot];
         }
 
         public bool TryAssign(int slot, string heroId, Roster roster, out string replacedHeroId)
@@ -44,11 +44,11 @@ namespace SandsOfLegends.Meta
 
             EnsureStorage();
             for (int i = 0; i < SlotCount; i++)
-                if (i != slot && HeroIds[i] == heroId) return false;
+                if (i != slot && _heroIds[i] == heroId) return false;
 
-            if (HeroIds[slot] == heroId) return true;
-            replacedHeroId = HeroIds[slot];
-            HeroIds[slot] = heroId;
+            if (_heroIds[slot] == heroId) return true;
+            replacedHeroId = _heroIds[slot];
+            _heroIds[slot] = heroId;
             return true;
         }
 
@@ -59,11 +59,11 @@ namespace SandsOfLegends.Meta
             if (!IsValidSlot(fromSlot) || !IsValidSlot(toSlot)) return false;
             EnsureStorage();
             if (fromSlot == toSlot) return true;
-            if (string.IsNullOrEmpty(HeroIds[fromSlot])) return false;
+            if (string.IsNullOrEmpty(_heroIds[fromSlot])) return false;
 
-            displacedHeroId = HeroIds[toSlot];
-            HeroIds[toSlot] = HeroIds[fromSlot];
-            HeroIds[fromSlot] = displacedHeroId;
+            displacedHeroId = _heroIds[toSlot];
+            _heroIds[toSlot] = _heroIds[fromSlot];
+            _heroIds[fromSlot] = displacedHeroId;
             return true;
         }
 
@@ -72,9 +72,9 @@ namespace SandsOfLegends.Meta
             removedHeroId = null;
             if (!IsValidSlot(slot)) return false;
             EnsureStorage();
-            if (string.IsNullOrEmpty(HeroIds[slot])) return false;
-            removedHeroId = HeroIds[slot];
-            HeroIds[slot] = null;
+            if (string.IsNullOrEmpty(_heroIds[slot])) return false;
+            removedHeroId = _heroIds[slot];
+            _heroIds[slot] = null;
             return true;
         }
 
@@ -82,14 +82,14 @@ namespace SandsOfLegends.Meta
         {
             EnsureStorage();
             var copy = new string[SlotCount];
-            Array.Copy(HeroIds, copy, SlotCount);
+            Array.Copy(_heroIds, copy, SlotCount);
             return copy;
         }
 
         // Restore only owned heroes and discard duplicates or invalid references.
         public void LoadSlots(string[] savedSlots, Roster roster)
         {
-            HeroIds = new string[SlotCount];
+            _heroIds = new string[SlotCount];
             if (savedSlots == null || roster == null) return;
 
             int count = Math.Min(savedSlots.Length, SlotCount);
@@ -100,19 +100,19 @@ namespace SandsOfLegends.Meta
 
                 bool alreadyAssigned = false;
                 for (int previous = 0; previous < slot; previous++)
-                    if (HeroIds[previous] == heroId) { alreadyAssigned = true; break; }
+                    if (_heroIds[previous] == heroId) { alreadyAssigned = true; break; }
 
-                if (!alreadyAssigned) HeroIds[slot] = heroId;
+                if (!alreadyAssigned) _heroIds[slot] = heroId;
             }
         }
 
         private void EnsureStorage()
         {
-            if (HeroIds != null && HeroIds.Length == SlotCount) return;
+            if (_heroIds != null && _heroIds.Length == SlotCount) return;
             var normalized = new string[SlotCount];
-            if (HeroIds != null)
-                Array.Copy(HeroIds, normalized, Math.Min(HeroIds.Length, SlotCount));
-            HeroIds = normalized;
+            if (_heroIds != null)
+                Array.Copy(_heroIds, normalized, Math.Min(_heroIds.Length, SlotCount));
+            _heroIds = normalized;
         }
     }
 }
