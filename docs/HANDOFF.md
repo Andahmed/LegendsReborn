@@ -32,7 +32,7 @@ Working title: **Sands of Legends**. Unity 2022.3.62f3, Android IL2CPP/ARM64 tar
 1. Open with Unity 2022.3.62f3.
 2. Run **Sands → Setup MVP Home Scene**.
 3. Confirm the castle FBX modules are present under Assets/Resources/HomeCastle.
-4. Run **Legends Reborn → Art → Install All CC0 3D Models** only after reviewing and accepting the in-Editor Quaternius license confirmation. The six humanoid FBXs are downloaded from the public legacy repository, validated as binary FBX files, and imported. The current Quaternius license is not CC0 and prohibits standalone redistribution; it permits inclusion in a completed game/product.
+4. Run **Legends Reborn → Art → Install Quaternius 3D Models** only after reviewing and accepting the in-Editor Quaternius license confirmation. The six humanoid FBXs are downloaded from the public legacy repository, validated as binary FBX files, and imported. The current Quaternius license is not CC0 and prohibits standalone redistribution; it permits inclusion in a completed game/product.
 5. Wait for asset import, then open Home.unity and press Play.
 6. From Server, install requirements, run uvicorn and python -m unittest discover -s tests -v.
 
