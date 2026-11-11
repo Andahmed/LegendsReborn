@@ -15,7 +15,8 @@ Working title: **Sands of Legends**. Unity 2022.3.62f3, Android IL2CPP/ARM64 tar
 
 ### Runtime UI and art pipeline
 - GameFlowController connects Home HUD actions to Campaign, Heroes, Formation, Summon, Equipment, Backpack, Quests and feature-status screens.
-- HeroView loads imported Quaternius FBX models when installed; battle feedback uses floating damage numbers.
+- HeroView loads the six Quaternius humanoid FBXs and existing monster FBXs from Resources, uses per-model exact animation clips through Playables, and reports a missing model instead of creating a primitive capsule. Battle feedback uses floating damage numbers.
+- QuaterniusFbxImporter configures humanoid and monster FBXs as Generic animated models with generated Avatars and imported clips.
 - The Home castle is assembled from the bundled Quaternius CC0 FBX modules: floor, gate, walls, battlements, tower pieces, banners, stairs and torches. Nature props and the home hero also load as FBX models.
 - The Home castle runtime does not use Unity primitive cubes or generated block geometry as a fallback. Missing required FBX files are reported explicitly.
 - The Quaternius installer downloads the six humanoid CC0 FBX rigs from the public legacy source repository into `Assets/Resources/HomeHeroes/`, validates the binary FBX signature, and retains a `SOURCE.txt` notice. The existing castle, monster and nature assets remain bundled in this repository.
