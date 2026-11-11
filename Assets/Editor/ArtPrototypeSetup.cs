@@ -27,7 +27,10 @@ namespace SandsOfLegends.EditorTools
         [MenuItem("Sands/Setup 3D Prototype")]
         public static void Setup3DPrototype()
         {
-            HeroDefinition[] heroes = AssetDatabase.LoadAllAssetsAtPath("Assets/Data/Heroes").OfType<HeroDefinition>().ToArray();
+            string[] heroGuids = AssetDatabase.FindAssets("t:HeroDefinition", new[] { "Assets/Data/Heroes" });
+            HeroDefinition[] heroes = new HeroDefinition[heroGuids.Length];
+            for (int i = 0; i < heroGuids.Length; i++)
+                heroes[i] = AssetDatabase.LoadAssetAtPath<HeroDefinition>(AssetDatabase.GUIDToAssetPath(heroGuids[i]));
             GeneratePrototypeArt(heroes);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
