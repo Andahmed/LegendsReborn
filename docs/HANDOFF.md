@@ -15,10 +15,11 @@ Working title: **Sands of Legends**. Unity 2022.3.62f3, Android IL2CPP/ARM64 tar
 
 ### Runtime UI and art pipeline
 - GameFlowController connects Home HUD actions to Campaign, Heroes, Formation, Summon, Equipment, Backpack, Quests and feature-status screens.
-- HeroView loads imported Quaternius FBX models when installed; battle feedback uses floating damage numbers.
+- HeroView loads the six Quaternius humanoid FBXs and existing monster FBXs from Resources, uses per-model exact animation clips through Playables, and reports a missing model instead of creating a primitive capsule. Battle feedback uses floating damage numbers.
+- QuaterniusFbxImporter configures humanoid and monster FBXs as Generic animated models with generated Avatars and imported clips.
 - The Home castle is assembled from the bundled Quaternius CC0 FBX modules: floor, gate, walls, battlements, tower pieces, banners, stairs and torches. Nature props and the home hero also load as FBX models.
 - The Home castle runtime does not use Unity primitive cubes or generated block geometry as a fallback. Missing required FBX files are reported explicitly.
-- The Quaternius asset installer imports only missing files and does not assume or search another project checkout.
+- The Quaternius installer can download the six humanoid FBX rigs from the public legacy source repository into `Assets/Resources/HomeHeroes/` after an explicit in-Editor license confirmation. Important: Quaternius's current license is not CC0; it permits use inside a completed game/product but prohibits standalone asset-pack redistribution. The existing castle, monster and nature assets remain bundled in this repository.
 - MVPProjectInstaller generates Assets/Scenes/Home.unity, adds GameBootstrap + HomeScreen and registers the scene in Build Settings. BuildScript calls it before Android builds.
 
 ### Development backend
@@ -31,15 +32,15 @@ Working title: **Sands of Legends**. Unity 2022.3.62f3, Android IL2CPP/ARM64 tar
 1. Open with Unity 2022.3.62f3.
 2. Run **Sands → Setup MVP Home Scene**.
 3. Confirm the castle FBX modules are present under Assets/Resources/HomeCastle.
-4. Run **Legends Reborn → Art → Install MVP Art** only if required models are missing; select the parent folder containing the extracted Quaternius pack folders if prompted.
+4. Run **Legends Reborn → Art → Install Quaternius 3D Models** only after reviewing and accepting the in-Editor Quaternius license confirmation. The six humanoid FBXs are downloaded from the public legacy repository, validated as binary FBX files, and imported. The current Quaternius license is not CC0 and prohibits standalone redistribution; it permits inclusion in a completed game/product.
 5. Wait for asset import, then open Home.unity and press Play.
 6. From Server, install requirements, run uvicorn and python -m unittest discover -s tests -v.
 
 ## Explicitly not complete or not verified
 - No Unity Editor compile, Play Mode run, Android APK, mobile touch or aspect-ratio test has been performed in this environment.
-- Unity will generate .meta files when it first imports new scripts/FBX assets; they must be committed after editor import.
+- Unity generates `.meta` files when the Editor installer refreshes downloaded FBXs; those generated files must be committed after the installer runs.
 - The Home castle is a modular FBX assembly, not a bespoke sculpted single-mesh castle. Imported FBX pivots, materials, scale, silhouette and camera framing still require visual review in Unity.
-- The five approved hero archetypes map to temporary Quaternius rigged character FBX models. Final bespoke hero models, animations and skill VFX are still outstanding.
+- The six humanoid Quaternius FBXs have not yet been downloaded into this repository. The Editor installer is gated by explicit acceptance because the current Quaternius license is not CC0. If accepted, Unity imports the FBXs and generates `.meta` files that must be committed. Model-specific animation clip mapping and actual Play Mode animation still require Unity verification. Final bespoke hero models and skill VFX are still outstanding.
 - Arabic font shaping/RTL presentation is not complete; the current runtime labels are English.
 - The Unity client summon screen still uses local preview RNG. It is not yet connected to the FastAPI guest/profile/summon endpoints.
 - Arena, world boss, alliance, shop billing, Battle Pass and live events remain feature-status screens or locked endpoints, not playable systems.

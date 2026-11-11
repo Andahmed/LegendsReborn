@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
 
@@ -34,18 +36,28 @@ namespace SandsOfLegends.Editor
                 new[] { "Bush_1", "Cactus_1", "Grass", "PalmTree_1", "PalmTree_2", "Rock_1" })
         };
 
-        [MenuItem("Legends Reborn/Art/Install All CC0 3D Models")]
+        [MenuItem("Legends Reborn/Art/Install Quaternius 3D Models")]
         public static void InstallAll()
         {
+            bool acceptCurrentQuaterniusLicense = EditorUtility.DisplayDialog(
+                "Quaternius asset license",
+                "The current Quaternius license is not CC0. It permits commercial use inside a completed game/product, " +
+                "but prohibits redistributing the FBX files as a standalone asset pack.\n\n" +
+                "Continue only if you explicitly approve using these six models under those terms.",
+                "I approve — continue", "Cancel");
+            if (!acceptCurrentQuaterniusLicense) return;
+
+            int downloadedHeroes = DownloadPublicHeroModels();
             int alreadyPresent = CountPresentFiles();
             int required = CountRequiredFiles();
             string root = null;
 
-            // Do not ask for an external source folder when all model files are already in this repository.
+            // The six humanoid rigs come directly from the public source repository.
+            // Ask for a local pack folder only if one of the already-bundled environment/monster assets is missing.
             if (alreadyPresent < required)
             {
                 root = EditorUtility.OpenFolderPanel(
-                    "Select the parent folder containing the extracted Quaternius pack folders",
+                    "Select the parent folder containing any missing Quaternius pack folders",
                     Application.dataPath, "");
                 if (string.IsNullOrEmpty(root)) return;
             }
@@ -91,8 +103,8 @@ namespace SandsOfLegends.Editor
                 }
 
                 Directory.CreateDirectory("ArtSource/ThirdParty");
-                File.WriteAllText("ArtSource/ThirdParty/Quaternius_CC0_NOTICE.md",
-                    "Quaternius third-party 3D assets\n" +
+                File.WriteAllText("ArtSource/ThirdParty/Quaternius_LICENSE_NOTICE.md",
+                    "Quaternius third-party 3D assets — license notice\n" +
                     "===============================\n\n" +
                     "Packs used: RPG Characters, Animated Monsters, Modular Dungeon and Nature.\n" +
                     "License reference: https://quaternius.com/license.html\n\n" +
@@ -102,7 +114,7 @@ namespace SandsOfLegends.Editor
                     "- https://quaternius.itch.io/lowpoly-modular-dungeon-pack\n");
 
                 AssetDatabase.Refresh();
-                string summary = "Already present: " + present + "\nCopied from selected Quaternius source: " + copied;
+                string summary = "Hero FBX downloaded/verified: " + downloadedHeroes + "\nAlready present: " + present + "\nCopied from selected Quaternius source: " + copied;
                 if (missing.Count > 0)
                 {
                     summary += "\n\nMissing source files (" + missing.Count + "):\n" + string.Join("\n", missing.ToArray());
@@ -116,6 +128,70 @@ namespace SandsOfLegends.Editor
                 Debug.LogException(ex);
                 EditorUtility.DisplayDialog("3D model import failed", ex.Message, "Close");
             }
+        }
+
+
+        private static int DownloadPublicHeroModels()
+        {
+            const string destination = "Assets/Resources/HomeHeroes";
+            const string sourceRoot = "https://raw.githubusercontent.com/Andahmed/LegendsStyleRPG/main/" +
+                "GameClient/Assets/Resources/GameArt/Free3D/Quaternius_RPGCharacters/FBX/";
+            string[] models = { "Warrior", "Cleric", "Monk", "Ranger", "Rogue", "Wizard" };
+            Directory.CreateDirectory(destination);
+            int ready = 0;
+
+            for (int i = 0; i < models.Length; i++)
+            {
+                string fileName = models[i] + ".fbx";
+                string target = Path.Combine(destination, fileName);
+                if (File.Exists(target) && IsBinaryFbx(File.ReadAllBytes(target)))
+                {
+                    ready++;
+                    continue;
+                }
+
+                byte[] bytes = DownloadBytes(sourceRoot + fileName);
+                if (!IsBinaryFbx(bytes))
+                    throw new InvalidDataException("Rejected " + fileName + ": expected a binary FBX larger than 2048 bytes.");
+                File.WriteAllBytes(target, bytes);
+                ready++;
+            }
+
+            File.WriteAllText(Path.Combine(destination, "SOURCE.txt"),
+                "Quaternius RPG Characters — current Quaternius License (not CC0).\n" +
+                "Commercial use inside a completed game/product is permitted; standalone asset-pack redistribution is prohibited.\n" +
+                "Files: Warrior.fbx, Cleric.fbx, Monk.fbx, Ranger.fbx, Rogue.fbx, Wizard.fbx.\n" +
+                "Source repository: https://github.com/Andahmed/LegendsStyleRPG\n" +
+                "Source path: GameClient/Assets/Resources/GameArt/Free3D/Quaternius_RPGCharacters/FBX/\n" +
+                "License reference: https://quaternius.com/license.html\n");
+            AssetDatabase.Refresh();
+            return ready;
+        }
+
+        private static byte[] DownloadBytes(string url)
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = "GET";
+            request.Timeout = 30000;
+            request.ReadWriteTimeout = 30000;
+            request.UserAgent = "SandsOfLegends-UnityAssetImporter";
+            using (WebResponse response = request.GetResponse())
+            using (Stream stream = response.GetResponseStream())
+            using (MemoryStream buffer = new MemoryStream())
+            {
+                if (stream == null) throw new IOException("Empty download response: " + url);
+                stream.CopyTo(buffer);
+                return buffer.ToArray();
+            }
+        }
+
+        private static bool IsBinaryFbx(byte[] bytes)
+        {
+            byte[] signature = Encoding.ASCII.GetBytes("Kaydara FBX Binary");
+            if (bytes == null || bytes.Length <= 2048 || bytes.Length < signature.Length) return false;
+            for (int i = 0; i < signature.Length; i++)
+                if (bytes[i] != signature[i]) return false;
+            return true;
         }
 
         private static int CountPresentFiles()
