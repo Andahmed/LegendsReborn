@@ -2,7 +2,7 @@
 
 ## 2026-11-12 - Architecture status correction (GPT Lane B)
 - Updated Server/app/main.py, Equipment.cs, and HeroView.cs status descriptions to reflect implemented MVP behavior and explicitly list remaining gaps.
-- Not verified: no Unity Editor compile/Play Mode/Android build; no production deployment verification.
+- Not verified: no Unity Editor compile/Play Mode/Android build; no production deployment verification. Engine-Free Tests run requested on this documentation branch.
 
 ## 2026-11-12 - A0 Unity font crash guard
 **Done:** Replaced direct Arial loading with LegacyRuntime.ttf plus guarded Arial fallback in GameFlowController and HomeScreen; assigned the TextMesh font and font material in DamageNumbers.
