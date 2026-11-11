@@ -14,6 +14,8 @@ namespace SandsOfLegends.EditorTools
 {
     public static class BuildScript
     {
+        private const string AndroidOutputPath = "Builds/SandsOfLegends.apk";
+
         [MenuItem("Sands/Build Android APK")]
         public static void BuildAndroid()
         {
@@ -32,7 +34,7 @@ namespace SandsOfLegends.EditorTools
             var options = new BuildPlayerOptions
             {
                 scenes = scenes,
-                locationPathName = "Builds/SandsOfLegends.apk",
+                locationPathName = AndroidOutputPath,
                 target = BuildTarget.Android,
                 options = BuildOptions.None
             };

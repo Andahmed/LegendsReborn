@@ -2,7 +2,7 @@
 
 ## 2026-11-12 - A0 Unity font crash guard
 **Done:** Replaced direct Arial loading with LegacyRuntime.ttf plus guarded Arial fallback in GameFlowController and HomeScreen; assigned the TextMesh font and font material in DamageNumbers.
-**Not verified:** لم يتم التحقق في Unity؛ CI/Android workflow was not run in this environment.
+**Not verified:** لم يتم التحقق في Unity؛ Android workflow ran successfully, and the Unity Build step was skipped because the required repository credentials were unavailable.
 
 ## 2026-11-11 - Foundations pass (Ahmed + Claude)
 **Done**
