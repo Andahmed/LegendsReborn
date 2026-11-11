@@ -11,6 +11,7 @@
 /.idea/
 /.vscode/
 *.csproj
+!Tests/EngineFree/*.csproj
 *.sln
 *.suo
 *.user
