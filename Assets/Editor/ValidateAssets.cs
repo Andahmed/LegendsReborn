@@ -47,6 +47,9 @@ namespace SandsOfLegends.EditorTools
                 ValidateCharacterPrefab(hero.prefab, 8000, register, true);
                 string heroId = hero.id.StartsWith("hero_", StringComparison.Ordinal) ? hero.id.Substring(5) : hero.id;
                 string heroFolder = "Assets/Art/Characters/" + heroId + "/";
+                GameObject artPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(heroFolder + "hero_" + heroId + ".prefab");
+                if (artPrefab == null) throw new Exception("Missing character-folder prefab: " + heroFolder);
+                ValidateCharacterPrefab(artPrefab, 8000, register, true);
                 ValidateFbxModel(heroFolder + "hero_" + heroId + ".fbx", 8000, register, true);
                 ValidateAnimationSet(heroFolder + "anims/", register);
             }
