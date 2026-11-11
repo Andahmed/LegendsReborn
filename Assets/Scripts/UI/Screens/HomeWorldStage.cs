@@ -24,6 +24,7 @@ namespace SandsOfLegends.UI
             root.SetParent(transform, false);
             Ground();
             Castle();
+            Nature();
             Hero();
             Torches();
             CameraSetup();
@@ -133,6 +134,42 @@ namespace SandsOfLegends.UI
             }
         }
 
+        private void Nature()
+        {
+            PlaceNatureAsset("PalmTree_1", new Vector3(-8.2f, 0f, 3.4f), new Vector3(2.8f, 5.6f, 2.8f));
+            PlaceNatureAsset("PalmTree_2", new Vector3(8.1f, 0f, 2.6f), new Vector3(2.5f, 5.1f, 2.5f));
+            PlaceNatureAsset("Cactus_1", new Vector3(-7.2f, 0f, -3.4f), new Vector3(1.05f, 1.8f, 1.05f));
+            PlaceNatureAsset("Bush_1", new Vector3(6.5f, 0f, -3.5f), new Vector3(1.65f, 1.1f, 1.65f));
+            PlaceNatureAsset("Rock_1", new Vector3(-5.7f, 0f, 4.4f), new Vector3(1.4f, .8f, 1.25f));
+            PlaceNatureAsset("Grass", new Vector3(5.7f, 0f, 4.3f), new Vector3(1.5f, .8f, 1.5f));
+        }
+
+        private void PlaceNatureAsset(string assetName, Vector3 position, Vector3 targetSize)
+        {
+            GameObject prefab = Resources.Load<GameObject>("HomeNature/" + assetName);
+            if (prefab == null)
+            {
+                Debug.LogWarning("Missing HomeNature model: " + assetName);
+                return;
+            }
+
+            GameObject instance = Instantiate(prefab, root);
+            instance.name = assetName;
+            instance.transform.localPosition = position;
+            instance.transform.localRotation = Quaternion.identity;
+            instance.transform.localScale = Vector3.one;
+
+            Renderer[] renderers = instance.GetComponentsInChildren<Renderer>(true);
+            if (renderers.Length == 0) return;
+            Bounds bounds = renderers[0].bounds;
+            for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
+            Vector3 size = bounds.size;
+            instance.transform.localScale = new Vector3(
+                size.x > .0001f ? targetSize.x / size.x : 1f,
+                size.y > .0001f ? targetSize.y / size.y : 1f,
+                size.z > .0001f ? targetSize.z / size.z : 1f);
+        }
+
         private void Hero()
         {
             GameObject prefab = Resources.Load<GameObject>("HomeHeroes/Warrior");
@@ -193,6 +230,10 @@ namespace SandsOfLegends.UI
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = new Color(.055f, .12f, .15f);
             RenderSettings.ambientLight = new Color(.48f, .49f, .46f);
+            RenderSettings.fog = true;
+            RenderSettings.fogColor = new Color(.48f, .56f, .57f);
+            RenderSettings.fogMode = FogMode.ExponentialSquared;
+            RenderSettings.fogDensity = .009f;
 
             Light[] lights = FindObjectsOfType<Light>();
             bool hasDirectional = false;

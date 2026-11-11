@@ -17,8 +17,9 @@ Working title: **Sands of Legends**. Unity 2022.3.62f3, Android IL2CPP/ARM64 tar
 - GameFlowController connects the Home HUD UnityEvents to Campaign, Heroes, Formation, Summon, Equipment, Backpack, Quests and feature-status screens.
 - Heroes, Campaign and Summon screen classes now expose validated gameplay operations; BattleHud controls speed/ultimates.
 - HeroView loads Quaternius FBX models when imported; combat feedback uses floating damage numbers.
-- HomeWorldStage no longer substitutes missing castle modules with cubes. It reports missing assets until the installer downloads/imports the modular meshes.
-- MVPArtInstaller downloads character and monster FBX source files into Resources folders.
+- 21 Quaternius FBX files are bundled in Assets/Resources: 11 modular dungeon pieces, four animated monster types, and six nature props.
+- HomeWorldStage assembles the castle from real modular meshes, adds trees/cactus/rocks/grass, and no longer substitutes missing castle modules with cubes.
+- QuaterniusAssetImporter copies any missing character rigs from a locally selected legacy Free3D folder. It avoids unauthenticated downloads from the private legacy repository.
 - MVPProjectInstaller generates Assets/Scenes/Home.unity, adds GameBootstrap + HomeScreen and registers the scene in Build Settings. BuildScript calls it before Android builds.
 
 ### Development backend
@@ -31,8 +32,8 @@ Working title: **Sands of Legends**. Unity 2022.3.62f3, Android IL2CPP/ARM64 tar
 
 1. Open with Unity 2022.3.62f3.
 2. Run **Sands → Setup MVP Home Scene**.
-3. Run **Legends Reborn → Art → Install Home Castle CC0 Models**.
-4. Run **Legends Reborn → Art → Install MVP Art**.
+3. The castle, monster and nature FBXs are already inside Assets/Resources and will import automatically.
+4. Run **Legends Reborn → Art → Install MVP Art** and select the local Free3D folder from the legacy LegendsStyleRPG checkout to copy the six humanoid character FBXs.
 5. Wait for asset import, then open Home.unity and press Play.
 6. From Server, install requirements, run uvicorn and python -m unittest discover -s tests -v.
 
@@ -40,7 +41,7 @@ Working title: **Sands of Legends**. Unity 2022.3.62f3, Android IL2CPP/ARM64 tar
 
 - No Unity Editor compile, Play Mode run, Android APK, mobile touch or aspect-ratio test has been performed in this environment.
 - Unity will generate .meta files when it first imports the new scripts/FBX assets; they must be committed after editor import.
-- The home castle remains a modular assembly, not a bespoke final castle. Mesh pivots, materials, scale and camera framing need visual review.
+- The home castle remains a modular assembly, not a bespoke final castle. Mesh pivots, materials, scale and camera framing need visual review. Environment meshes are committed, but texture/material appearance has not been checked in Unity.
 - The five approved hero archetypes map to the available Quaternius rigged character FBX models as temporary MVP models. Final bespoke hero models, animations and skill VFX are still outstanding.
 - Arabic font shaping/RTL presentation is not complete; the current runtime labels are English.
 - The Unity client summon screen still uses local preview RNG. It is not yet connected to the FastAPI guest/profile/summon endpoints.

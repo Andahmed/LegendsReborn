@@ -11,8 +11,8 @@ Unity mobile Idle RPG for Android. Working title: **Sands of Legends**.
 
 1. Open this repository with Unity 2022.3.62f3.
 2. Run **Sands → Setup MVP Home Scene**. This creates Assets/Scenes/Home.unity and registers it in Build Settings.
-3. Run **Legends Reborn → Art → Install Home Castle CC0 Models** for the modular courtyard.
-4. Run **Legends Reborn → Art → Install MVP Art** for the Quaternius hero and monster FBX models.
+3. The repository already contains 21 Quaternius CC0 FBX files for the modular castle, four monster types and six nature props; Unity imports them automatically.
+4. For the six humanoid character rigs, run **Legends Reborn → Art → Install MVP Art** and select the local Free3D folder from the legacy LegendsStyleRPG checkout. This copies the character FBXs into Resources/HomeHeroes; the importer no longer downloads from a private raw GitHub URL.
 5. Wait for the FBX import to complete, then open Home.unity and press Play.
 
 The Android build menu also creates/registers the Home scene before calling BuildPlayer. Android SDK/NDK, signing and device settings still need to be configured in the local Unity installation.
@@ -22,7 +22,7 @@ The Android build menu also creates/registers the Home scene before calling Buil
 - Five starter heroes and a 20-hero catalog with faction, role, rarity, combat stats, skills and ultimates.
 - 200 generated campaign stages: five biomes × 40 stages, with boss encounters every ten stages.
 - 5v5 deterministic auto-battle, 2 front + 3 back positions, x1/x2/x4 speed and optional manual ultimates.
-- Battle presentation loads imported character/monster FBX models, shows combat numbers and updates the result/rewards.
+- Battle presentation loads imported character/monster FBX models, shows combat numbers and updates the result/rewards. Four monster FBXs and 17 environment FBXs are included; humanoid rigs are imported from the local legacy Free3D folder.
 - Local save includes roster, five-slot formation, six equipment slots per hero, currencies, pity, energy, campaign and daily quests.
 - Home menu routes to Campaign, Heroes, Formation, Summon, Equipment, Backpack and feature-status screens.
 - Idle rewards capped at 12 hours; daily quest progress and claims.
