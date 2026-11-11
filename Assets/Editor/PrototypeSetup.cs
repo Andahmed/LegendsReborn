@@ -5,6 +5,7 @@
 // WORK ON: Replace prototype cubes and placeholder UI with approved art and production scene composition.
 // STATUS: Prototype implementation
 // =============================================================================
+using System.Collections.Generic;
 using System.IO;
 using SandsOfLegends.Bootstrap;
 using SandsOfLegends.Combat;
@@ -43,12 +44,18 @@ namespace SandsOfLegends.EditorTools
             if (!File.Exists(HomePath)) CreateHomeScene();
             if (!File.Exists(BattlePath)) CreateBattleScene(heroes);
 
-            EditorBuildSettings.scenes = new[]
+            var buildScenes = new List<EditorBuildSettingsScene>();
+            AddOrEnableScene(buildScenes, BootPath);
+            AddOrEnableScene(buildScenes, HomePath);
+            AddOrEnableScene(buildScenes, BattlePath);
+            foreach (EditorBuildSettingsScene existing in EditorBuildSettings.scenes)
             {
-                new EditorBuildSettingsScene(BootPath, true),
-                new EditorBuildSettingsScene(HomePath, true),
-                new EditorBuildSettingsScene(BattlePath, true)
-            };
+                bool alreadyAdded = false;
+                for (int i = 0; i < buildScenes.Count; i++)
+                    if (buildScenes[i].path == existing.path) { alreadyAdded = true; break; }
+                if (!alreadyAdded) buildScenes.Add(existing);
+            }
+            EditorBuildSettings.scenes = buildScenes.ToArray();
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -80,23 +87,21 @@ namespace SandsOfLegends.EditorTools
                 if (hero == null)
                 {
                     hero = ScriptableObject.CreateInstance<HeroDefinition>();
+                    hero.id = "hero_" + key.ToLowerInvariant();
+                    hero.displayName = names[i];
+                    hero.faction = factions[i];
+                    hero.role = roles[i];
+                    hero.rarity = Rarity.Epic;
+                    hero.hp = 1000;
+                    hero.atk = 100;
+                    hero.def = 50;
+                    hero.spd = 100;
+                    hero.critChance = 0.1f;
+                    hero.growth = 0.08f;
+                    hero.skill = active;
+                    hero.ultimate = ultimate;
                     AssetDatabase.CreateAsset(hero, assetPath);
                 }
-
-                hero.id = "hero_" + key.ToLowerInvariant();
-                hero.displayName = names[i];
-                hero.faction = factions[i];
-                hero.role = roles[i];
-                hero.rarity = Rarity.Epic;
-                hero.hp = 1000;
-                hero.atk = 100;
-                hero.def = 50;
-                hero.spd = 100;
-                hero.critChance = 0.1f;
-                hero.growth = 0.08f;
-                hero.skill = active;
-                hero.ultimate = ultimate;
-                EditorUtility.SetDirty(hero);
                 heroes[i] = hero;
             }
 
@@ -113,16 +118,14 @@ namespace SandsOfLegends.EditorTools
             if (skill == null)
             {
                 skill = ScriptableObject.CreateInstance<SkillDefinition>();
+                skill.id = id;
+                skill.displayName = displayName;
+                skill.cooldown = cooldown;
+                skill.power = power;
+                skill.target = target;
+                skill.isHeal = isHeal;
                 AssetDatabase.CreateAsset(skill, path);
             }
-
-            skill.id = id;
-            skill.displayName = displayName;
-            skill.cooldown = cooldown;
-            skill.power = power;
-            skill.target = target;
-            skill.isHeal = isHeal;
-            EditorUtility.SetDirty(skill);
             return skill;
         }
 
@@ -331,6 +334,19 @@ namespace SandsOfLegends.EditorTools
             Text text = CreateText(buttonObject.transform, name + "_Text", label, 22, Vector2.zero, new Vector2(125f, 52f), TextAnchor.MiddleCenter);
             text.raycastTarget = false;
             return button;
+        }
+
+        private static void AddOrEnableScene(List<EditorBuildSettingsScene> scenes, string path)
+        {
+            for (int i = 0; i < scenes.Count; i++)
+            {
+                if (scenes[i].path == path)
+                {
+                    scenes[i] = new EditorBuildSettingsScene(path, true);
+                    return;
+                }
+            }
+            scenes.Add(new EditorBuildSettingsScene(path, true));
         }
 
         private static void EnsureFolder(string parent, string child)
