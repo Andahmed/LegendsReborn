@@ -500,7 +500,7 @@ namespace SandsOfLegends.EditorTools
         private static void CreateVfxPrefab(string faction, string type, Color color, short particles)
         {
             string path = Art + "/VFX/" + faction + "/vfx_" + faction + "_" + type + ".prefab";
-            if (AssetDatabase.LoadAssetAtPath<GameObject>(path) != null) return;
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(path) != null) AssetDatabase.DeleteAsset(path);
             GameObject go = new GameObject("vfx_" + faction + "_" + type);
             ParticleSystem ps = go.AddComponent<ParticleSystem>();
             var main = ps.main;
@@ -524,7 +524,7 @@ namespace SandsOfLegends.EditorTools
             EnsureFolder(Art + "/Environments", biome);
             EnsureFolder(folder, "props");
             string path = folder + "/env_" + biome + ".prefab";
-            if (AssetDatabase.LoadAssetAtPath<GameObject>(path) != null) return;
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(path) != null) AssetDatabase.DeleteAsset(path);
             GameObject root = new GameObject("env_" + biome);
             var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
             ground.name = "ground";
@@ -552,7 +552,7 @@ namespace SandsOfLegends.EditorTools
 
         private static void CreatePropPrefab(string path, string name, Color color)
         {
-            if (AssetDatabase.LoadAssetAtPath<GameObject>(path) != null) return;
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(path) != null) AssetDatabase.DeleteAsset(path);
             GameObject go = new GameObject(name);
             GameObject meshObject = GameObject.CreatePrimitive(name.Contains("crystal") ? PrimitiveType.Sphere : PrimitiveType.Cube);
             meshObject.name = "mesh";
@@ -566,7 +566,6 @@ namespace SandsOfLegends.EditorTools
         private static void CreatePortrait(string id, Color background, Color accent)
         {
             string path = "Assets/Prefabs/UI/hero_" + id + "_portrait.png";
-            if (File.Exists(path)) return;
             const int size = 128;
             Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
             Color[] pixels = new Color[size * size];
@@ -591,7 +590,6 @@ namespace SandsOfLegends.EditorTools
         private static void CreateFactionIcon(string id, Color color)
         {
             string path = "Assets/Prefabs/UI/faction_" + id + "_icon.png";
-            if (File.Exists(path)) return;
             const int size = 64;
             Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
             Color[] pixels = new Color[size * size];
@@ -614,7 +612,6 @@ namespace SandsOfLegends.EditorTools
         private static void CreateUiFrame()
         {
             const string path = "Assets/Prefabs/UI/ui_frame_gold.png";
-            if (File.Exists(path)) return;
             Texture2D texture = new Texture2D(128,128,TextureFormat.RGBA32,false);
             Color[] pixels = new Color[128*128];
             for (int y=0;y<128;y++) for(int x=0;x<128;x++)
@@ -649,7 +646,12 @@ namespace SandsOfLegends.EditorTools
             EnsureFolder(Art, "Materials");
             string path = folder + "/" + id + ".mat";
             Material material = AssetDatabase.LoadAssetAtPath<Material>(path);
-            if (material != null) return material;
+            if (material != null)
+            {
+                material.color = color;
+                EditorUtility.SetDirty(material);
+                return material;
+            }
             Shader shader = Shader.Find("Universal Render Pipeline/Lit");
             if (shader == null) shader = Shader.Find("Standard");
             material = new Material(shader);
