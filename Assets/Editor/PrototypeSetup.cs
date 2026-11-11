@@ -226,7 +226,7 @@ namespace SandsOfLegends.EditorTools
                 playerHealth[i] = CreateHealthBar(canvas.transform, "PlayerHP_" + i, leftX, 220f);
                 enemyHealth[i] = CreateHealthBar(canvas.transform, "EnemyHP_" + i, rightX, 220f);
                 playerLabels[i] = CreateText(canvas.transform, "PlayerLabel_" + i, heroes[i].displayName, 14, new Vector2(leftX, 240f), new Vector2(124f, 22f), TextAnchor.MiddleCenter);
-                enemyLabels[i] = CreateText(canvas.transform, "EnemyLabel_" + i, "Echo " + heroes[i].displayName, 14, new Vector2(rightX, 240f), new Vector2(124f, 22f), TextAnchor.MiddleCenter);
+                enemyLabels[i] = CreateText(canvas.transform, "EnemyLabel_" + i, "Raider " + (i + 1), 14, new Vector2(rightX, 240f), new Vector2(124f, 22f), TextAnchor.MiddleCenter);
             }
 
             Button speed1 = CreateButton(canvas.transform, "Speed1", "x1", new Vector2(-155f, -300f));
