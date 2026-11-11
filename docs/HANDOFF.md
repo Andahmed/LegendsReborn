@@ -27,6 +27,7 @@ Working title: **Sands of Legends**. Unity 2022.3.62f3, Android IL2CPP/ARM64 tar
 - FastAPI guest account creation with opaque bearer token; only SHA-256 token hashes are stored.
 - SQLite profile storage and transactional server-side summons with cryptographic RNG, gem debit, pity, duplicate shards and per-pull audit rows.
 - Health, profile, summon-history, arena-status and boss-status routes.
+- Server-clock idle reward claims (12-hour cap), once-per-UTC-day login claims, and energy regeneration (1 point/5 minutes, cap 20). These endpoints are not yet connected to Unity.
 - Python unittest coverage and a GitHub Actions workflow for backend tests.
 
 ## Setup
