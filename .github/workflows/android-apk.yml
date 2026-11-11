@@ -3,18 +3,7 @@ name: Android APK
 on:
   workflow_dispatch:
   push:
-    branches: [main]
-    paths:
-      - "Assets/**"
-      - "Packages/**"
-      - "ProjectSettings/**"
-      - ".github/workflows/android-apk.yml"
   pull_request:
-    paths:
-      - "Assets/**"
-      - "Packages/**"
-      - "ProjectSettings/**"
-      - ".github/workflows/android-apk.yml"
 
 permissions:
   contents: read
