@@ -138,9 +138,12 @@ namespace SandsOfLegends.EditorTools
             EnsureFolder("Assets/Prefabs", "Heroes");
             EnsureFolder("Assets/Prefabs", "UI");
 
+            EnsureFolder(Art + "/Characters", "Enemies");
+            EnsureFolder(Art + "/Characters/Enemies", "gloom_raider");
             for (int i = 0; i < HeroIds.Length; i++)
             {
                 string id = HeroIds[i];
+                CreateFactionVfx(id, UIStyle.FactionColor((Faction)i));
                 GameObject prefab = CreateCharacter(id, id, Armor[i], Accent[i], false);
                 string prefabPath = "Assets/Prefabs/Heroes/hero_" + id + ".prefab";
                 PrefabUtility.SaveAsPrefabAsset(prefab, prefabPath);
@@ -155,7 +158,6 @@ namespace SandsOfLegends.EditorTools
                     }
                 }
                 CreatePortrait(id, Armor[i], Accent[i]);
-                CreateFactionVfx(id, UIStyle.FactionColor((Faction)i));
             }
 
             GameObject enemy = CreateCharacter("gloom_raider", "shadow", new Color(0.18f, 0.17f, 0.20f),
@@ -244,6 +246,7 @@ namespace SandsOfLegends.EditorTools
             {
                 Mesh mesh = pair.Value.Build("mesh_" + id + "_" + pair.Key, bindposes);
                 string meshPath = folder + "/meshes/" + id + "_" + pair.Key + ".asset";
+                if (File.Exists(meshPath)) AssetDatabase.DeleteAsset(meshPath);
                 AssetDatabase.CreateAsset(mesh, meshPath);
                 GameObject part = new GameObject(pair.Key + "_mesh");
                 part.transform.SetParent(root.transform, false);
@@ -362,6 +365,7 @@ namespace SandsOfLegends.EditorTools
         private static RuntimeAnimatorController CreateAnimatorController(GameObject root, Transform[] bones, string folder, string id)
         {
             string controllerPath = folder + "/" + id + "_animator.controller";
+            if (File.Exists(controllerPath)) AssetDatabase.DeleteAsset(controllerPath);
             AnimatorController controller = AnimatorController.CreateAnimatorControllerAtPath(controllerPath);
             AnimatorStateMachine machine = controller.layers[0].stateMachine;
             AnimatorState idle = machine.AddState("Idle");
@@ -423,7 +427,9 @@ namespace SandsOfLegends.EditorTools
                 SetRotation(clip, root.transform, bones[1], times, new[] { 0f, 75f, 88f });
                 SetRotation(clip, root.transform, bones[3], times, new[] { 0f, 25f, 40f });
             }
-            AssetDatabase.CreateAsset(clip, folder + "/anims/" + name.ToLowerInvariant() + ".anim");
+            string clipPath = folder + "/anims/" + name.ToLowerInvariant() + ".anim";
+            if (File.Exists(clipPath)) AssetDatabase.DeleteAsset(clipPath);
+            AssetDatabase.CreateAsset(clip, clipPath);
             return clip;
         }
 
@@ -516,7 +522,7 @@ namespace SandsOfLegends.EditorTools
         {
             if (AssetDatabase.LoadAssetAtPath<GameObject>(path) != null) return;
             GameObject go = new GameObject(name);
-            GameObject meshObject = GameObject.CreatePrimitive(name.Contains("crystal") ? PrimitiveType.Octahedron : PrimitiveType.Cube);
+            GameObject meshObject = GameObject.CreatePrimitive(name.Contains("crystal") ? PrimitiveType.Sphere : PrimitiveType.Cube);
             meshObject.name = "mesh";
             meshObject.transform.SetParent(go.transform, false);
             UnityEngine.Object.DestroyImmediate(meshObject.GetComponent<Collider>());
