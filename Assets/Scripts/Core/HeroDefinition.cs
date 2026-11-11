@@ -2,7 +2,7 @@
 // FILE: Assets/Scripts/Core/HeroDefinition.cs
 // OWNER ROLE: Systems Designer
 // RESPONSIBILITY: ScriptableObjects HeroDefinition/SkillDefinition: designer-editable hero and skill data converted to UnitSpec/SkillSpec.
-// WORK ON: Fill 20 hero cards for MVP (stats, skills, faction, role, rarity). Add lore/portrait/prefab references when art arrives.
+// WORK ON: Fill 20 hero cards for MVP; connect each approved battle prefab and portrait reference.
 // STATUS: Implemented
 // =============================================================================
 using SandsOfLegends.Combat;
@@ -10,7 +10,6 @@ using UnityEngine;
 
 namespace SandsOfLegends.Core
 {
-    /// <summary>Designer-editable skill asset. Converted to the engine-free SkillSpec for combat.</summary>
     [CreateAssetMenu(menuName = "SandsOfLegends/Skill", fileName = "Skill_")]
     public sealed class SkillDefinition : ScriptableObject
     {
@@ -35,7 +34,6 @@ namespace SandsOfLegends.Core
         }
     }
 
-    /// <summary>Designer-editable hero asset (one asset per hero; never hardcode hero stats in code).</summary>
     [CreateAssetMenu(menuName = "SandsOfLegends/Hero", fileName = "Hero_")]
     public sealed class HeroDefinition : ScriptableObject
     {
@@ -54,6 +52,9 @@ namespace SandsOfLegends.Core
 
         [Header("Per-level growth (multiplier per level above 1)")]
         [Range(0f, 0.5f)] public float growth = 0.08f;
+
+        [Header("Battle presentation")]
+        public GameObject prefab;
 
         [Header("Skills")]
         public SkillDefinition skill;
