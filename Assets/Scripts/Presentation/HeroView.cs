@@ -222,7 +222,6 @@ namespace SandsOfLegends.Presentation
             if (actionPlayable.IsValid()) animationGraph.DestroyPlayable(actionPlayable);
             actionPlayable = AnimationClipPlayable.Create(animationGraph, clip);
             actionPlayable.SetLoopTime(loop);
-            actionPlayable.SetDuration(loop ? double.PositiveInfinity : clip.length);
             animationGraph.Connect(actionPlayable, 0, animationMixer, 1);
             actionPlayable.SetTime(0d);
             actionElapsed = 0f;
