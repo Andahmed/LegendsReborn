@@ -44,7 +44,7 @@ Portrait PNGs are 128x128. Android texture importer settings are ASTC 6x6. No 4K
 
 ## Required output locations
 
-- `Assets/Art/Characters/<hero_id>/hero_<id>.fbx`: exported humanoid model.
+- `Assets/Art/Characters/<hero_id>/hero_<id>.fbx` and `hero_<id>.prefab`: exported humanoid model and source-folder prefab.
 - `Assets/Art/Characters/<hero_id>/meshes/`: generated source mesh assets.
 - `Assets/Art/Characters/<hero_id>/anims/`: seven Unity `.anim` source clips and seven Humanoid animation FBX exports.
 - `Assets/Art/Characters/<hero_id>/`: Humanoid Avatar and Animator Controller.
