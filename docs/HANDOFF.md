@@ -1,7 +1,7 @@
 # HANDOFF - where the project stands (2026-11-11)
 
 Working title: **Sands of Legends** (repo: LegendsReborn). Idle RPG for Android (Unity 2022.3.62f3).
-Plan source: "Idle RPG project plan" PDF (GDD summary below). Owner: Ahmed.
+Plan source: [Idle_RPG_Project_Plan.pdf](Idle_RPG_Project_Plan.pdf) (Arabic, 18 pages; GDD summary below). Owner: Ahmed.
 
 ## Done
 - Repo scaffold: README, .gitignore, .gitattributes, folders, `Packages/manifest.json`, `ProjectSettings/ProjectVersion.txt`.
