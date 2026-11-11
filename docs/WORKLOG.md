@@ -16,7 +16,7 @@
 - The PlayMode test and GameCI Android workflow have not run. Add repository Actions secrets `UNITY_LICENSE`, `UNITY_EMAIL`, and `UNITY_PASSWORD` before CI can authenticate.
 
 **Next**
-1. Review the three independent PRs and merge only after approval.
+1. Review the four independent PRs and merge only after approval.
 2. Open Unity `2022.3.62f3`, run **Sands > Setup Prototype**, inspect the three scenes, and run EditMode/PlayMode tests.
 3. Add the three Actions secrets and run the Android APK workflow; inspect its artifact and logs.
 
