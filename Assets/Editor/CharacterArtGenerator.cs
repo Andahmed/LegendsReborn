@@ -14,6 +14,7 @@ using SandsOfLegends.Presentation;
 using SandsOfLegends.UI;
 using UnityEditor;
 using UnityEditor.Animations;
+using UnityEditor.Formats.Fbx.Exporter;
 using UnityEngine;
 
 namespace SandsOfLegends.EditorTools
@@ -147,6 +148,7 @@ namespace SandsOfLegends.EditorTools
                 GameObject prefab = CreateCharacter(id, id, Armor[i], Accent[i], false);
                 string prefabPath = "Assets/Prefabs/Heroes/hero_" + id + ".prefab";
                 PrefabUtility.SaveAsPrefabAsset(prefab, prefabPath);
+                ExportFbx(prefab, Art + "/Characters/" + id + "/hero_" + id + ".fbx");
                 UnityEngine.Object.DestroyImmediate(prefab);
                 if (heroes != null)
                 {
@@ -177,6 +179,7 @@ namespace SandsOfLegends.EditorTools
             string enemyPath = "Assets/Art/Characters/Enemies/gloom_raider/enemy_gloom_raider.prefab";
             EnsureFolder(Art + "/Characters/Enemies", "gloom_raider");
             PrefabUtility.SaveAsPrefabAsset(enemy, enemyPath);
+            ExportFbx(enemy, Art + "/Characters/Enemies/gloom_raider/enemy_gloom_raider.fbx");
             UnityEngine.Object.DestroyImmediate(enemy);
 
             CreateBiome("forest", new Color(0.15f, 0.34f, 0.19f));
@@ -508,6 +511,7 @@ namespace SandsOfLegends.EditorTools
             shape.shapeType = ParticleSystemShapeType.Sphere;
             shape.radius = type == "ultimate" ? .8f : .35f;
             PrefabUtility.SaveAsPrefabAsset(go, path);
+            ExportFbx(go, Path.ChangeExtension(path, ".fbx"));
             UnityEngine.Object.DestroyImmediate(go);
         }
 
@@ -537,6 +541,7 @@ namespace SandsOfLegends.EditorTools
                 landmark.GetComponent<Renderer>().sharedMaterial = CreateMaterial("env_" + biome + "_landmark", Color.Lerp(color, UIStyle.Gold, .22f));
             }
             PrefabUtility.SaveAsPrefabAsset(root, path);
+            ExportFbx(root, folder + "/env_" + biome + ".fbx");
             UnityEngine.Object.DestroyImmediate(root);
             CreatePropPrefab(folder + "/props/prop_ancient_gate.prefab", "prop_ancient_gate", new Color(.38f,.32f,.24f));
             CreatePropPrefab(folder + "/props/prop_forest_crystal.prefab", "prop_forest_crystal", UIStyle.Turquoise);
@@ -648,6 +653,13 @@ namespace SandsOfLegends.EditorTools
             material.color = color;
             AssetDatabase.CreateAsset(material, path);
             return material;
+        }
+
+
+        private static void ExportFbx(GameObject source, string path)
+        {
+            if (File.Exists(path)) File.Delete(path);
+            ModelExporter.ExportObject(path, source);
         }
 
         private static void EnsureFolder(string parent, string name)
