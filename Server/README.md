@@ -15,8 +15,10 @@ The default database is Server/data/sands.sqlite3. Set SANDS_DB_PATH to use a di
 |---|---|
 | GET /health | Service health |
 | POST /auth/guest | Creates a guest account and one-time bearer token |
-| GET /profile | Reads the authenticated profile |
+| GET /profile | Reads the authenticated profile and applies server-clock energy regeneration |
 | POST /summon | Server RNG, gem debit, pity, duplicate shards and audit log |
+| POST /idle/claim | Server-clock idle rewards, capped at 12 hours |
+| POST /daily/claim | One UTC-day login reward claim |
 | GET /summon/history | Last 1-100 audited pulls |
 | GET /arena/status | Explicitly reports the PvP feature as locked |
 | GET /boss/status | Explicitly reports the boss feature as locked |
@@ -26,6 +28,8 @@ The default database is Server/data/sands.sqlite3. Set SANDS_DB_PATH to use a di
 - Summon results are generated with Python secrets, not client-provided randomness.
 - Bearer tokens are stored as SHA-256 hashes, not in plaintext.
 - Gem debit, pity, roster changes and audit inserts run in one SQLite write transaction.
+- Idle accrual and daily login rewards use server UTC time and transactional profile updates; the client cannot submit a timestamp or reward amount.
+- Energy regenerates at one point per five minutes up to 20, using the server timestamp returned by the profile endpoint.
 - This is a development backend. Before public release, add TLS termination, account recovery/provider linking, abuse controls, operational monitoring, database backups and server deployment.
 - The Unity prototype currently uses its local preview summon path. It is not yet connected to these endpoints.
 - Arena and boss attacks are intentionally unavailable until the server can re-simulate and verify battle events.

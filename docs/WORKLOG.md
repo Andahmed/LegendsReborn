@@ -1,3 +1,14 @@
+## 2026-11-11 - Server-authoritative idle and daily claims
+**Changed**
+- Added server UTC-based idle claim endpoint with a 12-hour cap and transactional gold/EXP updates.
+- Added once-per-UTC-day login reward claim and server-clock energy regeneration (1 per 5 minutes, cap 20).
+- Added focused unit tests for idle accrual caps, elapsed-time handling, stage clamping and UTC day keys.
+- Updated Server README and HANDOFF; Unity client is not connected yet.
+
+**Verification**
+- Static source review only. Python unittest execution was not available in this session.
+- Unity compilation, Play Mode and Android build: لم يتم التحقق في Unity.
+
 # Work Log (newest first)
 
 ## 2026-11-11 - Foundations pass (Ahmed + Claude)
