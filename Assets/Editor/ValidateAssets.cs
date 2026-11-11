@@ -52,12 +52,14 @@ namespace SandsOfLegends.EditorTools
                 string path = AssetDatabase.GUIDToAssetPath(prefabGuids[i]);
                 GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
                 if (prefab == null) continue;
+                string fileName = Path.GetFileNameWithoutExtension(path);
+                if (!register.Contains(fileName))
+                    throw new Exception("Prefab is missing from docs/ASSETS.md: " + fileName);
                 int budget = BudgetFor(path);
                 if (budget <= 0) continue;
                 int triangles = CountTriangles(prefab);
                 if (triangles > budget)
                     throw new Exception("Prefab exceeds " + budget + " triangle budget (" + triangles + "): " + path);
-                string fileName = Path.GetFileNameWithoutExtension(path);
                 if (!HasRequiredPrefix(fileName))
                     throw new Exception("Prefab name must use an approved type prefix: " + path);
             }
