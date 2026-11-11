@@ -11,9 +11,9 @@ Unity mobile Idle RPG for Android. Working title: **Sands of Legends**.
 
 1. Open this repository with Unity 2022.3.62f3.
 2. Run **Sands → Setup MVP Home Scene**. This creates Assets/Scenes/Home.unity and registers it in Build Settings.
-3. Run **Legends Reborn → Art → Install Home Castle CC0 Models** to import the 11 bundled Quaternius castle FBX modules.
-4. Run **Legends Reborn → Art → Install MVP Art** for the Quaternius hero and monster FBX models.
-5. Wait for the FBX import to complete, then open Home.unity and press Play.
+3. The Home castle is assembled from the 11 Quaternius Modular Dungeon CC0 FBX modules bundled in Assets/Resources/HomeCastle.
+4. Run **Legends Reborn → Art → Install MVP Art** only if models are missing. The installer checks files already in this repository first and asks for a Quaternius source folder only when required files are absent.
+5. Wait for FBX import to complete, then open Home.unity and press Play.
 
 The HomeWorldStage assembles the courtyard, gate, walls, towers, banners, stairs, torches and nature props from imported FBX meshes. It has no primitive-cube castle fallback. Missing required FBX assets produce explicit errors instead of silently substituting greybox geometry.
 
@@ -58,4 +58,4 @@ See docs/HANDOFF.md for implemented work, limitations and verification status.
 
 ## Verification limits
 
-This change has not been opened in Unity Editor in this environment. Unity compilation, FBX import, Play Mode, touch/layout testing, Android APK generation and device testing remain mandatory before calling the MVP playable. The Home castle's FBX pivots, material appearance, scale and camera framing still need visual review in Unity. Generated content and combat balance are development values, not final economy tuning.
+This change has not been opened in Unity Editor in this environment. Unity compilation, FBX import, materials, pivots, camera framing, Play Mode, touch/layout testing, Android APK generation and device testing remain mandatory before calling the MVP playable. The Home castle is a modular FBX assembly, not a bespoke sculpted single-mesh castle. Generated content and combat balance are development values, not final economy tuning.
