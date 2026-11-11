@@ -37,6 +37,7 @@ Working title: **Sands of Legends**. Unity 2022.3.62f3, Android IL2CPP/ARM64 tar
 4. Run **Legends Reborn → Art → Install MVP Art** and select the local Free3D folder from the legacy LegendsStyleRPG checkout to copy the six humanoid character FBXs.
 5. Wait for asset import, then open Home.unity and press Play.
 6. From Server, install requirements, run uvicorn and python -m unittest discover -s tests -v.
+7. Run **Sands → Validate MVP Assets** and inspect `Reports/MVP_ASSET_READINESS.md` for missing files and import status.
 
 ## Explicitly not complete or not verified
 
