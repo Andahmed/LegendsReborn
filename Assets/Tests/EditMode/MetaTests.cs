@@ -1,9 +1,9 @@
 // =============================================================================
 // FILE: Assets/Tests/EditMode/MetaTests.cs
 // OWNER ROLE: QA Engineer
-// RESPONSIBILITY: EditMode tests for meta systems: gacha pity, energy regen, idle cap, campaign order, roster duplicates, save round-trip.
-// WORK ON: Add a test whenever a Meta rule changes.
-// STATUS: Implemented
+// RESPONSIBILITY: EditMode tests for economy, progression, equipment, campaign, gacha and save migrations.
+// WORK ON: Add regression coverage for every gameplay rule and persistence change.
+// STATUS: Existing tests retained; equipment and version-1 migration tests added.
 // =============================================================================
 using System.Collections.Generic;
 using NUnit.Framework;
@@ -62,6 +62,51 @@ namespace SandsOfLegends.Tests
             r.Find("a").Level = 30;
             r.AddHeroOrShards("b", Rarity.Epic, out sh);
             Assert.AreEqual(25, r.Find("b").Level);
+        }
+
+        [Test]
+        public void Equipment_EquipReplacesOnlyMatchingSlot()
+        {
+            var hero = new HeroInstance { HeroId = "hero" };
+            EquipmentItem replaced;
+            Assert.IsTrue(EquipmentRules.TryEquip(hero, new EquipmentItem { Id = "sword-a", Slot = EquipSlot.Weapon }, out replaced));
+            Assert.IsNull(replaced);
+            Assert.IsTrue(EquipmentRules.TryEquip(hero, new EquipmentItem { Id = "sword-b", Slot = EquipSlot.Weapon }, out replaced));
+            Assert.AreEqual("sword-a", replaced.Id);
+            Assert.AreEqual(1, hero.Equipment.Count);
+            Assert.AreEqual("sword-b", EquipmentRules.Find(hero.Equipment, EquipSlot.Weapon).Id);
+        }
+
+        [Test]
+        public void Equipment_RejectsSameItemTwiceAndUnequips()
+        {
+            var hero = new HeroInstance { HeroId = "hero" };
+            var item = new EquipmentItem { Id = "ring-a", Slot = EquipSlot.Ring };
+            EquipmentItem result;
+            Assert.IsTrue(EquipmentRules.TryEquip(hero, item, out result));
+            Assert.IsFalse(EquipmentRules.TryEquip(hero, item, out result));
+            Assert.IsTrue(EquipmentRules.TryUnequip(hero, EquipSlot.Ring, out result));
+            Assert.AreEqual("ring-a", result.Id);
+            Assert.IsFalse(EquipmentRules.TryUnequip(hero, EquipSlot.Ring, out result));
+        }
+
+        [Test]
+        public void Equipment_SaveRoundTripAndVersionOneMigration()
+        {
+            var old = new SaveData { Version = 1 };
+            old.Heroes.Add(new HeroInstance { HeroId = "legacy", Equipment = null });
+            var migrated = SaveMigrations.Migrate(old);
+            Assert.AreEqual(2, migrated.Version);
+            Assert.IsNotNull(migrated.Heroes[0].Equipment);
+
+            var state = GameState.NewGame(1000);
+            int shards;
+            state.Roster.AddHeroOrShards("equipped", Rarity.Epic, out shards);
+            EquipmentItem replaced;
+            state.Roster.TryEquip("equipped", new EquipmentItem { Id = "helm-1", Slot = EquipSlot.Helmet, SetId = "sand" }, out replaced);
+            var loaded = GameState.FromSave(state.ToSave(2000));
+            Assert.AreEqual("helm-1", loaded.Roster.Find("equipped").Equipment[0].Id);
+            Assert.AreEqual(2, loaded.ToSave(3000).Version);
         }
 
         [Test]
