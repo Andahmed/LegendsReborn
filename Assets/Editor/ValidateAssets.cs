@@ -46,14 +46,18 @@ namespace SandsOfLegends.EditorTools
                     throw new Exception("HeroDefinition has no prefab reference: " + path);
                 ValidateCharacterPrefab(hero.prefab, 8000, register, true);
                 string heroId = hero.id.StartsWith("hero_", StringComparison.Ordinal) ? hero.id.Substring(5) : hero.id;
-                ValidateFbxModel("Assets/Art/Characters/" + heroId + "/hero_" + heroId + ".fbx", 8000, register, true);
+                string heroFolder = "Assets/Art/Characters/" + heroId + "/";
+                ValidateFbxModel(heroFolder + "hero_" + heroId + ".fbx", 8000, register, true);
+                ValidateAnimationSet(heroFolder + "anims/", register);
             }
 
             GameObject enemy = AssetDatabase.LoadAssetAtPath<GameObject>(
                 "Assets/Art/Characters/Enemies/gloom_raider/enemy_gloom_raider.prefab");
             if (enemy == null) throw new Exception("Missing enemy_gloom_raider.prefab.");
             ValidateCharacterPrefab(enemy, 6000, register, true);
-            ValidateFbxModel("Assets/Art/Characters/Enemies/gloom_raider/enemy_gloom_raider.fbx", 6000, register, true);
+            string enemyFolder = "Assets/Art/Characters/Enemies/gloom_raider/";
+            ValidateFbxModel(enemyFolder + "enemy_gloom_raider.fbx", 6000, register, true);
+            ValidateAnimationSet(enemyFolder + "anims/", register);
             string[] biomes = { "forest", "desert", "mountain", "sea", "ruins" };
             for (int i = 0; i < biomes.Length; i++)
             {
@@ -67,6 +71,7 @@ namespace SandsOfLegends.EditorTools
             for (int i = 0; i < prefabGuids.Length; i++)
             {
                 string path = AssetDatabase.GUIDToAssetPath(prefabGuids[i]);
+                if (path.Contains("/anims/")) continue;
                 GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
                 if (prefab == null) continue;
                 string fileName = Path.GetFileNameWithoutExtension(path);
@@ -122,6 +127,30 @@ namespace SandsOfLegends.EditorTools
                 throw new Exception(path + " exceeds " + budget + " triangles: " + triangles);
         }
 
+
+
+        private static void ValidateAnimationSet(string folder, string register)
+        {
+            string[] clips = { "idle", "run", "attack", "skill", "ultimate", "hit", "death" };
+            for (int i = 0; i < clips.Length; i++)
+            {
+                string path = folder + clips[i] + ".fbx";
+                if (!File.Exists(path))
+                    throw new Exception("Missing animation FBX: " + path);
+                if (!register.Contains(clips[i]))
+                    throw new Exception("Animation FBX is not registered: " + clips[i]);
+                ModelImporter importer = AssetImporter.GetAtPath(path) as ModelImporter;
+                if (importer == null || importer.animationType != ModelImporterAnimationType.Human ||
+                    importer.avatarSetup != ModelImporterAvatarSetup.CopyFromOther ||
+                    importer.sourceAvatar == null || !importer.importAnimation)
+                    throw new Exception("Animation FBX must use the character's Humanoid Avatar: " + path);
+                UnityEngine.Object[] subAssets = AssetDatabase.LoadAllAssetsAtPath(path);
+                bool hasClip = false;
+                for (int a = 0; a < subAssets.Length; a++)
+                    if (subAssets[a] is AnimationClip) { hasClip = true; break; }
+                if (!hasClip) throw new Exception("Animation FBX contains no imported AnimationClip: " + path);
+            }
+        }
 
         private static void ValidateFbxModel(string path, int budget, string register, bool requireHumanoid = false)
         {
