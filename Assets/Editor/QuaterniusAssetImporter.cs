@@ -108,7 +108,7 @@ namespace SandsOfLegends.Editor
                 if (missing.Count > 0)
                 {
                     summary += "\n\nMissing source files (" + missing.Count + "):\n" + string.Join("\n", missing.ToArray());
-                    summary += "\n\nSelect the folder containing the Quaternius pack folders, not an individual FBX folder.";
+                    summary += "\n\nFor missing FBX files, select the parent folder containing the extracted Quaternius pack folders. For missing portraits, add the five approved PNGs to ArtSource/Heroes/images/.";
                 }
                 else summary += "\n\nAll requested FBX files are available in Assets/Resources.";
                 EditorUtility.DisplayDialog("Quaternius 3D Models", summary, "OK");
