@@ -1,5 +1,8 @@
 # Work Log (newest first)
 
+## 2026-11-12 - B3 Hero visual metadata (GPT Lane B)
+- Added TintHex and PortraitId metadata for the 20 hero catalog entries. Engine-Free C# CI evidence is pending; no Unity verification.
+
 ## 2026-11-11 - Foundations pass (Ahmed + Claude)
 **Done**
 - Added all foundation folders and files per the project plan (see ARCHITECTURE.md): Meta (economy, roster, gacha, idle, campaign, quests, save), Services, Bootstrap, Presentation, UI framework + 5 screen stubs, Localization, Editor build script, Server skeleton, docs.
