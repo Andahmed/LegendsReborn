@@ -16,8 +16,8 @@ namespace SandsOfLegends.Presentation
     {
         public HeroDefinition[] heroes = new HeroDefinition[4];
         public BattleView battleView;
-        public Transform[] playerModels = new Transform[4];
-        public Transform[] enemyModels = new Transform[4];
+        public Transform[] playerModels = new Transform[5];
+        public Transform[] enemyModels = new Transform[5];
         public Image[] playerHealth = new Image[4];
         public Image[] enemyHealth = new Image[4];
         public Text[] playerLabels = new Text[4];
@@ -66,6 +66,9 @@ namespace SandsOfLegends.Presentation
                 _enemyViews[i] = SpawnHero(heroes[i].prefab, enemyModels, i, 1);
             }
 
+            if (playerModels != null && playerModels.Length > 4 && playerModels[4] != null) playerModels[4].gameObject.SetActive(false);
+            if (enemyModels != null && enemyModels.Length > 4 && enemyModels[4] != null) enemyModels[4].gameObject.SetActive(false);
+
             _simulation = new BattleSim(playerTeam, enemyTeam, 20261111);
             battleView.Begin(_simulation);
 
@@ -81,12 +84,15 @@ namespace SandsOfLegends.Presentation
         {
             if (slots == null || slot >= slots.Length || slots[slot] == null)
                 throw new System.InvalidOperationException("Missing battle slot transform for team " + team + ", slot " + slot + ".");
-            GameObject instance = Instantiate(prefab, slots[slot].position, Quaternion.identity, slots[slot]);
+            Transform slotTransform = slots[slot];
+            Vector3 position = slotTransform.position;
+            Transform parent = slotTransform.parent;
+            slotTransform.gameObject.SetActive(false);
+            GameObject instance = Instantiate(prefab, position, Quaternion.identity, parent);
             instance.name = (team == 0 ? "Player_" : "Enemy_") + slot;
             HeroView view = instance.GetComponent<HeroView>();
             if (view == null) throw new System.InvalidOperationException("Hero prefab is missing HeroView.");
             view.Bind(team, slot);
-            if (slots[slot].childCount > 1) slots[slot].GetChild(0).gameObject.SetActive(false);
             slots[slot] = instance.transform;
             return view;
         }
