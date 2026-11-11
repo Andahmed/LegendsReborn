@@ -128,10 +128,6 @@ class GuestLoginResponse(BaseModel):
 class SummonRequest(BaseModel):
     count: int = Field(default=1, description="Only 1 or 10 pulls are supported")
 
-class EmptyRequest(BaseModel):
-    pass
-
-
 def utc_day(timestamp: Optional[int] = None) -> str:
     return time.strftime("%Y-%m-%d", time.gmtime(timestamp or int(time.time())))
 
