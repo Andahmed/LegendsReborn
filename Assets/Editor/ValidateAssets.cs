@@ -91,6 +91,8 @@ namespace SandsOfLegends.EditorTools
                     throw new Exception("Invalid asset name prefix: " + path);
             }
 
+            ValidateEnvironmentPrefabs();
+            ValidateVfxPrefabs();
             ValidateStageData();
             ValidatePortraits();
 
@@ -185,6 +187,35 @@ namespace SandsOfLegends.EditorTools
             int triangles = CountTriangles(model);
             if (triangles > budget)
                 throw new Exception(path + " exceeds " + budget + " triangles: " + triangles);
+        }
+
+
+        private static void ValidateEnvironmentPrefabs()
+        {
+            string[] biomes = { "forest", "desert", "mountain", "sea", "ruins" };
+            for (int i = 0; i < biomes.Length; i++)
+            {
+                string root = "Assets/Art/Environments/" + biomes[i] + "/";
+                if (AssetDatabase.LoadAssetAtPath<GameObject>(root + "env_" + biomes[i] + ".prefab") == null)
+                    throw new Exception("Missing biome prefab: " + biomes[i]);
+                if (AssetDatabase.LoadAssetAtPath<GameObject>(root + "props/prop_ancient_gate.prefab") == null ||
+                    AssetDatabase.LoadAssetAtPath<GameObject>(root + "props/prop_forest_crystal.prefab") == null)
+                    throw new Exception("Missing registered props for biome: " + biomes[i]);
+            }
+        }
+
+        private static void ValidateVfxPrefabs()
+        {
+            string[] factions = { "fortress", "wild", "forest", "shadow", "raider" };
+            string[] types = { "skill", "ultimate" };
+            for (int f = 0; f < factions.Length; f++)
+            for (int t = 0; t < types.Length; t++)
+            {
+                string path = "Assets/Art/VFX/" + factions[f] + "/vfx_" + factions[f] + "_" + types[t] + ".prefab";
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                if (prefab == null || prefab.GetComponent<ParticleSystem>() == null)
+                    throw new Exception("Missing Particle System VFX prefab: " + path);
+            }
         }
 
         private static void ValidateStageData()
