@@ -1,7 +1,7 @@
 {
     "name": "SandsOfLegends.Core",
     "rootNamespace": "SandsOfLegends.Core",
-    "references": [ "SandsOfLegends.Combat" ],
+    "references": [ "SandsOfLegends.Combat", "SandsOfLegends.Meta" ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

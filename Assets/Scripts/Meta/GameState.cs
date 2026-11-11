@@ -2,8 +2,8 @@
 // FILE: Assets/Scripts/Meta/GameState.cs
 // OWNER ROLE: Client Programmer - Systems
 // RESPONSIBILITY: Aggregate player state (wallet, roster, pity, energy, campaign, quests, idle timer) with ToSave/FromSave.
-// WORK ON: Add new systems here (equipment, arena, boss...) and mirror them in SaveData + migration.
-// STATUS: Implemented
+// WORK ON: Add remaining systems with matching save migrations; connect formation to the battle setup flow.
+// STATUS: Implemented (partial MVP); equipment and team formation persist through the single save model.
 // =============================================================================
 using System;
 
@@ -45,6 +45,7 @@ namespace SandsOfLegends.Meta
                 Gems = Wallet.Get(Currency.Gems), Gold = Wallet.Get(Currency.Gold),
                 Exp = Wallet.Get(Currency.Exp), GearMaterials = Wallet.Get(Currency.GearMaterials),
                 Heroes = Roster.Heroes,
+                TeamSlots = Roster.Formation.ToArray(),
                 PitySinceEpic = Pity.SinceEpic, PitySinceLegendary = Pity.SinceLegendary,
                 Energy = Energy.Value, EnergyTickUnix = Energy.LastTickUnix,
                 HighestStage = Campaign.HighestCleared,
@@ -61,6 +62,7 @@ namespace SandsOfLegends.Meta
             s.Wallet.Set(Currency.Gems, d.Gems); s.Wallet.Set(Currency.Gold, d.Gold);
             s.Wallet.Set(Currency.Exp, d.Exp); s.Wallet.Set(Currency.GearMaterials, d.GearMaterials);
             s.Roster.Heroes = d.Heroes;
+            s.Roster.Formation.LoadSlots(d.TeamSlots, s.Roster);
             s.Pity.SinceEpic = d.PitySinceEpic; s.Pity.SinceLegendary = d.PitySinceLegendary;
             s.Energy.Value = d.Energy; s.Energy.LastTickUnix = d.EnergyTickUnix;
             s.Campaign.HighestCleared = d.HighestStage;

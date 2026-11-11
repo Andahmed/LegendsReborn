@@ -1,9 +1,9 @@
 // =============================================================================
 // FILE: Assets/Tests/EditMode/MetaTests.cs
 // OWNER ROLE: QA Engineer
-// RESPONSIBILITY: EditMode tests for economy, progression, equipment, campaign, gacha and save migrations.
+// RESPONSIBILITY: EditMode tests for economy, progression, equipment, formation, campaign, gacha and save migrations.
 // WORK ON: Add regression coverage for every gameplay rule and persistence change.
-// STATUS: Existing tests retained; equipment and version-1 migration tests added.
+// STATUS: Equipment, formation and versioned save migration regression tests included.
 // =============================================================================
 using System.Collections.Generic;
 using NUnit.Framework;
@@ -96,8 +96,9 @@ namespace SandsOfLegends.Tests
             var old = new SaveData { Version = 1 };
             old.Heroes.Add(new HeroInstance { HeroId = "legacy", Equipment = null });
             var migrated = SaveMigrations.Migrate(old);
-            Assert.AreEqual(2, migrated.Version);
+            Assert.AreEqual(3, migrated.Version);
             Assert.IsNotNull(migrated.Heroes[0].Equipment);
+            Assert.AreEqual(TeamFormation.SlotCount, migrated.TeamSlots.Length);
 
             var state = GameState.NewGame(1000);
             int shards;
@@ -106,7 +107,82 @@ namespace SandsOfLegends.Tests
             state.Roster.TryEquip("equipped", new EquipmentItem { Id = "helm-1", Slot = EquipSlot.Helmet, SetId = "sand" }, out replaced);
             var loaded = GameState.FromSave(state.ToSave(2000));
             Assert.AreEqual("helm-1", loaded.Roster.Find("equipped").Equipment[0].Id);
-            Assert.AreEqual(2, loaded.ToSave(3000).Version);
+            Assert.AreEqual(3, loaded.ToSave(3000).Version);
+        }
+
+        [Test]
+        public void Formation_AssignsOwnedHeroesToTwoFrontAndThreeBackSlots()
+        {
+            var roster = new Roster(); int shards;
+            for (int i = 0; i < TeamFormation.SlotCount; i++)
+                roster.AddHeroOrShards("hero-" + i, Rarity.Common, out shards);
+
+            for (int i = 0; i < TeamFormation.SlotCount; i++)
+            {
+                string replaced;
+                Assert.IsTrue(roster.TryAssignFormationSlot(i, "hero-" + i, out replaced));
+                Assert.IsNull(replaced);
+                Assert.AreEqual("hero-" + i, roster.Formation.GetHeroId(i));
+            }
+
+            Assert.IsTrue(TeamFormation.IsFrontSlot(0));
+            Assert.IsTrue(TeamFormation.IsFrontSlot(1));
+            Assert.IsFalse(TeamFormation.IsFrontSlot(2));
+            Assert.IsFalse(TeamFormation.IsFrontSlot(4));
+        }
+
+        [Test]
+        public void Formation_RejectsUnownedAndDuplicateHeroesAndSupportsMoveSwap()
+        {
+            var roster = new Roster(); int shards;
+            roster.AddHeroOrShards("a", Rarity.Common, out shards);
+            roster.AddHeroOrShards("b", Rarity.Common, out shards);
+            string result;
+
+            Assert.IsFalse(roster.TryAssignFormationSlot(0, "missing", out result));
+            Assert.IsTrue(roster.TryAssignFormationSlot(0, "a", out result));
+            Assert.IsTrue(roster.TryAssignFormationSlot(1, "b", out result));
+            Assert.IsFalse(roster.TryAssignFormationSlot(2, "a", out result));
+
+            Assert.IsTrue(roster.TryMoveFormationSlot(0, 1, out result));
+            Assert.AreEqual("b", result);
+            Assert.AreEqual("b", roster.Formation.GetHeroId(0));
+            Assert.AreEqual("a", roster.Formation.GetHeroId(1));
+
+            Assert.IsTrue(roster.TryRemoveFormationSlot(0, out result));
+            Assert.AreEqual("b", result);
+            Assert.IsNull(roster.Formation.GetHeroId(0));
+            Assert.IsFalse(roster.TryRemoveFormationSlot(0, out result));
+        }
+
+        [Test]
+        public void Formation_LoadDropsUnknownAndDuplicateIds()
+        {
+            var roster = new Roster(); int shards;
+            roster.AddHeroOrShards("known", Rarity.Common, out shards);
+            roster.Formation.LoadSlots(new[] { "known", "unknown", "known" }, roster);
+            Assert.AreEqual("known", roster.Formation.GetHeroId(0));
+            Assert.IsNull(roster.Formation.GetHeroId(1));
+            Assert.IsNull(roster.Formation.GetHeroId(2));
+        }
+
+        [Test]
+        public void Formation_SaveRoundTripAndVersionTwoMigration()
+        {
+            var state = GameState.NewGame(1000); int shards;
+            state.Roster.AddHeroOrShards("front", Rarity.Epic, out shards);
+            state.Roster.AddHeroOrShards("back", Rarity.Rare, out shards);
+            string replaced;
+            state.Roster.TryAssignFormationSlot(0, "front", out replaced);
+            state.Roster.TryAssignFormationSlot(4, "back", out replaced);
+
+            var loaded = GameState.FromSave(state.ToSave(2000));
+            Assert.AreEqual("front", loaded.Roster.Formation.GetHeroId(0));
+            Assert.AreEqual("back", loaded.Roster.Formation.GetHeroId(4));
+
+            var versionTwo = SaveMigrations.Migrate(new SaveData { Version = 2 });
+            Assert.AreEqual(3, versionTwo.Version);
+            Assert.AreEqual(TeamFormation.SlotCount, versionTwo.TeamSlots.Length);
         }
 
         [Test]

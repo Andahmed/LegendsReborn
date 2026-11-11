@@ -9,11 +9,13 @@ Server (`Server/`) can re-run `Combat` + `Meta` logic for authority/anti-cheat.
 | `Assets/Scripts/Combat/Types.cs` | Client Programmer - Combat | Combat data types and deterministic RNG. | Add new fields only with approved GDD change; remain engine-free. | Implemented |
 | `Assets/Scripts/Combat/BattleSim.cs` | Client Programmer - Combat | Deterministic fixed-step 2-front/3-back auto battle. | Add approved status effects, team synergy and targeting rules; remain deterministic and engine-free. | Implemented (placeholder balance) |
 | `Assets/Scripts/Core/HeroDefinition.cs` | Systems Designer | Designer-authored hero/skill ScriptableObjects converted to combat specs. | Populate 20 heroes and connect art references. | Implemented (definition types only) |
+| `Assets/Scripts/Core/TeamFormationBuilder.cs` | Client Programmer - Combat | Converts saved roster slots and HeroDefinitions into an ordered five-slot UnitSpec array. | Call from campaign battle setup and pass the result to BattleSim. | Implemented (Core bridge; battle launch pending) |
 | `Assets/Scripts/Meta/Heroes/HeroInstance.cs` | Client Programmer - Systems | Owned hero state, progression and serialized equipment collection. | Replace progression placeholders with approved economy tables. | Implemented (placeholder curves) |
-| `Assets/Scripts/Meta/Heroes/Roster.cs` | Client Programmer - Systems | Hero collection, Spirit Source ceiling and equipment operations. | Add approved hero progression and 5-slot team formation. | Implemented (equipment foundation) |
+| `Assets/Scripts/Meta/Heroes/Roster.cs` | Client Programmer - Systems | Hero collection, Spirit Source ceiling, equipment and formation entry points. | Connect formation to Heroes UI and battle launch. | Implemented (equipment + formation rules) |
+| `Assets/Scripts/Meta/Heroes/TeamFormation.cs` | Client Programmer - Systems | Engine-free five-slot formation; slots 0-1 front, 2-4 back; owned/unique hero validation. | Connect drag/drop UI. | Implemented (rules + save normalization) |
 | `Assets/Scripts/Meta/Equipment/Equipment.cs` | Systems Designer | Six equipment slots, serializable item stats/set identity, equip/replace/unequip rules. | Add authored items, approved set effects, drops and upgrade costs. | Foundation implemented |
-| `Assets/Scripts/Meta/Save/SaveData.cs` | Client Programmer - Systems | Single versioned save model and migrations. | Add a migration for each persisted schema change. | Version 2; equipment migration |
-| `Assets/Scripts/Meta/GameState.cs` | Client Programmer - Systems | Aggregate wallet, roster, pity, energy, campaign, quests and idle state. | Add remaining systems with matching save migration. | Implemented (partial MVP) |
+| `Assets/Scripts/Meta/Save/SaveData.cs` | Client Programmer - Systems | Single versioned save model and migrations. | Add a migration for each persisted schema change. | Version 3; equipment + formation migrations |
+| `Assets/Scripts/Meta/GameState.cs` | Client Programmer - Systems | Aggregate wallet, roster, pity, energy, campaign, quests and idle state. | Add remaining systems with matching save migration; connect battle launch. | Implemented (partial MVP) |
 | `Assets/Scripts/Meta/Gacha/GachaSystem.cs` | Systems Designer | Deterministic summon and pity logic. | Add server authority, banner data and official rates display. | Implemented (test rates) |
 | `Assets/Scripts/Meta/Idle/IdleRewards.cs` | Economy Designer | Offline rewards with 12-hour cap. | Replace placeholders with approved economy ledger. | Implemented (placeholder rates) |
 | `Assets/Scripts/Meta/Campaign/CampaignProgress.cs` | Systems Designer | Sequential 200-stage progress model. | Connect 200 authored stage definitions and reward/difficulty data. | Progress model only |
@@ -24,9 +26,9 @@ Server (`Server/`) can re-run `Combat` + `Meta` logic for authority/anti-cheat.
 | `Assets/Scripts/Presentation/HeroView.cs` | Animation/VFX Artist | Model, animator, HP anchor and battle reactions. | Bind licensed models/animations and event reactions. | Stub |
 | `Assets/Scripts/Presentation/DamageNumbers.cs` | Animation/VFX Artist | Pooled damage/heal/crit feedback. | Implement pooled TMP labels and camera-follow. | Stub |
 | `Assets/Scripts/UI/Screens/HomeScreen.cs` | Client Programmer - UI | Main hub and idle/quest/energy entry points. | Wire live game state and navigation. | Stub |
-| `Assets/Scripts/UI/Screens/HeroesScreen.cs` | Client Programmer - UI | Hero roster, details, equipment and formation. | Wire roster and equipment UI. | Stub |
+| `Assets/Scripts/UI/Screens/HeroesScreen.cs` | Client Programmer - UI | Hero list/details, equipment and formation. | Wire roster, equipment and five-slot formation UI. | Stub |
 | `Assets/Scripts/UI/Screens/SummonScreen.cs` | Client Programmer - UI | Single/x10 summon, pity and official rates. | Wire gacha and results presentation. | Stub |
-| `Assets/Scripts/UI/Screens/CampaignScreen.cs` | Client Programmer - UI | Five-biome campaign map and battle launch. | Connect stage definitions, progress and rewards. | Stub |
+| `Assets/Scripts/UI/Screens/CampaignScreen.cs` | Client Programmer - UI | Five-biome campaign map and battle launch. | Connect stage definitions, progress, rewards and TeamFormationBuilder. | Stub |
 | `Assets/Scripts/UI/Screens/BattleHud.cs` | Client Programmer - UI | Battle speeds, ultimates, HP and skip. | Bind to BattleView and BattleSim. | Stub |
 | `Server/app/main.py` | Server Programmer | FastAPI server entry point. | Add authenticated account/profile/inventory/gacha/arena/boss endpoints. | Health-only stub |
 | `docs/GDD.md` | Systems Designer | Condensed design reference derived from the project plan. | Complete review and freeze after reading full PDF. | Draft |
