@@ -39,6 +39,14 @@ namespace SandsOfLegends.Editor
         [MenuItem("Legends Reborn/Art/Install All CC0 3D Models")]
         public static void InstallAll()
         {
+            bool acceptCurrentQuaterniusLicense = EditorUtility.DisplayDialog(
+                "Quaternius asset license",
+                "The current Quaternius license is not CC0. It permits commercial use inside a completed game/product, " +
+                "but prohibits redistributing the FBX files as a standalone asset pack.\n\n" +
+                "Continue only if you explicitly approve using these six models under those terms.",
+                "I approve — continue", "Cancel");
+            if (!acceptCurrentQuaterniusLicense) return;
+
             int downloadedHeroes = DownloadPublicHeroModels();
             int alreadyPresent = CountPresentFiles();
             int required = CountRequiredFiles();
@@ -150,7 +158,8 @@ namespace SandsOfLegends.Editor
             }
 
             File.WriteAllText(Path.Combine(destination, "SOURCE.txt"),
-                "Quaternius RPG Characters — CC0.\\n" +
+                "Quaternius RPG Characters — current Quaternius License (not CC0).\\n" +
+                "Commercial use inside a completed game/product is permitted; standalone asset-pack redistribution is prohibited.\\n" +
                 "Files: Warrior.fbx, Cleric.fbx, Monk.fbx, Ranger.fbx, Rogue.fbx, Wizard.fbx.\\n" +
                 "Source repository: https://github.com/Andahmed/LegendsStyleRPG\\n" +
                 "Source path: GameClient/Assets/Resources/GameArt/Free3D/Quaternius_RPGCharacters/FBX/\\n" +
