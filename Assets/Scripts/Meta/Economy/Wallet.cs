@@ -21,7 +21,9 @@ namespace SandsOfLegends.Meta
         public void Add(Currency c, long amount)
         {
             if (amount < 0) throw new ArgumentOutOfRangeException("amount");
-            Set(c, Math.Min(long.MaxValue / 2, _v[(int)c] + amount));
+            long current = _v[(int)c];
+            long cap = long.MaxValue / 2;
+            Set(c, current >= cap || amount > cap - current ? cap : current + amount);
         }
 
         public bool TrySpend(Currency c, long amount)

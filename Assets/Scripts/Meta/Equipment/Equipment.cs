@@ -42,7 +42,7 @@ namespace SandsOfLegends.Meta
         public bool TryUpgrade(string heroId, EquipSlot slot, Wallet wallet)
         {
             EquipmentInstance item = Find(heroId, slot);
-            if (item == null) return false;
+            if (item == null || item.Level >= 20) return false;
             long goldCost = 100L * item.Level;
             long materialCost = 3L * item.Level;
             if (!wallet.TrySpend(Currency.Gold, goldCost)) return false;

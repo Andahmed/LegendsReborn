@@ -114,6 +114,128 @@ namespace SandsOfLegends.Tests
             Assert.IsNotNull(back.Roster.Find("h"));
         }
 
+
+        [Test]
+        public void GameState_ClaimIdleCreditsWalletAndAdvancesClaimTime()
+        {
+            GameState state = GameState.NewGame(1000);
+            IdleRewards.Reward reward = state.ClaimIdle(1600);
+            Assert.AreEqual(600, reward.Seconds);
+            Assert.AreEqual(100, reward.Gold);
+            Assert.AreEqual(50, reward.Exp);
+            Assert.AreEqual(100, state.Wallet.Get(Currency.Gold));
+            Assert.AreEqual(50, state.Wallet.Get(Currency.Exp));
+            Assert.AreEqual(1600, state.IdleLastClaimUnix);
+
+            IdleRewards.Reward second = state.ClaimIdle(1600);
+            Assert.AreEqual(0, second.Seconds);
+            Assert.AreEqual(100, state.Wallet.Get(Currency.Gold));
+            Assert.AreEqual(50, state.Wallet.Get(Currency.Exp));
+        }
+
+        [Test]
+        public void SaveMigration_RepairsNullArraysAndPreservesEmptyFormationSlots()
+        {
+            var data = new SaveData
+            {
+                Formation = new[] { "warrior", null, "healer", null, "scout" },
+                QuestProgress = null,
+                QuestClaimed = null,
+                QuestDay = null
+            };
+
+            SaveData migrated = SaveMigrations.Migrate(data);
+            Assert.AreEqual(SaveMigrations.CurrentVersion, migrated.Version);
+            Assert.AreEqual(5, migrated.Formation.Length);
+            Assert.IsNull(migrated.Formation[1]);
+            Assert.IsNull(migrated.Formation[3]);
+            Assert.AreEqual(5, migrated.QuestProgress.Length);
+            Assert.AreEqual(5, migrated.QuestClaimed.Length);
+            Assert.AreEqual("", migrated.QuestDay);
+        }
+
+        [Test]
+        public void Roster_LevelUpRollsBackGoldWhenExperienceIsInsufficient()
+        {
+            var roster = new Roster();
+            int shards;
+            roster.AddHeroOrShards("hero", Rarity.Common, out shards);
+            var wallet = new Wallet();
+            wallet.Set(Currency.Gold, 1000);
+            wallet.Set(Currency.Exp, 0);
+
+            Assert.IsFalse(roster.TryLevelUp("hero", wallet));
+            Assert.AreEqual(1, roster.Find("hero").Level);
+            Assert.AreEqual(1000, wallet.Get(Currency.Gold));
+            Assert.AreEqual(0, wallet.Get(Currency.Exp));
+        }
+
+        [Test]
+        public void Roster_AscendRollsBackGoldWhenMaterialsAreInsufficient()
+        {
+            var roster = new Roster();
+            int shards;
+            roster.AddHeroOrShards("hero", Rarity.Common, out shards);
+            roster.Find("hero").Stars = 1;
+            var wallet = new Wallet();
+            wallet.Set(Currency.Gold, 5000);
+            wallet.Set(Currency.GearMaterials, 0);
+
+            Assert.IsFalse(roster.TryAscend("hero", wallet));
+            Assert.AreEqual(0, roster.Find("hero").Ascension);
+            Assert.AreEqual(5000, wallet.Get(Currency.Gold));
+            Assert.AreEqual(0, wallet.Get(Currency.GearMaterials));
+        }
+
+        [Test]
+        public void Energy_RespectsCapClockAndInvalidConsumptionBoundaries()
+        {
+            var energy = new EnergyState { Value = EnergyState.Cap, LastTickUnix = 10 };
+            energy.Refresh(500);
+            Assert.AreEqual(EnergyState.Cap, energy.Value);
+            Assert.AreEqual(500, energy.LastTickUnix);
+
+            Assert.IsFalse(energy.TryConsume(-1, 500));
+            Assert.AreEqual(EnergyState.Cap, energy.Value);
+            Assert.IsTrue(energy.TryConsume(EnergyState.Cap, 500));
+            Assert.AreEqual(0, energy.Value);
+            energy.Refresh(500 + EnergyState.SecondsPerPoint - 1);
+            Assert.AreEqual(0, energy.Value);
+            energy.Refresh(500 + EnergyState.SecondsPerPoint);
+            Assert.AreEqual(1, energy.Value);
+        }
+
+        [Test]
+        public void Wallet_AddSaturatesAtSupportedMaximumWithoutOverflow()
+        {
+            var wallet = new Wallet();
+            long cap = long.MaxValue / 2;
+            wallet.Add(Currency.Gems, long.MaxValue);
+            Assert.AreEqual(cap, wallet.Get(Currency.Gems));
+            wallet.Add(Currency.Gems, long.MaxValue);
+            Assert.AreEqual(cap, wallet.Get(Currency.Gems));
+            Assert.IsFalse(wallet.TrySpend(Currency.Gems, cap + 1));
+            Assert.IsTrue(wallet.TrySpend(Currency.Gems, cap));
+            Assert.AreEqual(0, wallet.Get(Currency.Gems));
+            Assert.Throws<System.ArgumentOutOfRangeException>(() => wallet.Add(Currency.Gems, -1));
+        }
+
+        [Test]
+        public void Equipment_UpgradeAtLevelTwentyFailsWithoutSpendingResources()
+        {
+            var loadout = new EquipmentLoadout();
+            loadout.Equip("hero", EquipSlot.Weapon, "weapon");
+            loadout.Find("hero", EquipSlot.Weapon).Level = 20;
+            var wallet = new Wallet();
+            wallet.Set(Currency.Gold, 10000);
+            wallet.Set(Currency.GearMaterials, 100);
+
+            Assert.IsFalse(loadout.TryUpgrade("hero", EquipSlot.Weapon, wallet));
+            Assert.AreEqual(20, loadout.Find("hero", EquipSlot.Weapon).Level);
+            Assert.AreEqual(10000, wallet.Get(Currency.Gold));
+            Assert.AreEqual(100, wallet.Get(Currency.GearMaterials));
+        }
+
         [Test]
         public void DailyQuests_ClaimOnlyWhenComplete()
         {
