@@ -1,7 +1,7 @@
 {
     "name": "SandsOfLegends.Tests.EditMode",
     "rootNamespace": "SandsOfLegends.Tests",
-    "references": [ "UnityEngine.TestRunner", "UnityEditor.TestRunner", "SandsOfLegends.Combat", "SandsOfLegends.Meta" ],
+    "references": [ "UnityEngine.TestRunner", "UnityEditor.TestRunner", "SandsOfLegends.Combat", "SandsOfLegends.Meta", "SandsOfLegends.Core" ],
     "includePlatforms": [ "Editor" ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
