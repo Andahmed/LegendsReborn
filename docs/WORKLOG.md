@@ -1,5 +1,9 @@
 # Work Log (newest first)
 
+## 2026-11-12 - B8 open API/product decisions (GPT Lane B)
+- Recorded four unresolved product decisions with current behavior, options, and recommendations in docs/API_CONTRACT.md; documentation only, no behavior changed.
+
+
 ## 2026-11-12 - A0 Unity font crash guard
 **Done:** Replaced direct Arial loading with LegacyRuntime.ttf plus guarded Arial fallback in GameFlowController and HomeScreen; assigned the TextMesh font and font material in DamageNumbers.
 **Not verified:** لم يتم التحقق في Unity؛ CI/Android workflow was not run in this environment.
