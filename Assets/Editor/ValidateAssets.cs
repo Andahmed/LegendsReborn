@@ -142,8 +142,8 @@ namespace SandsOfLegends.EditorTools
         {
             if (path.Contains("/Characters/Enemies/")) return 6000;
             if (path.Contains("/Characters/")) return 8000;
-            if (path.Contains("/Environments/")) return 40000;
             if (path.Contains("/props/")) return 1500;
+            if (path.Contains("/Environments/")) return 40000;
             if (path.Contains("/Prefabs/Heroes/")) return 8000;
             return 0;
         }
