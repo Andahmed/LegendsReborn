@@ -1,5 +1,9 @@
 # Work Log (newest first)
 
+## 2026-11-12 - B7 Meta coverage expansion (GPT Lane B)
+- Added deterministic Gacha pity-reset/seed tests, Campaign boss/progression/biome-boundary tests, and DailyQuests day-reset/duplicate-claim tests. No gameplay code changed.
+
+
 ## 2026-11-12 - A0 Unity font crash guard
 **Done:** Replaced direct Arial loading with LegacyRuntime.ttf plus guarded Arial fallback in GameFlowController and HomeScreen; assigned the TextMesh font and font material in DamageNumbers.
 **Not verified:** لم يتم التحقق في Unity؛ CI/Android workflow was not run in this environment.
