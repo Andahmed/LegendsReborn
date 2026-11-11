@@ -28,6 +28,10 @@ namespace SandsOfLegends.Meta
 
     public static class GachaSystem
     {
+        public const int CommonRate = 40;
+        public const int RareRate = 35;
+        public const int EpicRate = 20;
+        public const int LegendaryRate = 5;
         public const int EpicPity = 30;
         public const int LegendaryPity = 90;
         public const int GemCostSingle = 300;
@@ -36,9 +40,9 @@ namespace SandsOfLegends.Meta
         // cumulative thresholds out of 100: Common 40, Rare 35, Epic 20, Legendary 5
         private static Rarity Roll(float r100)
         {
-            if (r100 < 40f) return Rarity.Common;
-            if (r100 < 75f) return Rarity.Rare;
-            if (r100 < 95f) return Rarity.Epic;
+            if (r100 < CommonRate) return Rarity.Common;
+            if (r100 < CommonRate + RareRate) return Rarity.Rare;
+            if (r100 < CommonRate + RareRate + EpicRate) return Rarity.Epic;
             return Rarity.Legendary;
         }
 
