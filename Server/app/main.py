@@ -21,7 +21,14 @@ HERO_POOLS = {
     "EPIC": ["berserker", "sunwarden", "dragonknight"],
     "LEGENDARY": ["phoenix", "voidreaper", "titan"],
 }
+RARITY_RATES = {"COMMON": 40, "RARE": 35, "EPIC": 20, "LEGENDARY": 5}
 RARITY_WEIGHTS = [("COMMON", 4000), ("RARE", 3500), ("EPIC", 2000), ("LEGENDARY", 500)]
+EPIC_PITY = 30
+LEGENDARY_PITY = 90
+EPIC_PITY_GUARANTEE_CUTOFF = 9500
+SUMMON_COST_SINGLE = 300
+SUMMON_COST_TEN = 2700
+DUPLICATE_SHARDS = {"COMMON": 5, "RARE": 10, "EPIC": 20, "LEGENDARY": 40}
 
 
 def connect() -> sqlite3.Connection:
@@ -127,9 +134,9 @@ class SummonRequest(BaseModel):
 
 def roll_rarity(profile: Dict) -> str:
     roll = secrets.randbelow(10000)
-    if int(profile.get("pity_legendary", 0)) >= 89:
+    if int(profile.get("pity_legendary", 0)) >= LEGENDARY_PITY - 1:
         return "LEGENDARY"
-    if int(profile.get("pity_epic", 0)) >= 29 and roll < 9500:
+    if int(profile.get("pity_epic", 0)) >= EPIC_PITY - 1 and roll < EPIC_PITY_GUARANTEE_CUTOFF:
         return "EPIC"
     cursor = 0
     for rarity, weight in RARITY_WEIGHTS:
@@ -176,7 +183,7 @@ def summon(payload: SummonRequest, authorization: Optional[str] = Header(default
     account_id = require_account(authorization)
     if payload.count not in (1, 10):
         raise HTTPException(status_code=400, detail="count must be 1 or 10")
-    cost = 2700 if payload.count == 10 else 300
+    cost = SUMMON_COST_TEN if payload.count == 10 else SUMMON_COST_SINGLE
     now = int(time.time())
     results: List[Dict] = []
 
@@ -197,7 +204,7 @@ def summon(payload: SummonRequest, authorization: Optional[str] = Header(default
             if is_new:
                 heroes[hero_id] = {"level": max(1, int(profile.get("highest_hero_level", 1)) - 5), "stars": 0, "shards": 0}
             else:
-                shards = {"COMMON": 5, "RARE": 10, "EPIC": 20, "LEGENDARY": 40}[rarity]
+                shards = DUPLICATE_SHARDS[rarity]
                 heroes[hero_id]["shards"] = int(heroes[hero_id].get("shards", 0)) + shards
 
             if rarity == "LEGENDARY":
@@ -229,7 +236,7 @@ def summon(payload: SummonRequest, authorization: Optional[str] = Header(default
         "results": results,
         "profile": profile,
         "rates_version": 1,
-        "rates": {"COMMON": 40, "RARE": 35, "EPIC": 20, "LEGENDARY": 5},
+        "rates": RARITY_RATES.copy(),
         "pity": {"epic": profile["pity_epic"], "legendary": profile["pity_legendary"]},
     }
 
