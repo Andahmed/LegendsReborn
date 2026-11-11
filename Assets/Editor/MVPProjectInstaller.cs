@@ -21,6 +21,7 @@ namespace SandsOfLegends.Editor
 
         public static void EnsureMvpScene()
         {
+            HomeCastleMeshGenerator.GenerateIfMissing();
             Directory.CreateDirectory("Assets/Scenes");
             if (!File.Exists(HomeScenePath))
             {

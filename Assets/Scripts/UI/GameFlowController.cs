@@ -274,12 +274,7 @@ namespace SandsOfLegends.UI
         private void PullHeroes(int amount)
         {
             if (State == null) return;
-            long cost = amount == 10 ? GachaSystem.GemCostTen : GachaSystem.GemCostSingle;
-            if (!State.Wallet.TrySpend(Currency.Gems, cost))
-            {
-                AddInfo("Not enough Gems.", 64);
-                return;
-            }
+            // SummonScreen.TryPull owns the single gem debit. Do not pre-spend here.
             PullResult[] pulls;
             if (!SummonScreen.TryPull(State, amount,
                 Environment.TickCount ^ (int)(Time.realtimeSinceStartup * 7919f), out pulls))
