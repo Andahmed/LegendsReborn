@@ -10,7 +10,7 @@
 **Not verified / uncertainty**
 - Unity Editor was not run. Generated prefabs, materials, particle assets, and biome prefabs have not been created on disk in this session; they are produced by Sands > Setup Prototype / Sands > Setup 3D Prototype.
 - The four character prototypes are primitive low-poly meshes, not FBX/GLB Humanoid rigs. They do not contain authored Idle/Run/Attack/Skill/Ultimate/Hit/Death clips; HeroView currently uses procedural placeholder motion and has optional Animator trigger forwarding.
-- Five biome prefabs are placeholders and are not yet selected by CampaignProgress.BiomeOf(stage); no stage-environment binding was added.
+- Five biome prefabs are placeholders and are not yet selected by CampaignProgress.BiomeOf(stage); no stage-environment binding was added. Enemy-stage prefab wiring, UIStyle-driven VFX colors, portraits/icons, texture-atlas import settings and ASTC 6x6 importer configuration also remain open.
 - Asset validation has not been executed in Unity or CI. No Battle scene visual test has been performed; therefore 3D is NOT marked complete.
 
 **Next**
