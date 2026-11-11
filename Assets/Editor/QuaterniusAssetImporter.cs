@@ -101,12 +101,14 @@ namespace SandsOfLegends.Editor
                     "- https://quaternius.itch.io/150-lowpoly-nature-models\n" +
                     "- https://quaternius.itch.io/lowpoly-modular-dungeon-pack\n");
 
+                int portraitsCopied = CopyApprovedHeroPortraits(missing);
                 AssetDatabase.Refresh();
-                string summary = "Already present: " + present + "\nCopied from selected Quaternius source: " + copied;
+                string summary = "Already present: " + present + "\nCopied from selected Quaternius source: " + copied +
+                    "\nApproved hero portraits copied: " + portraitsCopied;
                 if (missing.Count > 0)
                 {
                     summary += "\n\nMissing source files (" + missing.Count + "):\n" + string.Join("\n", missing.ToArray());
-                    summary += "\n\nSelect the folder containing the Quaternius pack folders, not an individual FBX folder.";
+                    summary += "\n\nFor missing FBX files, select the parent folder containing the extracted Quaternius pack folders. For missing portraits, add the five approved PNGs to ArtSource/Heroes/images/.";
                 }
                 else summary += "\n\nAll requested FBX files are available in Assets/Resources.";
                 EditorUtility.DisplayDialog("Quaternius 3D Models", summary, "OK");
@@ -116,6 +118,37 @@ namespace SandsOfLegends.Editor
                 Debug.LogException(ex);
                 EditorUtility.DisplayDialog("3D model import failed", ex.Message, "Close");
             }
+        }
+
+        private static int CopyApprovedHeroPortraits(List<string> missing)
+        {
+            string sourceFolder = Path.Combine("ArtSource", "Heroes", "images");
+            string destinationFolder = Path.Combine("Assets", "Resources", "HeroPortraits");
+            string[] heroIds = { "warrior", "paladin", "berserker", "healer", "sharpshooter" };
+            int copied = 0;
+
+            for (int i = 0; i < heroIds.Length; i++)
+            {
+                string fileName = "hero_" + heroIds[i] + ".png";
+                string source = Path.Combine(sourceFolder, fileName);
+                string destination = Path.Combine(destinationFolder, fileName);
+
+                if (!File.Exists(source) || new FileInfo(source).Length <= 2048)
+                {
+                    missing.Add("Approved hero portrait: " + source.Replace('\\', '/'));
+                    continue;
+                }
+
+                Directory.CreateDirectory(destinationFolder);
+                if (File.Exists(destination) &&
+                    new FileInfo(destination).Length == new FileInfo(source).Length)
+                    continue;
+
+                File.Copy(source, destination, true);
+                copied++;
+            }
+
+            return copied;
         }
 
         private static int CountPresentFiles()
