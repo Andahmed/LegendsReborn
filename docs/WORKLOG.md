@@ -8,8 +8,14 @@
 - Updated the Quaternius installer so it checks bundled assets before prompting for a source folder and no longer searches or names another project checkout.
 - Updated README and HANDOFF to describe the actual FBX-based assembly and the correct installer menu.
 
+**Verified**
+- GitHub Actions Server Tests completed successfully: 5 tests ran, all passed.
+- Static checks on the PR branch confirm HomeWorldStage has no primitive cube/capsule creation and no procedural castle generator reference.
+- Static checks confirm the setup menu no longer calls the procedural generator and the asset importer no longer searches another repository.
+
 **Not verified**
-- Unity Editor compilation, FBX import, materials, pivots, camera framing, Play Mode and Android APK were not run in this environment.
+- Unity Editor compilation, FBX import, materials, pivots, camera framing, Play Mode, mobile layout and Android APK were not run in this environment.
+- Android APK workflow completed successfully but skipped the actual build because UNITY_LICENSE, UNITY_EMAIL and UNITY_PASSWORD are not configured.
 - FBX module names and files are listed by the repository asset-readiness audit; the final placement still requires visual review in Unity.
 
 **Next**
