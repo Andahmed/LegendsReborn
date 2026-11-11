@@ -9,6 +9,7 @@ namespace SandsOfLegends.UI
     public sealed class HomeWorldStage : MonoBehaviour
     {
         private Transform root;
+        private float castleDaisTop = 0.91f;
 
         private void Awake()
         {
@@ -60,6 +61,9 @@ namespace SandsOfLegends.UI
                 -bounds.center.x * fit,
                 -bounds.min.y * fit,
                 0f);
+
+            // The dais top is y=0.7075 in the generated mesh; account for the castle's ground offset.
+            castleDaisTop = (0.7075f - bounds.min.y) * fit;
         }
 
         private void PlaceNature()
@@ -123,7 +127,7 @@ namespace SandsOfLegends.UI
             float scale = 2.65f / Mathf.Max(.01f, bounds.size.y);
             hero.transform.localScale = Vector3.one * scale;
             // The generated dais top sits just below one world unit after the castle fit.
-            hero.transform.localPosition = new Vector3(0f, .93f - bounds.min.y * scale, -2.15f);
+            hero.transform.localPosition = new Vector3(0f, castleDaisTop - bounds.min.y * scale, -2.15f);
         }
 
         private void CreateWarmLights()
