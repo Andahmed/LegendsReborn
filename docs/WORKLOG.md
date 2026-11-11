@@ -1,19 +1,22 @@
 # Work Log (newest first)
 
-## 2026-11-11 - Unity compile-readiness source audit (ChatGPT)
+## 2026-11-11 - Unity readiness, Android CI, and prototype setup (ChatGPT)
 **Changed**
-- `Packages/manifest.json`: added Unity Test Framework `1.1.33`, required by the existing EditMode test assembly references.
-- Reviewed all 35 tracked C# files in the repository, including Combat, Meta, Unity-facing scripts, Editor build script, and EditMode tests.
-- Confirmed by source inspection that Combat and Meta source files contain no `UnityEngine` references; their asmdefs also set `noEngineReferences: true`.
+- PR #1: reviewed all 35 tracked C# files and assembly definitions; added Unity Test Framework `1.1.33` for the existing EditMode test assembly.
+- PR #2: added `.github/workflows/android-apk.yml` using GameCI Unity Builder v4, Unity `2022.3.62f3`, Android target, `workflow_dispatch` and `pull_request`; APK artifact upload is configured.
+- PR #3: added `Sands > Setup Prototype`, runtime 4v4 battle presentation, prototype HeroDefinition/SkillDefinition generation, Boot/Home/Battle scene generation, Build Settings registration, and a PlayMode 4v4 completion smoke test.
+- Updated the Android build entry point to create missing prototype assets/scenes before building.
+- Kept Combat and Meta engine-free; no combat rules or economy values changed. All code files added/changed include the required ownership headers.
 
 **Not verified / uncertainty**
-- No Unity Editor or Unity batchmode compiler was run in this environment; this is a source/API and assembly-definition audit, not proof of a successful Unity compile.
-- The Unity Test Framework package resolution and NUnit test discovery still need confirmation in Unity 2022.3.62f3.
-- Existing balance values and combat rules were not changed.
+- No Unity Editor compile or Test Runner was executed in this session. Source inspection is not a Unity compile result.
+- The prototype setup menu has not been executed; generated Unity assets/scenes, serialized references, and visual appearance are not yet observed.
+- The PlayMode test and GameCI Android workflow have not run. Add repository Actions secrets `UNITY_LICENSE`, `UNITY_EMAIL`, and `UNITY_PASSWORD` before CI can authenticate.
 
 **Next**
-1. Open the branch in Unity 2022.3.62f3 and confirm package resolution, compilation, and EditMode test discovery.
-2. Review/merge this PR before starting the independent Android CI PR.
+1. Review the three independent PRs and merge only after approval.
+2. Open Unity `2022.3.62f3`, run **Sands > Setup Prototype**, inspect the three scenes, and run EditMode/PlayMode tests.
+3. Add the three Actions secrets and run the Android APK workflow; inspect its artifact and logs.
 
 ## 2026-11-11 - Foundations pass (Ahmed + Claude)
 **Done**
