@@ -1,5 +1,23 @@
 # Work Log (newest first)
 
+## 2026-11-11 - Five-slot team formation
+**Done**
+- Created follow-up branch `feature/mvp-five-slot-formation` from the equipment foundation branch; PR #7 and `main` remain untouched.
+- Added an engine-free formation model with five fixed slots (0-1 front, 2-4 back).
+- Added ownership checks, duplicate prevention, slot replacement, move/swap and removal operations.
+- Persisted team slots in the single save model and added version 2 -> 3 migration; legacy version 1 saves still pass through the equipment migration before formation migration.
+- Added regression tests for 5-slot assignment, unique ownership, move/swap, removal, load sanitization and save round-trip.
+
+**Not verified**
+- Unity 2022.3.62f3 compilation and EditMode execution have not been run in this environment.
+- The Heroes screen does not yet expose formation controls, and battle setup does not yet convert saved hero IDs into ordered UnitSpecs.
+- No combat stats, economy values, or synergy percentages were changed.
+
+**Next**
+1. Connect the formation to the Heroes screen and battle setup.
+2. Populate the MVP's 20 hero/skill definitions and authored stage data.
+3. Implement the remaining MVP modes and visual presentation after the full PDF acceptance criteria are checked.
+
 ## 2026-11-11 - MVP equipment foundation
 **Done**
 - Created branch `feature/mvp-equipment-foundation` from `main`; no existing PRs or main-branch files were changed.
@@ -30,9 +48,8 @@
 
 **Next**
 1. Open in Unity, fix compile errors, run EditMode tests, commit `.meta`.
-2. Create Boot/Home/Battle scenes; add GameBootstrap to Boot.
-3. 4 prototype heroes (one per faction) + skills as ScriptableObjects; battle scene using BattleView.
-4. CI build (secrets needed: UNITY_LICENSE/EMAIL/PASSWORD).
+2. Create Boot/Home/Battle scenes; 4 prototype heroes (one per faction) + skills as ScriptableObjects; battle scene using BattleView.
+3. CI build (secrets needed: UNITY_LICENSE/EMAIL/PASSWORD).
 
 ## 2026-11-11 - Combat core + scaffold (Ahmed + Claude)
 - Repo created, scaffold pushed; deterministic `BattleSim`, hero/skill ScriptableObjects, 6 tests; HANDOFF.md and the plan PDF added.
