@@ -77,6 +77,8 @@ def default_profile() -> Dict:
         "pity_epic": 0,
         "pity_legendary": 0,
         "highest_stage": 0,
+        "idle_last_claim_at": int(time.time()),
+        "daily_claimed_day": "",
     }
 
 
@@ -124,6 +126,24 @@ class GuestLoginResponse(BaseModel):
 class SummonRequest(BaseModel):
     count: int = Field(default=1, description="Only 1 or 10 pulls are supported")
 
+class EmptyRequest(BaseModel):
+    pass
+
+
+def utc_day(timestamp: Optional[int] = None) -> str:
+    return time.strftime("%Y-%m-%d", time.gmtime(timestamp or int(time.time())))
+
+
+def calculate_idle_reward(last_claim_at: int, now: int, highest_stage: int) -> Dict:
+    elapsed = max(0, min(12 * 60 * 60, now - last_claim_at))
+    hours = elapsed / 3600.0
+    stage = max(0, min(200, int(highest_stage)))
+    return {
+        "elapsed_seconds": elapsed,
+        "gold": int(hours * (20 + stage * 3)),
+        "exp": int(hours * (10 + stage * 2)),
+    }
+
 
 def roll_rarity(profile: Dict) -> str:
     roll = secrets.randbelow(10000)
@@ -168,7 +188,18 @@ def guest_login():
 def get_profile(authorization: Optional[str] = Header(default=None)):
     account_id = require_account(authorization)
     with connect() as db:
-        return {"account_id": account_id, "profile": read_profile(db, account_id)}
+        profile = read_profile(db, account_id)
+        now = int(time.time())
+        last_tick = int(profile.get("energy_updated_at", now))
+        energy = max(0, min(20, int(profile.get("energy", 20))))
+        gained = max(0, (now - last_tick) // 300)
+        if gained:
+            energy = min(20, energy + gained)
+            last_tick = now if energy == 20 else last_tick + gained * 300
+            profile["energy"] = energy
+            profile["energy_updated_at"] = last_tick
+            write_profile(db, account_id, profile)
+        return {"account_id": account_id, "profile": profile, "server_time": now}
 
 
 @app.post("/summon")
@@ -232,6 +263,41 @@ def summon(payload: SummonRequest, authorization: Optional[str] = Header(default
         "rates": {"COMMON": 40, "RARE": 35, "EPIC": 20, "LEGENDARY": 5},
         "pity": {"epic": profile["pity_epic"], "legendary": profile["pity_legendary"]},
     }
+
+
+@app.post("/idle/claim")
+def claim_idle_rewards(payload: EmptyRequest, authorization: Optional[str] = Header(default=None)):
+    account_id = require_account(authorization)
+    now = int(time.time())
+    with connect() as db:
+        db.execute("BEGIN IMMEDIATE")
+        profile = read_profile(db, account_id)
+        last_claim = int(profile.get("idle_last_claim_at", now))
+        if last_claim > now:
+            raise HTTPException(status_code=409, detail="Server clock moved backwards; retry later")
+        reward = calculate_idle_reward(last_claim, now, int(profile.get("highest_stage", 0)))
+        profile["gold"] = int(profile.get("gold", 0)) + reward["gold"]
+        profile["exp"] = int(profile.get("exp", 0)) + reward["exp"]
+        profile["idle_last_claim_at"] = now
+        write_profile(db, account_id, profile)
+    return {"reward": reward, "profile": profile, "server_time": now}
+
+
+@app.post("/daily/claim")
+def claim_daily_login(payload: EmptyRequest, authorization: Optional[str] = Header(default=None)):
+    account_id = require_account(authorization)
+    now = int(time.time())
+    day = utc_day(now)
+    with connect() as db:
+        db.execute("BEGIN IMMEDIATE")
+        profile = read_profile(db, account_id)
+        if profile.get("daily_claimed_day", "") == day:
+            raise HTTPException(status_code=409, detail="Daily reward already claimed")
+        reward_gold = 100 + max(0, min(200, int(profile.get("highest_stage", 0)))) * 5
+        profile["gold"] = int(profile.get("gold", 0)) + reward_gold
+        profile["daily_claimed_day"] = day
+        write_profile(db, account_id, profile)
+    return {"day": day, "reward": {"gold": reward_gold}, "profile": profile, "server_time": now}
 
 
 @app.get("/summon/history")
