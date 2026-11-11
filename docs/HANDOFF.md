@@ -40,7 +40,7 @@ Working title: **Sands of Legends**. Unity 2022.3.62f3, Android IL2CPP/ARM64 tar
 
 ## Explicitly not complete or not verified
 
-- No Unity Editor compile, Play Mode run, Android APK, mobile touch or aspect-ratio test has been performed in this environment.
+- No Unity Editor compile, Play Mode run, Android APK, mobile touch or aspect-ratio test has been performed in this environment. The GameCI Android APK workflow is configured, but it skips the build until the three Unity Actions secrets are present.
 - Unity will generate .meta files when it first imports the new scripts/FBX assets; they must be committed after editor import.
 - The original home castle Mesh generator is committed, but its generated prefab is materialized only when the user runs the Editor setup menu. Castle scale, Mesh normals, materials, silhouette and camera framing still require visual review inside Unity.
 - The five approved hero archetypes map to the available Quaternius rigged character FBX models as temporary MVP models. Final bespoke hero models, animations and skill VFX are still outstanding.

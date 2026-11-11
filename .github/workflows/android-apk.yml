@@ -1,0 +1,66 @@
+name: Android APK
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "Assets/**"
+      - "Packages/**"
+      - "ProjectSettings/**"
+      - ".github/workflows/android-apk.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-apk-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-android:
+    name: Build Android APK (Unity 2022.3.62f3)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Unity credentials and build entry point
+        id: readiness
+        shell: bash
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        run: |
+          if [[ -n "${UNITY_LICENSE:-}" && -n "${UNITY_EMAIL:-}" && -n "${UNITY_PASSWORD:-}" ]] && [[ -f Assets/Editor/BuildScript.cs ]]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "## Android APK build skipped"
+              echo "Configure the repository Actions secrets UNITY_LICENSE, UNITY_EMAIL, and UNITY_PASSWORD to enable the Unity build."
+              echo "The build method expected by this project is SandsOfLegends.EditorTools.BuildScript.BuildAndroid."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Build Android APK with GameCI
+        if: steps.readiness.outputs.ready == 'true'
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: 2022.3.62f3
+          targetPlatform: Android
+          buildMethod: SandsOfLegends.EditorTools.BuildScript.BuildAndroid
+          allowDirtyBuild: true
+
+      - name: Upload APK
+        if: steps.readiness.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SandsOfLegends-Android-APK
+          path: Builds/SandsOfLegends.apk
+          if-no-files-found: error
+          retention-days: 14

@@ -1,15 +1,14 @@
 // =============================================================================
 // FILE: Assets/Editor/BuildScript.cs
-// OWNER ROLE: Client Programmer - Systems
-// RESPONSIBILITY: Menu 'Sands > Build Android APK' + CI entry point (BuildScript.BuildAndroid) used by Cloud Build/GitHub Actions.
-// WORK ON: Set keystore, IL2CPP/ARM64, versionCode bump, AAB output for Play Store.
-// STATUS: Implemented
+// ROLE: Android APK build entry point used by the Editor menu and GameCI.
 // =============================================================================
 using System;
+using System.IO;
 using System.Linq;
 using SandsOfLegends.Editor;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
+using UnityEngine;
 
 namespace SandsOfLegends.EditorTools
 {
@@ -18,18 +17,44 @@ namespace SandsOfLegends.EditorTools
         [MenuItem("Sands/Build Android APK")]
         public static void BuildAndroid()
         {
+            ConfigureAndroid();
             MVPProjectInstaller.EnsureMvpScene();
-            var scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray();
-            var opts = new BuildPlayerOptions
+
+            string[] scenes = EditorBuildSettings.scenes
+                .Where(scene => scene.enabled)
+                .Select(scene => scene.path)
+                .ToArray();
+
+            if (scenes.Length == 0)
+                throw new InvalidOperationException("No enabled scenes are registered in Build Settings.");
+
+            Directory.CreateDirectory("Builds");
+            var options = new BuildPlayerOptions
             {
                 scenes = scenes,
                 locationPathName = "Builds/SandsOfLegends.apk",
                 target = BuildTarget.Android,
                 options = BuildOptions.None
             };
-            var report = BuildPipeline.BuildPlayer(opts);
+
+            BuildReport report = BuildPipeline.BuildPlayer(options);
             if (report.summary.result != BuildResult.Succeeded)
-                throw new Exception("Build failed: " + report.summary.result);
+                throw new InvalidOperationException("Android APK build failed: " + report.summary.result +
+                    ". Errors: " + report.summary.totalErrors);
+
+            if (!File.Exists(options.locationPathName) || new FileInfo(options.locationPathName).Length == 0)
+                throw new IOException("Unity reported success but the APK is missing or empty.");
+
+            Debug.Log("Android APK created: " + Path.GetFullPath(options.locationPathName) +
+                " (" + report.summary.totalSize + " bytes)");
+        }
+
+        private static void ConfigureAndroid()
+        {
+            EditorUserBuildSettings.buildAppBundle = false;
+            PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
+            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+            PlayerSettings.productName = "Sands of Legends";
         }
     }
 }
