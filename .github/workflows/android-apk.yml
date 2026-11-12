@@ -68,6 +68,7 @@ jobs:
           allowDirtyBuild: true
 
       - name: Verify APK output
+        id: verify_apk
         if: always() && steps.readiness.outputs.ready == 'true'
         shell: bash
         run: |
@@ -77,7 +78,7 @@ jobs:
           ls -lh build/Android/Android.apk
 
       - name: Upload APK
-        if: always() && steps.readiness.outputs.ready == 'true' && hashFiles('build/Android/Android.apk') != ''
+        if: always() && steps.readiness.outputs.ready == 'true' && steps.verify_apk.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: SandsOfLegends-Android-APK
