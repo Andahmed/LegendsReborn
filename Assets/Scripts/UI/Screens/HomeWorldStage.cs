@@ -3,13 +3,12 @@ using UnityEngine;
 namespace SandsOfLegends.UI
 {
     /// <summary>
-    /// Loads the original generated castle mesh and Quaternius CC0 nature and hero models.
-    /// The castle is a real multi-part Mesh prefab, not Unity primitive cubes.
+    /// Loads the original generated castle mesh and the procedural home scenery.
+    /// The home courtyard intentionally contains no displayed hero characters.
     /// </summary>
     public sealed class HomeWorldStage : MonoBehaviour
     {
         private Transform root;
-        private float castleDaisTop = 0.91f;
 
         private void Awake()
         {
@@ -18,7 +17,6 @@ namespace SandsOfLegends.UI
             HomeWorldScenery.Create(root);
             PlaceCastle();
             PlaceNature();
-            PlaceHeroes();
             ConfigureCamera();
             CreateWarmLights();
         }
@@ -62,9 +60,6 @@ namespace SandsOfLegends.UI
                 -bounds.center.x * fit,
                 -bounds.min.y * fit,
                 0f);
-
-            // The dais top is y=0.7075 in the generated mesh; account for the castle's ground offset.
-            castleDaisTop = (0.7075f - bounds.min.y) * fit;
         }
 
         private void PlaceNature()
@@ -104,50 +99,6 @@ namespace SandsOfLegends.UI
                 size.z > .0001f ? targetSize.z / size.z : 1f);
             // Align the bottom of the imported mesh with the courtyard instead of assuming its pivot is at the feet.
             instance.transform.localPosition = position + Vector3.up * (-bounds.min.y * scaleY);
-        }
-
-        private void PlaceHeroes()
-        {
-            string[] modelNames = { "Cleric", "Monk", "Ranger", "Rogue", "Warrior", "Wizard" };
-            Vector3[] positions =
-            {
-                new Vector3(-5.25f, 0f, -1.3f),
-                new Vector3(-3.15f, 0f, -1.85f),
-                new Vector3(-1.05f, 0f, -2.15f),
-                new Vector3(1.05f, 0f, -2.15f),
-                new Vector3(3.15f, 0f, -1.85f),
-                new Vector3(5.25f, 0f, -1.3f)
-            };
-
-            for (int i = 0; i < modelNames.Length; i++)
-                PlaceHero(modelNames[i], positions[i]);
-        }
-
-        private void PlaceHero(string modelName, Vector3 position)
-        {
-            GameObject prefab = Resources.Load<GameObject>("HomeHeroes/" + modelName);
-            if (prefab == null)
-            {
-                Debug.LogWarning("Missing HomeHeroes model: " + modelName + ". Merge the A1 asset PR or run the art installer.");
-                return;
-            }
-
-            GameObject hero = Instantiate(prefab, root);
-            hero.name = "Home Hero - " + modelName;
-            hero.transform.localPosition = position;
-            hero.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
-
-            Renderer[] renderers = hero.GetComponentsInChildren<Renderer>(true);
-            if (renderers.Length == 0) return;
-            Bounds bounds = renderers[0].bounds;
-            for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
-            float scale = 2.65f / Mathf.Max(.01f, bounds.size.y);
-            hero.transform.localScale = Vector3.one * scale;
-            // The generated dais top sits just below one world unit after the castle fit.
-            hero.transform.localPosition = new Vector3(
-                position.x,
-                castleDaisTop - bounds.min.y * scale,
-                position.z);
         }
 
         private void CreateWarmLights()
