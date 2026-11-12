@@ -13,6 +13,9 @@ namespace SandsOfLegends.UI
 
         private void Awake()
         {
+            if (GetComponent<HomeLandscapePresentation>() == null)
+                gameObject.AddComponent<HomeLandscapePresentation>();
+
             root = new GameObject("Home World - Castle Mesh Stage").transform;
             root.SetParent(transform, false);
             HomeWorldScenery.Create(root);
@@ -175,7 +178,7 @@ namespace SandsOfLegends.UI
                 go.tag = "MainCamera";
             }
 
-            // Pulled back and tilted slightly down so the castle, hills, mountains and sky all fit a portrait screen.
+            // Frame the castle, hills, mountains and sky for the centered 16:9 view.
             cam.transform.position = new Vector3(0f, 15f, -34f);
             cam.transform.LookAt(new Vector3(0f, 5.5f, 6f));
             cam.fieldOfView = 50f;
