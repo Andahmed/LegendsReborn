@@ -305,7 +305,7 @@ namespace SandsOfLegends.UI
                 go.tag = "MainCamera";
             }
 
-            // Pulled back and tilted slightly down so the castle, hills, mountains and sky all fit a portrait screen.
+            // Framed as a wide Home-world establishing shot for the locked landscape mobile layout.
             cam.transform.position = new Vector3(0f, 15f, -34f);
             cam.transform.LookAt(new Vector3(0f, 5.5f, 6f));
             cam.fieldOfView = 50f;
