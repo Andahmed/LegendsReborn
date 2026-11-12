@@ -44,11 +44,13 @@ namespace SandsOfLegends.UI
 
         private Text gemsText, goldText, energyText, stageText, powerText, idleText, idleAmountText;
         private Button idleClaimButton;
+        private RectTransform eventRail, leftMenu, rightMenu, idleCard, campaignArea, bottomNavigation;
+        private bool lastLandscape;
         private float refreshTimer;
         private bool built;
 
         private void Start() { Build(); RefreshData(); }
-        private void Update() { if (!built) return; refreshTimer += Time.unscaledDeltaTime; if (refreshTimer >= 1f) { refreshTimer = 0f; RefreshData(); } }
+        private void Update() { if (!built) return; ApplyResponsiveLayout(); refreshTimer += Time.unscaledDeltaTime; if (refreshTimer >= 1f) { refreshTimer = 0f; RefreshData(); } }
         public override void OnShow() { base.OnShow(); Build(); RefreshData(); }
 
         private void Build()
@@ -84,8 +86,40 @@ namespace SandsOfLegends.UI
             BuildCampaign();
             BuildBottomNavigation();
             built = true;
+            ApplyResponsiveLayout(true);
         }
 
+        private void ApplyResponsiveLayout(bool force = false)
+        {
+            if (safeAreaRoot == null || canvas == null) return;
+            bool landscape = Screen.width > Screen.height;
+            if (!force && landscape == lastLandscape) return;
+            lastLandscape = landscape;
+            CanvasScaler scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null) { scaler.referenceResolution = landscape ? new Vector2(1920, 1080) : new Vector2(1080, 1920); scaler.matchWidthOrHeight = 0.5f; }
+            if (landscape)
+            {
+                SetRect(eventRail, new Vector2(0.015f,0.52f), new Vector2(0.015f,0.52f), new Vector2(170,300), Vector2.zero);
+                SetRect(leftMenu, new Vector2(0.015f,0.22f), new Vector2(0.015f,0.22f), new Vector2(174,290), Vector2.zero);
+                SetRect(rightMenu, new Vector2(0.985f,0.50f), new Vector2(0.985f,0.50f), new Vector2(174,300), Vector2.zero);
+                SetRect(idleCard, new Vector2(0.28f,0.19f), new Vector2(0.72f,0.19f), new Vector2(0,112), Vector2.zero);
+                SetRect(campaignArea, new Vector2(0.34f,0.075f), new Vector2(0.66f,0.075f), new Vector2(0,92), Vector2.zero);
+                SetRect(bottomNavigation, Vector2.zero, new Vector2(1,0), new Vector2(0,76), Vector2.zero);
+                if (idleClaimButton != null) idleClaimButton.GetComponent<RectTransform>().sizeDelta = new Vector2(190,38);
+            }
+            else
+            {
+                SetRect(eventRail, new Vector2(0,0.69f), new Vector2(0.22f,0.69f), new Vector2(0,420), Vector2.zero);
+                SetRect(leftMenu, new Vector2(0,0.34f), new Vector2(0,0.34f), new Vector2(190,360), Vector2.zero);
+                SetRect(rightMenu, new Vector2(1,0.34f), new Vector2(1,0.34f), new Vector2(190,360), Vector2.zero);
+                SetRect(idleCard, new Vector2(0.24f,0.20f), new Vector2(0.76f,0.20f), new Vector2(0,142), Vector2.zero);
+                SetRect(campaignArea, new Vector2(0.24f,0.105f), new Vector2(0.76f,0.105f), new Vector2(0,128), Vector2.zero);
+                SetRect(bottomNavigation, Vector2.zero, new Vector2(1,0), new Vector2(0,116), Vector2.zero);
+                if (idleClaimButton != null) idleClaimButton.GetComponent<RectTransform>().sizeDelta = new Vector2(210,48);
+            }
+        }
+        private static void SetRect(RectTransform rect, Vector2 min, Vector2 max, Vector2 size, Vector2 pos)
+        { if (rect == null) return; rect.anchorMin=min; rect.anchorMax=max; rect.sizeDelta=size; rect.anchoredPosition=pos; }
         private void BuildProfileAndResources()
         {
             RectTransform profile = Box("Player Profile", safeAreaRoot, new Vector2(0,1), new Vector2(0.43f,1), new Vector2(0,116), new Vector2(0,-4), panel);
@@ -103,7 +137,7 @@ namespace SandsOfLegends.UI
 
         private void BuildEventRail()
         {
-            RectTransform rail = Box("Limited Events Rail", safeAreaRoot, new Vector2(0,0.69f), new Vector2(0.22f,0.69f), new Vector2(0,420), new Vector2(0,0), Color.clear);
+            eventRail = Box("Limited Events Rail", safeAreaRoot, new Vector2(0,0.69f), new Vector2(0.22f,0.69f), new Vector2(0,420), new Vector2(0,0), Color.clear);
             AddNav(rail,"EVENTS",onEvents, gold, 68);
             AddNav(rail,"DAILY LOGIN",onDailyLogin,turquoise,68);
             AddNav(rail,"BATTLE PASS",onBattlePass,gold,68);
@@ -112,14 +146,16 @@ namespace SandsOfLegends.UI
 
         private void BuildSideMenus()
         {
-            RectTransform left = Box("Left Menu", safeAreaRoot, new Vector2(0,0.34f), new Vector2(0,0.34f), new Vector2(190,360), Vector2.zero, Color.clear);
+            leftMenu = Box("Left Menu", safeAreaRoot, new Vector2(0,0.34f), new Vector2(0,0.34f), new Vector2(190,360), Vector2.zero, Color.clear);
+            RectTransform left = leftMenu;
             left.pivot = new Vector2(0f,0.5f);
             AddNav(left,"HEROES",onHeroes,turquoise,72);
             AddNav(left,"FORMATION",onFormation,gold,72);
             AddNav(left,"QUESTS",onQuests,turquoise,72);
             AddNav(left,"EQUIPMENT",onEquipment,gold,72);
 
-            RectTransform right = Box("Right Menu", safeAreaRoot, new Vector2(1,0.34f), new Vector2(1,0.34f), new Vector2(190,360), Vector2.zero, Color.clear);
+            rightMenu = Box("Right Menu", safeAreaRoot, new Vector2(1,0.34f), new Vector2(1,0.34f), new Vector2(190,360), Vector2.zero, Color.clear);
+            RectTransform right = rightMenu;
             right.pivot = new Vector2(1f,0.5f);
             AddNav(right,"SUMMON",onSummon,gold,72);
             AddNav(right,"ARENA",onArena,turquoise,72);
@@ -129,7 +165,8 @@ namespace SandsOfLegends.UI
 
         private void BuildIdleRewards()
         {
-            RectTransform idle = Box("Idle Rewards Card", safeAreaRoot, new Vector2(0.24f,0.20f), new Vector2(0.76f,0.20f), new Vector2(0,142), Vector2.zero, panel);
+            idleCard = Box("Idle Rewards Card", safeAreaRoot, new Vector2(0.24f,0.20f), new Vector2(0.76f,0.20f), new Vector2(0,142), Vector2.zero, panel);
+            RectTransform idle = idleCard;
             idleText = AddText("IDLE REWARDS  •  00:00:00", idle, 20, cream, TextAnchor.MiddleCenter, new Vector2(8,62), new Vector2(-8,-2));
             idleAmountText = AddText("+0 GOLD  •  +0 XP", idle, 17, turquoise, TextAnchor.MiddleCenter, new Vector2(8,36), new Vector2(-8,-26));
             idleClaimButton = MakeButton("CLAIM REWARDS", idle, gold, 210, 48);
@@ -141,7 +178,8 @@ namespace SandsOfLegends.UI
 
         private void BuildCampaign()
         {
-            RectTransform area = Box("Campaign CTA", safeAreaRoot, new Vector2(0.24f,0.105f), new Vector2(0.76f,0.105f), new Vector2(0,128), Vector2.zero, deep);
+            campaignArea = Box("Campaign CTA", safeAreaRoot, new Vector2(0.24f,0.105f), new Vector2(0.76f,0.105f), new Vector2(0,128), Vector2.zero, deep);
+            RectTransform area = campaignArea;
             stageText = AddText("THE SEVEN SANDS  •  STAGE 1", area, 22, cream, TextAnchor.MiddleCenter, new Vector2(8,54), new Vector2(-8,0));
             Button enter = MakeButton("⚔  CAMPAIGN", area, gold, 0, 68);
             RectTransform er = enter.GetComponent<RectTransform>();
@@ -152,7 +190,8 @@ namespace SandsOfLegends.UI
 
         private void BuildBottomNavigation()
         {
-            RectTransform nav = Box("Bottom Navigation", safeAreaRoot, new Vector2(0,0), new Vector2(1,0), new Vector2(0,116), new Vector2(0,0), deep);
+            bottomNavigation = Box("Bottom Navigation", safeAreaRoot, new Vector2(0,0), new Vector2(1,0), new Vector2(0,116), new Vector2(0,0), deep);
+            RectTransform nav = bottomNavigation;
             string[] labels = { "HOME", "HEROES", "BAG", "GUILD", "ARENA", "MORE" };
             UnityEvent[] actions = { null, onHeroes, onBackpack, onAllies, onArena, onMore };
             for (int i=0;i<labels.Length;i++)
