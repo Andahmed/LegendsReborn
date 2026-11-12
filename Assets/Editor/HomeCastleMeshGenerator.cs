@@ -112,7 +112,6 @@ namespace SandsOfLegends.Editor
             BuildKeep(builders);
             BuildBanners(builders);
             BuildStairsAndDais(builders);
-            BuildTorches(builders);
 
             GameObject root = new GameObject("Legends Reborn - Original Castle Mesh");
             root.transform.position = Vector3.zero;
