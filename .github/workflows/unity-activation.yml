@@ -33,9 +33,9 @@ jobs:
             {
               echo "## Unity Personal secrets are not ready"
               echo "Add the following repository Actions secrets:"
-              for name in "${missing[@]}"; do echo "- `$name`"; done
+              for name in "${missing[@]}"; do echo "- $name"; done
               echo ""
-              echo "See `docs/UNITY_LICENSE_SETUP.md` for the supported Unity Hub activation steps."
+              echo "See docs/UNITY_LICENSE_SETUP.md for the supported Unity Hub activation steps."
             } >> "$GITHUB_STEP_SUMMARY"
             echo "::warning::Missing Unity repository secrets: ${missing[*]}"
           fi
