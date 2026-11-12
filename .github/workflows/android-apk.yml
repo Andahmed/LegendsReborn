@@ -63,11 +63,18 @@ jobs:
           buildMethod: SandsOfLegends.EditorTools.BuildScript.BuildAndroid
           allowDirtyBuild: true
 
+      - name: Verify APK output
+        if: steps.readiness.outputs.ready == 'true'
+        shell: bash
+        run: |
+          test -s build/Android/Android.apk
+          ls -lh build/Android/Android.apk
+
       - name: Upload APK
         if: steps.readiness.outputs.ready == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: SandsOfLegends-Android-APK
-          path: Builds/SandsOfLegends.apk
+          path: build/Android/Android.apk
           if-no-files-found: error
           retention-days: 14
