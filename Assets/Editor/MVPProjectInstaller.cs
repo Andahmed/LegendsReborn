@@ -10,38 +10,54 @@ namespace SandsOfLegends.Editor
 {
     public static class MVPProjectInstaller
     {
+        public const string BootScenePath = "Assets/Scenes/Boot.unity";
         public const string HomeScenePath = "Assets/Scenes/Home.unity";
 
         [MenuItem("Sands/Setup MVP Home Scene")]
         public static void SetupMenu()
         {
             EnsureMvpScene();
-            EditorUtility.DisplayDialog("Sands of Legends", "Home scene is ready. Install MVP Art from Legends Reborn > Art, then press Play.", "OK");
+            EditorUtility.DisplayDialog("Sands of Legends", "Boot and Home scenes are ready. Boot initializes the save and routes into Home.", "OK");
         }
 
         public static void EnsureMvpScene()
         {
             HomeCastleMeshGenerator.GenerateIfMissing();
             Directory.CreateDirectory("Assets/Scenes");
-            if (!File.Exists(HomeScenePath))
-            {
-                Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-                GameObject systems = new GameObject("Game Systems");
-                systems.AddComponent<GameBootstrap>();
-                GameObject home = new GameObject("Home Screen");
-                home.AddComponent<HomeScreen>();
-                GameObject lightObject = new GameObject("Fallback Directional Light");
-                Light light = lightObject.AddComponent<Light>();
-                light.type = LightType.Directional;
-                light.intensity = 1.1f;
-                lightObject.transform.rotation = Quaternion.Euler(45f, -32f, 0f);
-                EditorSceneManager.SaveScene(scene, HomeScenePath);
-            }
+            EnsureBootScene();
+            EnsureHomeScene();
 
+            // Boot must be first so GameBootstrap owns state before Home UI binds.
             EditorBuildSettings.scenes = new[]
             {
+                new EditorBuildSettingsScene(BootScenePath, true),
                 new EditorBuildSettingsScene(HomeScenePath, true)
             };
+        }
+
+        private static void EnsureBootScene()
+        {
+            // Preserve any existing Boot scene and its authored objects.
+            if (File.Exists(BootScenePath)) return;
+
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            new GameObject("Game Systems").AddComponent<GameBootstrap>();
+            EditorSceneManager.SaveScene(scene, BootScenePath);
+        }
+
+        private static void EnsureHomeScene()
+        {
+            // Preserve any existing Home scene and its authored objects.
+            if (File.Exists(HomeScenePath)) return;
+
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            new GameObject("Home Screen").AddComponent<HomeScreen>();
+            GameObject lightObject = new GameObject("Fallback Directional Light");
+            Light light = lightObject.AddComponent<Light>();
+            light.type = LightType.Directional;
+            light.intensity = 1.1f;
+            lightObject.transform.rotation = Quaternion.Euler(45f, -32f, 0f);
+            EditorSceneManager.SaveScene(scene, HomeScenePath);
         }
     }
 }
