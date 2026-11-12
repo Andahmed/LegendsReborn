@@ -47,6 +47,18 @@ namespace SandsOfLegends.EditorTools
 
             Debug.Log("Android APK created: " + Path.GetFullPath(options.locationPathName) +
                 " (" + report.summary.totalSize + " bytes)");
+
+            // GameCI's custom build-method validator requires these exact success markers.
+            // Emit them only after Unity reports success and the APK has been verified.
+            Console.WriteLine("Build succeeded!");
+            Console.WriteLine(Environment.NewLine +
+                "###########################" + Environment.NewLine +
+                "#      Build results      #" + Environment.NewLine +
+                "###########################" + Environment.NewLine + Environment.NewLine +
+                "Duration: " + report.summary.totalTime + Environment.NewLine +
+                "Warnings: " + report.summary.totalWarnings + Environment.NewLine +
+                "Errors: " + report.summary.totalErrors + Environment.NewLine +
+                "Size: " + report.summary.totalSize + " bytes" + Environment.NewLine);
         }
 
         private static void ConfigureAndroid()
