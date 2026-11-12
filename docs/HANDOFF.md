@@ -18,9 +18,9 @@ Working title: **Sands of Legends**. Unity 2022.3.62f3, Android IL2CPP/ARM64 tar
 - GameFlowController connects the Home HUD UnityEvents to Campaign, Heroes, Formation, Summon, Equipment, Backpack, Quests and feature-status screens. Long screens and the battle HUD now use a scrollable viewport.
 - Heroes, Campaign and Summon screen classes now expose validated gameplay operations; BattleHud controls speed/ultimates.
 - HeroView loads Quaternius FBX models when imported, with forward attack lunges, hit reactions and a defeat fall; combat feedback uses floating damage numbers. Summon results reuse the approved hero portraits.
-- 21 Quaternius FBX files are bundled in Assets/Resources: 11 modular dungeon pieces, four animated monster types, and six nature props.
+- 27 Quaternius FBX files are bundled in Assets/Resources: 11 modular dungeon pieces, four animated monster types, six nature props, and six temporary humanoid home hero models.
 - HomeWorldStage loads an original editor-generated low-poly castle Mesh prefab (bevelled stone blocks, arched gate, polygonal towers, crenellations, banners and courtyard) and places the committed Quaternius nature meshes around it. It does not instantiate Unity primitive cubes for the castle.
-- QuaterniusAssetImporter copies any missing character rigs from a locally selected legacy Free3D folder. It avoids unauthenticated downloads from the private legacy repository.
+- QuaterniusAssetImporter can copy any missing character rigs from a locally selected Free3D folder. The six MVP home hero FBXs are now committed under `Assets/Resources/HomeHeroes/`; the source project is public at https://github.com/Andahmed/LegendsStyleRPG.
 - MVPProjectInstaller generates Assets/Scenes/Home.unity, adds GameBootstrap + HomeScreen and registers the scene in Build Settings. BuildScript calls it before Android builds.
 
 ### Development backend
@@ -34,7 +34,7 @@ Working title: **Sands of Legends**. Unity 2022.3.62f3, Android IL2CPP/ARM64 tar
 1. Open with Unity 2022.3.62f3.
 2. Run **Sands → Setup MVP Home Scene**. This generates the original castle Mesh assets and its Resources prefab, then creates/updates Home.unity.
 3. The Quaternius castle, monster and nature FBXs are already inside Assets/Resources and will import automatically.
-4. Run **Legends Reborn → Art → Install MVP Art** and select the local Free3D folder from the legacy LegendsStyleRPG checkout to copy the six humanoid character FBXs.
+4. The six temporary humanoid home hero FBXs are already committed under `Assets/Resources/HomeHeroes/`. For any additional legacy art, use the public `Andahmed/LegendsStyleRPG` checkout and the **Legends Reborn → Art → Install MVP Art** menu.
 5. Wait for asset import, then open Home.unity and press Play.
 6. From Server, install requirements, run uvicorn and python -m unittest discover -s tests -v.
 7. Run **Sands → Validate MVP Assets** and inspect `Reports/MVP_ASSET_READINESS.md` for missing files and import status.
