@@ -17,7 +17,7 @@ namespace SandsOfLegends.UI
             root.SetParent(transform, false);
             PlaceCastle();
             PlaceNature();
-            PlaceHeroes();
+            CreateSnowyBackdrop();
             ConfigureCamera();
             CreateWarmLights();
         }
@@ -64,6 +64,36 @@ namespace SandsOfLegends.UI
 
             // The dais top is y=0.7075 in the generated mesh; account for the castle's ground offset.
             castleDaisTop = (0.7075f - bounds.min.y) * fit;
+        }
+
+        private void CreateSnowyBackdrop()
+        {
+            // A distant alpine ridge gives the home city the bright mountain skyline of the approved reference.
+            GameObject ridge = new GameObject("Distant Snow Mountain Ridge");
+            ridge.transform.SetParent(root, false);
+            ridge.transform.localPosition = new Vector3(0f, 0f, 20f);
+            Mesh mesh = new Mesh();
+            Vector3[] vertices =
+            {
+                new Vector3(-28f,0f,0f), new Vector3(-21f,8f,0f), new Vector3(-15f,1f,0f),
+                new Vector3(-8f,11f,0f), new Vector3(-1f,1f,0f), new Vector3(7f,9f,0f),
+                new Vector3(14f,1f,0f), new Vector3(22f,10f,0f), new Vector3(29f,0f,0f),
+                new Vector3(-28f,0f,2f), new Vector3(-21f,8f,2f), new Vector3(-15f,1f,2f),
+                new Vector3(-8f,11f,2f), new Vector3(-1f,1f,2f), new Vector3(7f,9f,2f),
+                new Vector3(14f,1f,2f), new Vector3(22f,10f,2f), new Vector3(29f,0f,2f)
+            };
+            int[] triangles = { 0,1,9, 1,10,9, 1,2,10, 2,11,10, 2,3,11, 3,12,11, 3,4,12, 4,13,12, 4,5,13, 5,14,13, 5,6,14, 6,15,14, 6,7,15, 7,16,15, 7,8,16, 8,17,16 };
+            mesh.vertices = vertices;
+            mesh.triangles = triangles;
+            mesh.RecalculateNormals();
+            MeshFilter filter = ridge.AddComponent<MeshFilter>();
+            filter.sharedMesh = mesh;
+            MeshRenderer renderer = ridge.AddComponent<MeshRenderer>();
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null) shader = Shader.Find("Standard");
+            Material mountain = new Material(shader);
+            mountain.color = new Color(0.48f, 0.67f, 0.78f);
+            renderer.sharedMaterial = mountain;
         }
 
         private void PlaceNature()
@@ -175,18 +205,19 @@ namespace SandsOfLegends.UI
                 go.tag = "MainCamera";
             }
 
-            cam.transform.position = new Vector3(0f, 6.1f, -14.2f);
-            cam.transform.LookAt(new Vector3(0f, 3f, 3.3f));
-            cam.fieldOfView = 40f;
+            bool landscape = Screen.width > Screen.height;
+            cam.transform.position = landscape ? new Vector3(0f, 6.2f, -14.2f) : new Vector3(0f, 8.5f, -20.5f);
+            cam.transform.LookAt(landscape ? new Vector3(0f, 3.2f, 4.2f) : new Vector3(0f, 4.2f, 4.8f));
+            cam.fieldOfView = landscape ? 40f : 48f;
             cam.nearClipPlane = .1f;
             cam.farClipPlane = 120f;
             cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = new Color(.035f, .085f, .105f);
+            cam.backgroundColor = new Color(.48f, .76f, .94f);
 
-            RenderSettings.ambientLight = new Color(.48f, .49f, .46f);
+            RenderSettings.ambientLight = new Color(.72f, .78f, .82f);
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.ExponentialSquared;
-            RenderSettings.fogColor = new Color(.18f, .24f, .24f);
+            RenderSettings.fogColor = new Color(.62f, .79f, .88f);
             RenderSettings.fogDensity = .006f;
 
             Light[] lights = FindObjectsOfType<Light>();
