@@ -113,8 +113,8 @@ namespace SandsOfLegends.UI
             // A small emerald guardian statue and a blue crystal echo the reference artwork.
             CastlePart(castle, PrimitiveType.Sphere, new Vector3(4.25f, 1.55f, -5.0f), new Vector3(1.15f, 1.05f, 1.1f), green, "Dragon Guardian Head");
             CastlePart(castle, PrimitiveType.Sphere, new Vector3(4.25f, 1.25f, -5.55f), new Vector3(.9f, .48f, .72f), green, "Dragon Guardian Snout");
-            CastlePart(castle, PrimitiveType.Cone, new Vector3(3.75f, 2.15f, -4.95f), new Vector3(.38f, .8f, .38f), gold, "Guardian Horn L");
-            CastlePart(castle, PrimitiveType.Cone, new Vector3(4.75f, 2.15f, -4.95f), new Vector3(.38f, .8f, .38f), gold, "Guardian Horn R");
+            CastleCone(castle, new Vector3(3.75f, 2.15f, -4.95f), new Vector3(.38f, .8f, .38f), gold, "Guardian Horn L");
+            CastleCone(castle, new Vector3(4.75f, 2.15f, -4.95f), new Vector3(.38f, .8f, .38f), gold, "Guardian Horn R");
             CastlePart(castle, PrimitiveType.Cylinder, new Vector3(-4.1f, 1.35f, -5.0f), new Vector3(1.2f, .22f, 1.2f), gold, "Crystal Pedestal");
             CastlePart(castle, PrimitiveType.Cube, new Vector3(-4.1f, 2.15f, -5.0f), new Vector3(.78f, 1.2f, .78f), new Color(.15f,.66f,.96f), "Blue Crystal");
         }
@@ -127,12 +127,53 @@ namespace SandsOfLegends.UI
             CastlePart(parent, PrimitiveType.Cylinder,
                 basePosition + Vector3.up * (height - .12f),
                 new Vector3(diameter * 1.12f, .18f, diameter * 1.12f), trim, "Tower Gold Band");
-            CastlePart(parent, PrimitiveType.Cone,
+            CastleCone(parent,
                 basePosition + Vector3.up * (height + .95f),
                 new Vector3(diameter * 1.42f, 2.0f, diameter * 1.42f), roof, "Blue Tower Roof");
             CastlePart(parent, PrimitiveType.Sphere,
                 basePosition + Vector3.up * (height + 2.0f),
                 new Vector3(.28f,.34f,.28f), trim, "Roof Finial");
+        }
+
+        private void CastleCone(Transform parent, Vector3 position, Vector3 scale, Color color, string partName)
+        {
+            const int sides = 8;
+            List<Vector3> vertices = new List<Vector3>();
+            List<int> triangles = new List<int>();
+            Vector3 apex = new Vector3(0f, .5f, 0f);
+            for (int i = 0; i < sides; i++)
+            {
+                float a0 = 2f * Mathf.PI * i / sides;
+                float a1 = 2f * Mathf.PI * (i + 1) / sides;
+                Vector3 p0 = new Vector3(Mathf.Cos(a0) * .5f, -.5f, Mathf.Sin(a0) * .5f);
+                Vector3 p1 = new Vector3(Mathf.Cos(a1) * .5f, -.5f, Mathf.Sin(a1) * .5f);
+                int start = vertices.Count;
+                vertices.Add(apex); vertices.Add(p1); vertices.Add(p0);
+                triangles.Add(start); triangles.Add(start + 1); triangles.Add(start + 2);
+                int baseStart = vertices.Count;
+                vertices.Add(new Vector3(0f, -.5f, 0f)); vertices.Add(p0); vertices.Add(p1);
+                triangles.Add(baseStart); triangles.Add(baseStart + 1); triangles.Add(baseStart + 2);
+            }
+            Mesh mesh = new Mesh();
+            mesh.name = "Castle Low Poly Cone";
+            mesh.SetVertices(vertices);
+            mesh.SetTriangles(triangles, 0);
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+
+            GameObject part = new GameObject(partName);
+            part.transform.SetParent(parent, false);
+            part.transform.localPosition = position;
+            part.transform.localScale = scale;
+            part.AddComponent<MeshFilter>().sharedMesh = mesh;
+            MeshRenderer renderer = part.AddComponent<MeshRenderer>();
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null) shader = Shader.Find("Standard");
+            Material material = new Material(shader);
+            material.color = color;
+            renderer.sharedMaterial = material;
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            renderer.receiveShadows = false;
         }
 
         private void CastlePart(Transform parent, PrimitiveType type, Vector3 position, Vector3 scale, Color color, string partName)
