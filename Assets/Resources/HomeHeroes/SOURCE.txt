@@ -1,0 +1,7 @@
+Source: public repository https://github.com/Andahmed/LegendsStyleRPG
+Source path: GameClient/Assets/Resources/GameArt/Free3D/Quaternius_RPGCharacters/FBX/
+Destination project: https://github.com/Andahmed/LegendsReborn
+Destination path: Assets/Resources/HomeHeroes/
+Files copied: Cleric.fbx, Monk.fbx, Ranger.fbx, Rogue.fbx, Warrior.fbx, Wizard.fbx
+
+These files are copied from the user's public LegendsStyleRPG project for use as temporary MVP home hero models. Do not modify the source repository as part of this change.
