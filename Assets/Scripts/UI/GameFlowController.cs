@@ -274,7 +274,7 @@ namespace SandsOfLegends.UI
                     "\nSTARS " + instance.Stars + "/5  •  ASCENSION " + instance.Ascension + "/4" +
                     "  •  " + instance.Shards + " shards";
                 UnitSpec details = card.ToSpec(instance.Level);
-                AddHeroPortrait(id);
+                AddHeroPortrait(card);
                 AddInfo("COMBAT STATS  •  HP " + details.Hp + "  •  ATK " + details.Atk +
                     "  •  DEF " + details.Def + "  •  SPD " + details.Spd, 52);
                 AddButton(panel, line + "\nTAP TO LEVEL UP", () => LevelUpHero(id), 116, teal);
@@ -290,30 +290,55 @@ namespace SandsOfLegends.UI
             }
         }
 
-        private void AddHeroPortrait(string heroId)
+        private void AddHeroPortrait(HeroCardData card)
         {
-            if (contentRoot == null || string.IsNullOrEmpty(heroId)) return;
-            Sprite sprite;
-            if (!portraitCache.TryGetValue(heroId, out sprite))
-            {
-                Texture2D texture = Resources.Load<Texture2D>("HeroPortraits/hero_" + heroId);
-                if (texture == null) return;
-                sprite = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height),
-                    new Vector2(.5f, .5f), 100f, 0, SpriteMeshType.FullRect);
-                portraitCache[heroId] = sprite;
-            }
+            if (contentRoot == null || card == null) return;
 
-            GameObject go = new GameObject("Hero Portrait - " + heroId,
+            Color tint = cream;
+            if (!string.IsNullOrEmpty(card.TintHex))
+                ColorUtility.TryParseHtmlString(card.TintHex, out tint);
+
+            // The card backdrop always uses the catalog tint, including heroes without portrait art.
+            GameObject frame = new GameObject("Hero Card Art - " + card.Id,
                 typeof(RectTransform), typeof(Image), typeof(LayoutElement));
-            go.transform.SetParent(contentRoot, false);
-            Image image = go.GetComponent<Image>();
-            image.sprite = sprite;
-            image.preserveAspect = true;
-            image.raycastTarget = false;
-            LayoutElement layout = go.GetComponent<LayoutElement>();
+            frame.transform.SetParent(contentRoot, false);
+            Image frameImage = frame.GetComponent<Image>();
+            frameImage.color = new Color(tint.r, tint.g, tint.b, .24f);
+            frameImage.raycastTarget = false;
+            LayoutElement layout = frame.GetComponent<LayoutElement>();
             layout.minHeight = 210f;
             layout.preferredHeight = 210f;
             layout.flexibleWidth = 1f;
+
+            if (string.IsNullOrEmpty(card.PortraitId)) return;
+
+            Sprite sprite;
+            if (!portraitCache.TryGetValue(card.PortraitId, out sprite))
+            {
+                Texture2D texture = Resources.Load<Texture2D>("HeroPortraits/" + card.PortraitId);
+                if (texture == null)
+                {
+                    Debug.LogWarning("Missing hero portrait resource: " + card.PortraitId);
+                    return;
+                }
+                sprite = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height),
+                    new Vector2(.5f, .5f), 100f, 0, SpriteMeshType.FullRect);
+                portraitCache[card.PortraitId] = sprite;
+            }
+
+            GameObject portrait = new GameObject("Hero Portrait - " + card.PortraitId,
+                typeof(RectTransform), typeof(Image));
+            portrait.transform.SetParent(frame.transform, false);
+            RectTransform portraitRect = portrait.GetComponent<RectTransform>();
+            portraitRect.anchorMin = new Vector2(.18f, .04f);
+            portraitRect.anchorMax = new Vector2(.82f, .96f);
+            portraitRect.offsetMin = Vector2.zero;
+            portraitRect.offsetMax = Vector2.zero;
+            Image image = portrait.GetComponent<Image>();
+            image.sprite = sprite;
+            image.preserveAspect = true;
+            image.raycastTarget = false;
+            image.color = Color.Lerp(Color.white, tint, .18f);
         }
 
         private void LevelUpHero(string heroId)
