@@ -28,11 +28,13 @@ namespace SandsOfLegends.EditorTools
             if (scenes.Length == 0)
                 throw new InvalidOperationException("No enabled scenes are registered in Build Settings.");
 
-            Directory.CreateDirectory("Builds");
+            // Match GameCI's configured output location exactly.
+            const string outputPath = "build/Android/Android.apk";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
             var options = new BuildPlayerOptions
             {
                 scenes = scenes,
-                locationPathName = "Builds/SandsOfLegends.apk",
+                locationPathName = outputPath,
                 target = BuildTarget.Android,
                 options = BuildOptions.None
             };
@@ -47,6 +49,18 @@ namespace SandsOfLegends.EditorTools
 
             Debug.Log("Android APK created: " + Path.GetFullPath(options.locationPathName) +
                 " (" + report.summary.totalSize + " bytes)");
+
+            // GameCI validates custom build methods by scanning Unity logs for these markers.
+            // Emit both supported success formats only after Unity reports a successful build.
+            Console.WriteLine("Build succeeded!");
+            Console.WriteLine(Environment.NewLine +
+                "###########################" + Environment.NewLine +
+                "#      Build results      #" + Environment.NewLine +
+                "###########################" + Environment.NewLine + Environment.NewLine +
+                "Duration: " + report.summary.totalTime + Environment.NewLine +
+                "Warnings: " + report.summary.totalWarnings + Environment.NewLine +
+                "Errors: " + report.summary.totalErrors + Environment.NewLine +
+                "Size: " + report.summary.totalSize + " bytes" + Environment.NewLine);
         }
 
         private static void ConfigureAndroid()

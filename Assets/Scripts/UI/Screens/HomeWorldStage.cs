@@ -10,16 +10,24 @@ namespace SandsOfLegends.UI
     {
         private Transform root;
         private float castleDaisTop = 0.91f;
+        private bool lastLandscape;
 
         private void Awake()
         {
             root = new GameObject("Home World - Castle Mesh Stage").transform;
             root.SetParent(transform, false);
             PlaceCastle();
+            PlaceCityDistrict();
             PlaceNature();
-            PlaceHeroes();
+            CreateSnowyBackdrop();
             ConfigureCamera();
             CreateWarmLights();
+        }
+
+        private void Update()
+        {
+            bool landscape = Screen.width > Screen.height;
+            if (landscape != lastLandscape) ConfigureCamera();
         }
 
         private void OnEnable()
@@ -66,6 +74,36 @@ namespace SandsOfLegends.UI
             castleDaisTop = (0.7075f - bounds.min.y) * fit;
         }
 
+        private void CreateSnowyBackdrop()
+        {
+            // A distant alpine ridge gives the home city the bright mountain skyline of the approved reference.
+            GameObject ridge = new GameObject("Distant Snow Mountain Ridge");
+            ridge.transform.SetParent(root, false);
+            ridge.transform.localPosition = new Vector3(0f, 0f, 20f);
+            Mesh mesh = new Mesh();
+            Vector3[] vertices =
+            {
+                new Vector3(-28f,0f,0f), new Vector3(-21f,8f,0f), new Vector3(-15f,1f,0f),
+                new Vector3(-8f,11f,0f), new Vector3(-1f,1f,0f), new Vector3(7f,9f,0f),
+                new Vector3(14f,1f,0f), new Vector3(22f,10f,0f), new Vector3(29f,0f,0f),
+                new Vector3(-28f,0f,2f), new Vector3(-21f,8f,2f), new Vector3(-15f,1f,2f),
+                new Vector3(-8f,11f,2f), new Vector3(-1f,1f,2f), new Vector3(7f,9f,2f),
+                new Vector3(14f,1f,2f), new Vector3(22f,10f,2f), new Vector3(29f,0f,2f)
+            };
+            int[] triangles = { 0,1,9, 1,10,9, 1,2,10, 2,11,10, 2,3,11, 3,12,11, 3,4,12, 4,13,12, 4,5,13, 5,14,13, 5,6,14, 6,15,14, 6,7,15, 7,16,15, 7,8,16, 8,17,16 };
+            mesh.vertices = vertices;
+            mesh.triangles = triangles;
+            mesh.RecalculateNormals();
+            MeshFilter filter = ridge.AddComponent<MeshFilter>();
+            filter.sharedMesh = mesh;
+            MeshRenderer renderer = ridge.AddComponent<MeshRenderer>();
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null) shader = Shader.Find("Standard");
+            Material mountain = new Material(shader);
+            mountain.color = new Color(0.48f, 0.67f, 0.78f);
+            renderer.sharedMaterial = mountain;
+        }
+
         private void PlaceNature()
         {
             PlaceNatureAsset("PalmTree_1", new Vector3(-8.2f, 0f, 3.4f), new Vector3(2.8f, 5.6f, 2.8f));
@@ -104,6 +142,124 @@ namespace SandsOfLegends.UI
                 size.z > .0001f ? targetSize.z / size.z : 1f);
             // Align the bottom of the imported mesh with the courtyard instead of assuming its pivot is at the feet.
             instance.transform.localPosition = position + Vector3.up * (-bounds.min.y * scaleY);
+        }
+
+
+        // Builds a layered fantasy city around the keep. All pieces are generated at runtime
+        // from lightweight primitives so the home scene does not depend on missing external art.
+        private void PlaceCityDistrict()
+        {
+            Material stone = MakeMaterial("City Warm Ivory", new Color(.78f, .72f, .60f));
+            Material lightStone = MakeMaterial("City Pale Limestone", new Color(.91f, .84f, .70f));
+            Material roof = MakeMaterial("City Deep Teal Roof", new Color(.075f, .34f, .36f));
+            Material roofLight = MakeMaterial("City Turquoise Roof", new Color(.12f, .52f, .52f));
+            Material gold = MakeMaterial("City Gold Trim", new Color(.88f, .62f, .25f));
+            Material glass = MakeMaterial("City Blue Windows", new Color(.30f, .67f, .78f));
+            Material grass = MakeMaterial("City Terrace Green", new Color(.31f, .48f, .31f));
+            Material cliff = MakeMaterial("Floating Island Stone", new Color(.40f, .48f, .50f));
+
+            // Raised terraces make the settlement read as a connected city, not isolated props.
+            CityBlock("West Lower Terrace", new Vector3(-10.0f, -.12f, 5.1f), new Vector3(7.2f,.55f,8.2f), grass);
+            CityBlock("East Lower Terrace", new Vector3(10.0f, -.12f, 5.3f), new Vector3(7.2f,.55f,8.4f), grass);
+            CityBlock("West Upper Terrace", new Vector3(-10.3f, .62f, 10.0f), new Vector3(6.0f,.55f,6.0f), lightStone);
+            CityBlock("East Upper Terrace", new Vector3(10.3f, .62f, 10.2f), new Vector3(6.0f,.55f,6.0f), lightStone);
+
+            // Three depth bands of buildings frame the central castle and preserve its silhouette.
+            CityHouse("West Market Hall", new Vector3(-10.1f, .22f, 3.2f), new Vector3(3.4f,3.0f,3.1f), stone, roof, gold, glass, 1);
+            CityHouse("West Guild House", new Vector3(-11.5f, .92f, 9.1f), new Vector3(2.5f,3.7f,2.7f), lightStone, roofLight, gold, glass, 2);
+            CityHouse("West High Tower", new Vector3(-8.0f, .92f, 11.0f), new Vector3(2.2f,5.2f,2.4f), stone, roof, gold, glass, 3);
+            CityHouse("East Inn", new Vector3(10.0f, .22f, 3.0f), new Vector3(3.5f,3.2f,3.0f), lightStone, roofLight, gold, glass, 1);
+            CityHouse("East Workshop", new Vector3(11.6f, .92f, 8.8f), new Vector3(2.6f,3.6f,2.8f), stone, roof, gold, glass, 2);
+            CityHouse("East High Tower", new Vector3(8.0f, .92f, 11.2f), new Vector3(2.2f,5.0f,2.4f), lightStone, roofLight, gold, glass, 3);
+
+            // Small rear skyline buildings fill the gap between the keep and the mountains.
+            CityHouse("Rear West Spire", new Vector3(-5.8f, .6f, 14.2f), new Vector3(2.0f,4.4f,2.2f), stone, roof, gold, glass, 3);
+            CityHouse("Rear East Spire", new Vector3(5.8f, .6f, 14.4f), new Vector3(2.0f,4.6f,2.2f), lightStone, roofLight, gold, glass, 3);
+            CityHouse("Rear Central Manor", new Vector3(0f, .55f, 15.0f), new Vector3(3.4f,3.0f,2.5f), stone, roof, gold, glass, 2);
+
+            // Rocky undersides and snowy ledges give the city a mountain-settlement foundation.
+            CityBlock("West Floating Rock", new Vector3(-10.1f,-1.8f,8.0f), new Vector3(5.8f,3.1f,6.0f), cliff);
+            CityBlock("East Floating Rock", new Vector3(10.1f,-1.8f,8.2f), new Vector3(5.8f,3.1f,6.0f), cliff);
+            CityBlock("West Snow Ledge", new Vector3(-10.1f,.22f,1.15f), new Vector3(7.1f,.18f,1.0f), lightStone);
+            CityBlock("East Snow Ledge", new Vector3(10.1f,.22f,1.15f), new Vector3(7.1f,.18f,1.0f), lightStone);
+        }
+
+        private Material MakeMaterial(string materialName, Color color)
+        {
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null) shader = Shader.Find("Standard");
+            Material material = new Material(shader);
+            material.name = materialName;
+            material.color = color;
+            return material;
+        }
+
+        private void CityBlock(string objectName, Vector3 position, Vector3 size, Material material)
+        {
+            GameObject block = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            block.name = objectName;
+            block.transform.SetParent(root, false);
+            block.transform.localPosition = position;
+            block.transform.localScale = size;
+            block.GetComponent<Renderer>().sharedMaterial = material;
+        }
+
+        private void CityHouse(string objectName, Vector3 basePosition, Vector3 size,
+            Material wall, Material roof, Material trim, Material window, int towerCount)
+        {
+            float width = size.x;
+            float height = size.y;
+            float depth = size.z;
+            CityBlock(objectName + " Stone Body", basePosition + Vector3.up * (height * .5f),
+                new Vector3(width, height, depth), wall);
+            CityBlock(objectName + " Foundation", basePosition + Vector3.up * .16f,
+                new Vector3(width + .22f, .32f, depth + .22f), trim);
+
+            // Stepped pitched roof and a small ridge cap.
+            for (int roofSide = -1; roofSide <= 1; roofSide += 2)
+            {
+                GameObject roofPiece = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                roofPiece.name = objectName + " Pitched Roof " + roofSide;
+                roofPiece.transform.SetParent(root, false);
+                roofPiece.transform.localPosition = basePosition + new Vector3(0f, height + .27f, roofSide * depth * .19f);
+                roofPiece.transform.localScale = new Vector3(width + .55f, .18f, depth * .62f);
+                roofPiece.transform.localRotation = Quaternion.Euler(roofSide * 30f, 0f, 0f);
+                roofPiece.GetComponent<Renderer>().sharedMaterial = roof;
+            }
+            CityBlock(objectName + " Roof Ridge", basePosition + Vector3.up * (height + .43f),
+                new Vector3(width * .72f,.15f,.20f), trim);
+
+            // Tall corner turrets help vary the skyline without hiding the central keep.
+            for (int i = 0; i < towerCount; i++)
+            {
+                float side = (i % 2 == 0) ? -1f : 1f;
+                float x = side * width * .34f;
+                float z = (i >= 2) ? depth * .28f : -depth * .28f;
+                GameObject turret = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                turret.name = objectName + " Turret " + i;
+                turret.transform.SetParent(root, false);
+                turret.transform.localPosition = basePosition + new Vector3(x, height + .52f, z);
+                turret.transform.localScale = new Vector3(.48f,.72f,.48f);
+                turret.GetComponent<Renderer>().sharedMaterial = wall;
+                GameObject cap = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                cap.name = objectName + " Turret Roof " + i;
+                cap.transform.SetParent(root, false);
+                cap.transform.localPosition = basePosition + new Vector3(x, height + 1.22f, z);
+                cap.transform.localScale = new Vector3(.62f,.48f,.62f);
+                cap.GetComponent<Renderer>().sharedMaterial = roof;
+            }
+
+            // Front-facing windows and warm trim are deliberately kept simple for mobile rendering.
+            for (int floor = 0; floor < Mathf.Max(1, Mathf.FloorToInt(height / 1.35f)); floor++)
+            {
+                for (int side = -1; side <= 1; side += 2)
+                {
+                    CityBlock(objectName + " Window", basePosition + new Vector3(side * width * .23f,
+                        .82f + floor * 1.28f, -depth * .505f), new Vector3(.34f,.48f,.07f), window);
+                    CityBlock(objectName + " Window Frame", basePosition + new Vector3(side * width * .23f,
+                        .82f + floor * 1.28f, -depth * .54f), new Vector3(.42f,.055f,.045f), trim);
+                }
+            }
         }
 
         private void PlaceHeroes()
@@ -175,18 +331,20 @@ namespace SandsOfLegends.UI
                 go.tag = "MainCamera";
             }
 
-            cam.transform.position = new Vector3(0f, 6.1f, -14.2f);
-            cam.transform.LookAt(new Vector3(0f, 3f, 3.3f));
-            cam.fieldOfView = 40f;
+            bool landscape = Screen.width > Screen.height;
+            lastLandscape = landscape;
+            cam.transform.position = landscape ? new Vector3(0f, 8.0f, -20.0f) : new Vector3(0f, 10.0f, -25.0f);
+            cam.transform.LookAt(landscape ? new Vector3(0f, 3.7f, 6.0f) : new Vector3(0f, 4.5f, 6.5f));
+            cam.fieldOfView = landscape ? 48f : 55f;
             cam.nearClipPlane = .1f;
             cam.farClipPlane = 120f;
             cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = new Color(.035f, .085f, .105f);
+            cam.backgroundColor = new Color(.48f, .76f, .94f);
 
-            RenderSettings.ambientLight = new Color(.48f, .49f, .46f);
+            RenderSettings.ambientLight = new Color(.72f, .78f, .82f);
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.ExponentialSquared;
-            RenderSettings.fogColor = new Color(.18f, .24f, .24f);
+            RenderSettings.fogColor = new Color(.62f, .79f, .88f);
             RenderSettings.fogDensity = .006f;
 
             Light[] lights = FindObjectsOfType<Light>();

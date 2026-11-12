@@ -1,5 +1,9 @@
 # Work Log (newest first)
 
+## 2026-11-12 - GameCI custom build success markers
+**Done:** BuildScript prints GameCI's `Build succeeded!` marker and the `Build results` block (duration, warnings, errors and APK size) only after Unity reports a successful build. The Android workflow now treats a GameCI build-step failure as a failure; the APK existence and ZIP-integrity check remains an additional gate, not a replacement for build success.
+**Not verified:** The updated workflow has not yet run; Unity Editor/device rendering remains unverified.
+
 ## 2026-11-12 - Log Boot and Home scene generation during CI builds
 **Done:** MVPProjectInstaller now checks SaveScene results and emits explicit Unity log lines for generated Assets/Scenes/Boot.unity and Assets/Scenes/Home.unity. A failed save throws immediately instead of silently continuing.
 **Not verified:** The logs have not yet been observed in a real Unity/GameCI build; this is pending the first build with Unity Personal credentials.
