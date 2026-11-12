@@ -1,5 +1,9 @@
 # Work Log (newest first)
 
+## 2026-11-12 - A6 Local summon screen
+**Done:** Confirmed and documented the existing local x1/x10 summon UI, 300/2,700 Gem costs, pity display and result presentation through SummonScreen.TryPull/GachaSystem. Server integration remains intentionally deferred; no Server, Meta or HeroCatalog files changed.
+**Not verified:** لم يتم التحقق في Unity؛ summon button interaction, results layout and local save persistence require Unity Play Mode verification.
+
 ## 2026-11-12 - A0 Unity font crash guard
 **Done:** Replaced direct Arial loading with LegacyRuntime.ttf plus guarded Arial fallback in GameFlowController and HomeScreen; assigned the TextMesh font and font material in DamageNumbers.
 **Not verified:** لم يتم التحقق في Unity؛ CI/Android workflow was not run in this environment.
