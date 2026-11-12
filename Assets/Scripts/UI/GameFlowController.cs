@@ -277,7 +277,7 @@ namespace SandsOfLegends.UI
                 AddHeroPortrait(id);
                 AddInfo("COMBAT STATS  •  HP " + details.Hp + "  •  ATK " + details.Atk +
                     "  •  DEF " + details.Def + "  •  SPD " + details.Spd, 52);
-                AddButton(panel, line + "\nTAP TO LEVEL UP", () => LevelUpHero(id), 116, teal);
+                AddButton(panel, line + "\nTAP TO LEVEL UP", () => LevelUpHero(id), 116, GetHeroTint(card.TintHex));
                 if (instance.Stars < Progression.MaxStars)
                     AddButton(panel, "STAR UP  •  " + instance.Shards + " / " + nextStarCost + " SHARDS",
                         () => StarUpHero(id), 58, gold);
@@ -290,27 +290,54 @@ namespace SandsOfLegends.UI
             }
         }
 
+        private Color GetHeroTint(string tintHex)
+        {
+            Color tint;
+            if (!string.IsNullOrEmpty(tintHex) && ColorUtility.TryParseHtmlString(tintHex, out tint))
+                return tint;
+            return teal;
+        }
+
         private void AddHeroPortrait(string heroId)
         {
             if (contentRoot == null || string.IsNullOrEmpty(heroId)) return;
+            HeroCardData card = HeroCatalog.Get(heroId);
+            if (card == null || string.IsNullOrEmpty(card.PortraitId)) return;
+
+            string portraitId = card.PortraitId;
             Sprite sprite;
-            if (!portraitCache.TryGetValue(heroId, out sprite))
+            if (!portraitCache.TryGetValue(portraitId, out sprite))
             {
-                Texture2D texture = Resources.Load<Texture2D>("HeroPortraits/hero_" + heroId);
+                Texture2D texture = Resources.Load<Texture2D>("HeroPortraits/" + portraitId);
                 if (texture == null) return;
                 sprite = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height),
                     new Vector2(.5f, .5f), 100f, 0, SpriteMeshType.FullRect);
-                portraitCache[heroId] = sprite;
+                portraitCache[portraitId] = sprite;
             }
 
-            GameObject go = new GameObject("Hero Portrait - " + heroId,
+            GameObject plate = new GameObject("Hero Portrait Plate - " + heroId,
                 typeof(RectTransform), typeof(Image), typeof(LayoutElement));
-            go.transform.SetParent(contentRoot, false);
-            Image image = go.GetComponent<Image>();
+            plate.transform.SetParent(contentRoot, false);
+            Image plateImage = plate.GetComponent<Image>();
+            Color tint = GetHeroTint(card.TintHex);
+            tint.a = .24f;
+            plateImage.color = tint;
+            plateImage.raycastTarget = false;
+
+            GameObject portrait = new GameObject("Hero Portrait - " + portraitId,
+                typeof(RectTransform), typeof(Image));
+            portrait.transform.SetParent(plate.transform, false);
+            RectTransform portraitRect = portrait.GetComponent<RectTransform>();
+            portraitRect.anchorMin = new Vector2(.04f, .04f);
+            portraitRect.anchorMax = new Vector2(.96f, .96f);
+            portraitRect.offsetMin = Vector2.zero;
+            portraitRect.offsetMax = Vector2.zero;
+            Image image = portrait.GetComponent<Image>();
             image.sprite = sprite;
             image.preserveAspect = true;
             image.raycastTarget = false;
-            LayoutElement layout = go.GetComponent<LayoutElement>();
+
+            LayoutElement layout = plate.GetComponent<LayoutElement>();
             layout.minHeight = 210f;
             layout.preferredHeight = 210f;
             layout.flexibleWidth = 1f;

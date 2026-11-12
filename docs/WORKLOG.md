@@ -1,5 +1,9 @@
 # Work Log (newest first)
 
+## 2026-11-12 - A3b Hero portrait and tint metadata
+**Done:** Wired `HeroCardData.PortraitId` to the roster portrait resource lookup and `TintHex` to the portrait plate and hero-card accent. Missing portrait IDs safely omit the portrait; missing/invalid tints fall back to the existing teal accent.
+**Not verified:** Unity Editor import, roster rendering and Android runtime presentation remain unverified. Engine-Free CI does not compile Unity UI code.
+
 ## 2026-11-12 - B3 Hero visual metadata (GPT Lane B)
 - Added TintHex and PortraitId metadata for the 20 hero catalog entries. Engine-Free C# CI evidence is pending; no Unity verification.
 ## 2026-11-12 - A7 Boot to Home game flow
