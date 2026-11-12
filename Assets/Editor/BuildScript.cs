@@ -28,11 +28,11 @@ namespace SandsOfLegends.EditorTools
             if (scenes.Length == 0)
                 throw new InvalidOperationException("No enabled scenes are registered in Build Settings.");
 
-            Directory.CreateDirectory("Builds");
+            Directory.CreateDirectory(Path.Combine("build", "Android"));
             var options = new BuildPlayerOptions
             {
                 scenes = scenes,
-                locationPathName = "Builds/SandsOfLegends.apk",
+                locationPathName = Path.Combine("build", "Android", "Android.apk"),
                 target = BuildTarget.Android,
                 options = BuildOptions.None
             };
