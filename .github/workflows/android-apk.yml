@@ -61,7 +61,17 @@ jobs:
           unityVersion: 2022.3.62f3
           targetPlatform: Android
           buildMethod: SandsOfLegends.EditorTools.BuildScript.BuildAndroid
+          # BuildScript writes to Builds/SandsOfLegends.apk; GameCI must collect
+          # this same directory from its container and copy it back to the runner.
+          buildsPath: Builds
           allowDirtyBuild: true
+
+      - name: Verify APK output
+        if: steps.readiness.outputs.ready == 'true'
+        shell: bash
+        run: |
+          test -s Builds/SandsOfLegends.apk
+          ls -lh Builds/SandsOfLegends.apk
 
       - name: Upload APK
         if: steps.readiness.outputs.ready == 'true'
