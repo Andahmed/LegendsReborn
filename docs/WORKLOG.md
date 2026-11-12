@@ -1,5 +1,10 @@
 # Work Log (newest first)
 
+## 2026-11-12 - Log Boot and Home scene generation during CI builds
+**Done:** MVPProjectInstaller now checks SaveScene results and emits explicit Unity log lines for generated Assets/Scenes/Boot.unity and Assets/Scenes/Home.unity. A failed save throws immediately instead of silently continuing.
+**Not verified:** The logs have not yet been observed in a real Unity/GameCI build; this is pending the first build with Unity Personal credentials.
+
+
 ## 2026-11-12 - Unity Personal headless licensing for Android CI
 **Done:** Switched Android APK CI to `game-ci/unity-builder@v6.0.0` with `game-ci/cli v0.1.73`; readiness now requires only `UNITY_EMAIL` and `UNITY_PASSWORD`. Removed the obsolete Unity Activation workflow and replaced .ulf instructions with the CLI Personal flow, GitHub GUI secret setup, 2FA/undocumented-flag/E2E caveats. Kept the requested Android paths filters.
 **Not verified:** No live Unity Personal activation or Android APK build has yet been performed with these credentials. The upstream PR #246 explicitly had not completed live-account end-to-end testing.
