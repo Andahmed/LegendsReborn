@@ -32,7 +32,7 @@ namespace SandsOfLegends.EditorTools
             var options = new BuildPlayerOptions
             {
                 scenes = scenes,
-                locationPathName = "Builds/SandsOfLegends.apk",
+                locationPathName = Path.Combine("Builds", "Android", "SandsOfLegends.apk"),
                 target = BuildTarget.Android,
                 options = BuildOptions.None
             };
