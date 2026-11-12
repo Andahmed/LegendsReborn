@@ -6,6 +6,7 @@
 // STATUS: Implemented
 // =============================================================================
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using SandsOfLegends.Meta;
 using SandsOfLegends.Services;
 using SandsOfLegends.Core;
@@ -57,7 +58,33 @@ namespace SandsOfLegends.Bootstrap
             }
         }
 
+        private void OnEnable()
+        {
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        private void OnDisable()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+
         private void Start()
+        {
+            if (SceneManager.GetActiveScene().name != "Home" &&
+                Application.CanStreamedLevelBeLoaded("Home"))
+            {
+                SceneManager.LoadScene("Home");
+                return;
+            }
+            BindHomeScreen();
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (scene.name == "Home") BindHomeScreen();
+        }
+
+        private void BindHomeScreen()
         {
             HomeScreen home = FindObjectOfType<HomeScreen>();
             if (home == null) return;

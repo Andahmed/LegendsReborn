@@ -1,5 +1,9 @@
 # Work Log (newest first)
 
+## 2026-11-12 - A7 Boot to Home game flow
+**Done:** Added a generated Boot scene with the persistent GameBootstrap, automatic Boot -> Home routing, HomeScreen binding after scene load, and Build Settings order Boot then Home. Battle remains the existing in-Home presentation; victory/defeat results return to Home or offer the next stage.
+**Not verified:** لم يتم التحقق في Unity؛ generated scene contents, runtime sceneLoaded timing, Play Mode battle/result flow and Android build are pending CI/editor verification.
+
 ## 2026-11-12 - A6 Local summon screen
 **Done:** Confirmed and documented the existing local x1/x10 summon UI, 300/2,700 Gem costs, pity display and result presentation through SummonScreen.TryPull/GachaSystem. Server integration remains intentionally deferred; no Server, Meta or HeroCatalog files changed.
 **Not verified:** لم يتم التحقق في Unity؛ summon button interaction, results layout and local save persistence require Unity Play Mode verification.
