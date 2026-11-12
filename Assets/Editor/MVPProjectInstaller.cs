@@ -37,36 +37,26 @@ namespace SandsOfLegends.Editor
 
         private static void EnsureBootScene()
         {
-            Scene scene;
-            if (File.Exists(BootScenePath))
-                scene = EditorSceneManager.OpenScene(BootScenePath, OpenSceneMode.Single);
-            else
-                scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            // Preserve any existing Boot scene and its authored objects.
+            if (File.Exists(BootScenePath)) return;
 
-            if (Object.FindObjectOfType<GameBootstrap>() == null)
-                new GameObject("Game Systems").AddComponent<GameBootstrap>();
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            new GameObject("Game Systems").AddComponent<GameBootstrap>();
             EditorSceneManager.SaveScene(scene, BootScenePath);
         }
 
         private static void EnsureHomeScene()
         {
-            Scene scene;
-            if (File.Exists(HomeScenePath))
-                scene = EditorSceneManager.OpenScene(HomeScenePath, OpenSceneMode.Single);
-            else
-                scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            // Preserve any existing Home scene and its authored objects.
+            if (File.Exists(HomeScenePath)) return;
 
-            if (Object.FindObjectOfType<HomeScreen>() == null)
-                new GameObject("Home Screen").AddComponent<HomeScreen>();
-
-            if (Object.FindObjectOfType<Light>() == null)
-            {
-                GameObject lightObject = new GameObject("Fallback Directional Light");
-                Light light = lightObject.AddComponent<Light>();
-                light.type = LightType.Directional;
-                light.intensity = 1.1f;
-                lightObject.transform.rotation = Quaternion.Euler(45f, -32f, 0f);
-            }
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            new GameObject("Home Screen").AddComponent<HomeScreen>();
+            GameObject lightObject = new GameObject("Fallback Directional Light");
+            Light light = lightObject.AddComponent<Light>();
+            light.type = LightType.Directional;
+            light.intensity = 1.1f;
+            lightObject.transform.rotation = Quaternion.Euler(45f, -32f, 0f);
             EditorSceneManager.SaveScene(scene, HomeScenePath);
         }
     }
