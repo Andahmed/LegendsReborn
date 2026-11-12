@@ -70,14 +70,14 @@ jobs:
         if: steps.readiness.outputs.ready == 'true'
         shell: bash
         run: |
-          test -s Builds/SandsOfLegends.apk
-          ls -lh Builds/SandsOfLegends.apk
+          test -s Builds/Android/SandsOfLegends.apk
+          ls -lh Builds/Android/SandsOfLegends.apk
 
       - name: Upload APK
         if: steps.readiness.outputs.ready == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: SandsOfLegends-Android-APK
-          path: Builds/SandsOfLegends.apk
+          path: Builds/Android/SandsOfLegends.apk
           if-no-files-found: error
           retention-days: 14
