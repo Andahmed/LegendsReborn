@@ -216,15 +216,18 @@ namespace SandsOfLegends.UI
                 new Vector3(width + .22f, .32f, depth + .22f), trim);
 
             // Stepped pitched roof and a small ridge cap.
-            GameObject roofPiece = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            roofPiece.name = objectName + " Roof";
-            roofPiece.transform.SetParent(root, false);
-            roofPiece.transform.localPosition = basePosition + Vector3.up * (height + .16f);
-            roofPiece.transform.localScale = new Vector3(width + .55f, .24f, depth + .55f);
-            roofPiece.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
-            roofPiece.GetComponent<Renderer>().sharedMaterial = roof;
-            CityBlock(objectName + " Roof Ridge", basePosition + Vector3.up * (height + .34f),
-                new Vector3(width * .72f,.16f,.22f), trim);
+            for (int roofSide = -1; roofSide <= 1; roofSide += 2)
+            {
+                GameObject roofPiece = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                roofPiece.name = objectName + " Pitched Roof " + roofSide;
+                roofPiece.transform.SetParent(root, false);
+                roofPiece.transform.localPosition = basePosition + new Vector3(0f, height + .27f, roofSide * depth * .19f);
+                roofPiece.transform.localScale = new Vector3(width + .55f, .18f, depth * .62f);
+                roofPiece.transform.localRotation = Quaternion.Euler(roofSide * 30f, 0f, 0f);
+                roofPiece.GetComponent<Renderer>().sharedMaterial = roof;
+            }
+            CityBlock(objectName + " Roof Ridge", basePosition + Vector3.up * (height + .43f),
+                new Vector3(width * .72f,.15f,.20f), trim);
 
             // Tall corner turrets help vary the skyline without hiding the central keep.
             for (int i = 0; i < towerCount; i++)
@@ -330,9 +333,9 @@ namespace SandsOfLegends.UI
 
             bool landscape = Screen.width > Screen.height;
             lastLandscape = landscape;
-            cam.transform.position = landscape ? new Vector3(0f, 6.2f, -14.2f) : new Vector3(0f, 8.5f, -20.5f);
-            cam.transform.LookAt(landscape ? new Vector3(0f, 3.2f, 4.2f) : new Vector3(0f, 4.2f, 4.8f));
-            cam.fieldOfView = landscape ? 40f : 48f;
+            cam.transform.position = landscape ? new Vector3(0f, 8.0f, -20.0f) : new Vector3(0f, 10.0f, -25.0f);
+            cam.transform.LookAt(landscape ? new Vector3(0f, 3.7f, 6.0f) : new Vector3(0f, 4.5f, 6.5f));
+            cam.fieldOfView = landscape ? 48f : 55f;
             cam.nearClipPlane = .1f;
             cam.farClipPlane = 120f;
             cam.clearFlags = CameraClearFlags.SolidColor;
