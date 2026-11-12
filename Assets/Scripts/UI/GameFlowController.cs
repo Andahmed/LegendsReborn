@@ -273,7 +273,10 @@ namespace SandsOfLegends.UI
                     "\nLV " + instance.Level + "  •  " + card.Role + "  •  " + card.Faction +
                     "\nSTARS " + instance.Stars + "/5  •  ASCENSION " + instance.Ascension + "/4" +
                     "  •  " + instance.Shards + " shards";
+                UnitSpec details = card.ToSpec(instance.Level);
                 AddHeroPortrait(id);
+                AddInfo("COMBAT STATS  •  HP " + details.Hp + "  •  ATK " + details.Atk +
+                    "  •  DEF " + details.Def + "  •  SPD " + details.Spd, 52);
                 AddButton(panel, line + "\nTAP TO LEVEL UP", () => LevelUpHero(id), 116, teal);
                 if (instance.Stars < Progression.MaxStars)
                     AddButton(panel, "STAR UP  •  " + instance.Shards + " / " + nextStarCost + " SHARDS",

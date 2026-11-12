@@ -1,5 +1,9 @@
 # Work Log (newest first)
 
+## 2026-11-12 - A5 Roster details and progression UI
+**Done:** Extended the existing Heroes screen cards with level-scaled HP/ATK/DEF/SPD details from the existing hero data; list, portraits, level-up, star-up and ascension continue to use the existing Meta-backed operations. No Combat, Meta, Server or HeroCatalog files changed.
+**Not verified:** لم يتم التحقق في Unity؛ layout, portrait import and button interaction require Unity Play Mode/device verification.
+
 ## 2026-11-12 - A3 Battle event presentation
 **Done:** Added world-space HP bars to `HeroView`, updated them from damage/heal/death `BattleEvent` values, and retained the existing basic attack lunge, hit shake, ultimate motion and defeat fall presentation.
 **Not verified:** لم يتم التحقق في Unity؛ Battle scene rendering, Canvas layout, imported model presentation and Play Mode execution were not run in this environment.
