@@ -1,5 +1,9 @@
 # Work Log (newest first)
 
+## 2026-11-12 - A6 Local summon screen
+**Done:** Confirmed and documented the existing local x1/x10 summon UI, 300/2,700 Gem costs, pity display and result presentation through SummonScreen.TryPull/GachaSystem. Server integration remains intentionally deferred; no Server, Meta or HeroCatalog files changed.
+**Not verified:** لم يتم التحقق في Unity؛ summon button interaction, results layout and local save persistence require Unity Play Mode verification.
+
 ## 2026-11-12 - A5 Roster details and progression UI
 **Done:** Extended the existing Heroes screen cards with level-scaled HP/ATK/DEF/SPD details from the existing hero data; list, portraits, level-up, star-up and ascension continue to use the existing Meta-backed operations. No Combat, Meta, Server or HeroCatalog files changed.
 **Not verified:** لم يتم التحقق في Unity؛ layout, portrait import and button interaction require Unity Play Mode/device verification.
