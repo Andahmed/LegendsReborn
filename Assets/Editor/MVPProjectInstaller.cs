@@ -42,7 +42,9 @@ namespace SandsOfLegends.Editor
 
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             new GameObject("Game Systems").AddComponent<GameBootstrap>();
-            EditorSceneManager.SaveScene(scene, BootScenePath);
+            if (!EditorSceneManager.SaveScene(scene, BootScenePath))
+                throw new IOException("Failed to save generated scene: " + BootScenePath);
+            Debug.Log("[MVPProjectInstaller] Generated scene: " + BootScenePath);
         }
 
         private static void EnsureHomeScene()
@@ -57,7 +59,9 @@ namespace SandsOfLegends.Editor
             light.type = LightType.Directional;
             light.intensity = 1.1f;
             lightObject.transform.rotation = Quaternion.Euler(45f, -32f, 0f);
-            EditorSceneManager.SaveScene(scene, HomeScenePath);
+            if (!EditorSceneManager.SaveScene(scene, HomeScenePath))
+                throw new IOException("Failed to save generated scene: " + HomeScenePath);
+            Debug.Log("[MVPProjectInstaller] Generated scene: " + HomeScenePath);
         }
     }
 }
