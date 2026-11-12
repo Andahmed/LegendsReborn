@@ -1,5 +1,9 @@
 # Work Log (newest first)
 
+## 2026-11-12 - Unity activation summary shell fix
+**Done:** Removed shell command-substitution backticks from the missing-secret summary so the manual readiness workflow prints secret names and documentation path literally.
+**Not verified:** The workflow must be run again after this correction; repository secrets are still missing and Unity license validity is unverified.
+
 ## 2026-11-12 - Unity Personal activation workflow correction
 **Done:** Replaced the deprecated `unity-request-activation-file` action with a manual secret-readiness check. Updated the instructions to the currently supported Unity Hub Personal-license flow and documented the OS-specific `.ulf` locations.
 **Not verified:** The actual Unity license remains unvalidated until GameCI runs the Android build with the repository secrets.
