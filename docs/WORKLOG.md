@@ -1,5 +1,9 @@
 # Work Log (newest first)
 
+## 2026-11-12 - A7 Boot to Home game flow
+**Done:** Added a generated Boot scene with the persistent GameBootstrap, automatic Boot -> Home routing, HomeScreen binding after scene load, and Build Settings order Boot then Home. Battle remains the existing in-Home presentation; victory/defeat results return to Home or offer the next stage.
+**Not verified:** لم يتم التحقق في Unity؛ generated scene contents, runtime sceneLoaded timing, Play Mode battle/result flow and Android build are pending CI/editor verification.
+
 ## 2026-11-12 - A0 Unity font crash guard
 **Done:** Replaced direct Arial loading with LegacyRuntime.ttf plus guarded Arial fallback in GameFlowController and HomeScreen; assigned the TextMesh font and font material in DamageNumbers.
 **Not verified:** لم يتم التحقق في Unity؛ CI/Android workflow was not run in this environment.
