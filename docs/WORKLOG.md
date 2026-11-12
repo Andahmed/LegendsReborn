@@ -1,5 +1,10 @@
 # Work Log (newest first)
 
+## 2026-11-12 - Unity Personal headless licensing for Android CI
+**Done:** Switched Android APK CI to `game-ci/unity-builder@v6.0.0` with `game-ci/cli v0.1.73`; readiness now requires only `UNITY_EMAIL` and `UNITY_PASSWORD`. Removed the obsolete Unity Activation workflow and replaced .ulf instructions with the CLI Personal flow, GitHub GUI secret setup, 2FA/undocumented-flag/E2E caveats. Kept the requested Android paths filters.
+**Not verified:** No live Unity Personal activation or Android APK build has yet been performed with these credentials. The upstream PR #246 explicitly had not completed live-account end-to-end testing.
+
+
 ## 2026-11-12 - Unity activation summary shell fix
 **Done:** Removed shell command-substitution backticks from the missing-secret summary so the manual readiness workflow prints secret names and documentation path literally.
 **Not verified:** The workflow must be run again after this correction; repository secrets are still missing and Unity license validity is unverified.
