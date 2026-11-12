@@ -60,6 +60,7 @@ jobs:
           cliVersion: v0.1.73
           unityVersion: 2022.3.62f3
           targetPlatform: Android
+          buildPath: Builds
           buildMethod: SandsOfLegends.EditorTools.BuildScript.BuildAndroid
           allowDirtyBuild: true
 
