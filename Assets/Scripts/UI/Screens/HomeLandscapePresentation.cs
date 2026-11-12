@@ -4,8 +4,9 @@ using UnityEngine.UI;
 namespace SandsOfLegends.UI
 {
     /// <summary>
-    /// Landscape-only home game HUD: keeps the whole 3D world visible, with player/resources above,
-    /// feature shortcuts at the sides, and chat/navigation along the bottom edge.
+    /// Landscape presentation for the Home world. Keeps the 3D kingdom full-screen and arranges
+    /// the HUD into the familiar RPG layout: player/resources at top, event shortcuts above,
+    /// tappable features at the sides, and chat/navigation along the bottom.
     /// </summary>
     public sealed class HomeLandscapePresentation : MonoBehaviour
     {
@@ -28,10 +29,28 @@ namespace SandsOfLegends.UI
         {
             if (Screen.width <= 0 || Screen.height <= 0) return;
             if (lastWidth == Screen.width && lastHeight == Screen.height) return;
+
             lastWidth = Screen.width;
             lastHeight = Screen.height;
+            ApplyLandscapeCanvasScaling();
             ApplyCamera();
             ArrangeHud();
+        }
+
+        private void ApplyLandscapeCanvasScaling()
+        {
+            Canvas[] canvases = FindObjectsOfType<Canvas>();
+            for (int i = 0; i < canvases.Length; i++)
+            {
+                Canvas canvas = canvases[i];
+                if (canvas == null) continue;
+                CanvasScaler scaler = canvas.GetComponent<CanvasScaler>();
+                if (scaler == null) continue;
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1920f, 1080f);
+                scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+                scaler.matchWidthOrHeight = 0.5f;
+            }
         }
 
         private void ApplyCamera()
@@ -59,34 +78,32 @@ namespace SandsOfLegends.UI
             }
             if (safeArea == null) return;
 
-            CanvasScaler scaler = homeCanvas.GetComponent<CanvasScaler>();
-            if (scaler != null)
-            {
-                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-                scaler.referenceResolution = new Vector2(1920f, 1080f);
-                scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-                scaler.matchWidthOrHeight = 0.5f;
-            }
-
             safeArea.anchorMin = Vector2.zero;
             safeArea.anchorMax = Vector2.one;
-            safeArea.offsetMin = new Vector2(18f, 12f);
-            safeArea.offsetMax = new Vector2(-18f, -12f);
+            safeArea.offsetMin = new Vector2(18f, 10f);
+            safeArea.offsetMax = new Vector2(-18f, -10f);
 
-            Set(safeArea, "Player Profile", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(370f, 88f), new Vector2(0f, -4f), new Vector2(0f, 1f));
-            Set(safeArea, "Resource Strip", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(620f, 76f), new Vector2(0f, -4f), new Vector2(1f, 1f));
-            Set(safeArea, "Limited Events Rail", new Vector2(0.50f, 1f), new Vector2(0.50f, 1f), new Vector2(650f, 76f), new Vector2(0f, -86f), new Vector2(0.5f, 1f));
-            Set(safeArea, "Left Menu", new Vector2(0f, 0.48f), new Vector2(0f, 0.48f), new Vector2(138f, 300f), new Vector2(0f, 0f), new Vector2(0f, 0.5f));
-            Set(safeArea, "Right Menu", new Vector2(1f, 0.48f), new Vector2(1f, 0.48f), new Vector2(150f, 300f), new Vector2(0f, 0f), new Vector2(1f, 0.5f));
-            Set(safeArea, "Idle Rewards Card", new Vector2(0.50f, 0f), new Vector2(0.50f, 0f), new Vector2(300f, 94f), new Vector2(-170f, 90f), new Vector2(0.5f, 0f));
-            Set(safeArea, "Campaign CTA", new Vector2(0.50f, 0f), new Vector2(0.50f, 0f), new Vector2(300f, 94f), new Vector2(170f, 90f), new Vector2(0.5f, 0f));
-            Set(safeArea, "Bottom Navigation", new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(930f, 70f), new Vector2(0f, 0f), new Vector2(1f, 0f));
+            // Profile/resource bars share the top edge without covering the central castle.
+            Set(safeArea, "Player Profile", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(410f, 84f), new Vector2(0f, -4f), new Vector2(0f, 1f));
+            Set(safeArea, "Resource Strip", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(650f, 66f), new Vector2(0f, -4f), new Vector2(1f, 1f));
+            Set(safeArea, "Limited Events Rail", new Vector2(0.50f, 1f), new Vector2(0.50f, 1f), new Vector2(650f, 66f), new Vector2(0f, -76f), new Vector2(0.5f, 1f));
+
+            // Vertical side rails keep the center of the world clear and the labels legible.
+            Set(safeArea, "Left Menu", new Vector2(0f, 0.48f), new Vector2(0f, 0.48f), new Vector2(148f, 300f), new Vector2(0f, 0f), new Vector2(0f, 0.5f));
+            Set(safeArea, "Right Menu", new Vector2(1f, 0.48f), new Vector2(1f, 0.48f), new Vector2(158f, 300f), new Vector2(0f, 0f), new Vector2(1f, 0.5f));
+
+            // Bottom rewards and campaign actions sit above the chat/navigation strip.
+            Set(safeArea, "Idle Rewards Card", new Vector2(0.50f, 0f), new Vector2(0.50f, 0f), new Vector2(300f, 92f), new Vector2(-158f, 80f), new Vector2(0.5f, 0f));
+            Set(safeArea, "Campaign CTA", new Vector2(0.50f, 0f), new Vector2(0.50f, 0f), new Vector2(300f, 92f), new Vector2(158f, 80f), new Vector2(0.5f, 0f));
+            Set(safeArea, "Bottom Navigation", new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(940f, 66f), new Vector2(0f, 0f), new Vector2(1f, 0f));
 
             ArrangeResources();
-            ArrangeRail("Limited Events Rail", 4, 144f, 64f);
-            ArrangeRail("Left Menu", 4, 130f, 62f);
-            ArrangeRail("Right Menu", 4, 140f, 62f);
+            ArrangeRail("Limited Events Rail", false, 4);
+            ArrangeRail("Left Menu", true, 4);
+            ArrangeRail("Right Menu", true, 4);
             ArrangeBottomNavigation();
+            ArrangeCompactCard("Idle Rewards Card", "CLAIM REWARDS Button");
+            ArrangeCompactCard("Campaign CTA", "⚔  CAMPAIGN Button");
             BuildAuxiliaryHud();
         }
 
@@ -104,10 +121,12 @@ namespace SandsOfLegends.UI
                 item.anchorMax = new Vector2(edges[index + 1], 1f);
                 item.offsetMin = new Vector2(2f, 0f);
                 item.offsetMax = new Vector2(-2f, 0f);
+                Text text = item.GetComponent<Text>();
+                if (text != null) text.fontSize = 22;
             }
         }
 
-        private void ArrangeRail(string name, int count, float width, float height)
+        private void ArrangeRail(string name, bool verticalButtons, int expectedCount)
         {
             Transform rail = safeArea.Find(name);
             if (rail == null) return;
@@ -115,24 +134,43 @@ namespace SandsOfLegends.UI
             if (vertical != null) vertical.enabled = false;
             HorizontalLayoutGroup horizontal = rail.GetComponent<HorizontalLayoutGroup>();
             if (horizontal != null) horizontal.enabled = false;
-            for (int i = 0; i < rail.childCount; i++)
+
+            int count = Mathf.Max(1, rail.childCount);
+            for (int i = 0; i < count; i++)
             {
                 RectTransform button = rail.GetChild(i) as RectTransform;
                 if (button == null) continue;
-                button.anchorMin = new Vector2((float)i / count, 0f);
-                button.anchorMax = new Vector2((float)(i + 1) / count, 1f);
+                if (verticalButtons)
+                {
+                    float top = 1f - (float)i / count;
+                    float bottom = 1f - (float)(i + 1) / count;
+                    button.anchorMin = new Vector2(0f, bottom);
+                    button.anchorMax = new Vector2(1f, top);
+                }
+                else
+                {
+                    button.anchorMin = new Vector2((float)i / count, 0f);
+                    button.anchorMax = new Vector2((float)(i + 1) / count, 1f);
+                }
                 button.offsetMin = new Vector2(3f, 3f);
                 button.offsetMax = new Vector2(-3f, -3f);
+
+                Image image = button.GetComponent<Image>();
+                if (image != null) image.color = new Color(0.055f, 0.045f, 0.035f, 0.90f);
                 LayoutElement element = button.GetComponent<LayoutElement>();
                 if (element != null)
                 {
-                    element.minHeight = height;
-                    element.preferredHeight = height;
-                    element.minWidth = width / count;
-                    element.preferredWidth = width / count;
+                    element.minHeight = verticalButtons ? 64f : 58f;
+                    element.preferredHeight = verticalButtons ? 64f : 58f;
+                    element.minWidth = verticalButtons ? 140f : 150f;
+                    element.preferredWidth = verticalButtons ? 140f : 150f;
                 }
                 Text label = button.GetComponentInChildren<Text>();
-                if (label != null) label.fontSize = name == "Limited Events Rail" ? 16 : 15;
+                if (label != null)
+                {
+                    label.fontSize = verticalButtons ? 15 : 15;
+                    label.color = (i % 2 == 0) ? new Color(1f, 0.84f, 0.46f) : new Color(0.94f, 0.90f, 0.78f);
+                }
             }
         }
 
@@ -140,7 +178,8 @@ namespace SandsOfLegends.UI
         {
             Transform nav = safeArea.Find("Bottom Navigation");
             if (nav == null) return;
-            string[] labels = { "MISSIONS", "CHAT", "TECH", "SHOP", "BOUNTY", "FORGE", "HEROES", "BAG" };
+            // Preserve the actual HomeScreen event bindings; do not rename a button to an unrelated feature.
+            string[] labels = { "HOME", "HEROES", "BAG", "GUILD", "ARENA", "MORE" };
             for (int i = 0; i < nav.childCount; i++)
             {
                 RectTransform button = nav.GetChild(i) as RectTransform;
@@ -149,12 +188,45 @@ namespace SandsOfLegends.UI
                 button.anchorMax = new Vector2((float)(i + 1) / nav.childCount, 1f);
                 button.offsetMin = new Vector2(2f, 2f);
                 button.offsetMax = new Vector2(-2f, -2f);
+                Image image = button.GetComponent<Image>();
+                if (image != null) image.color = new Color(0.025f, 0.035f, 0.042f, 0.96f);
                 Text label = button.GetComponentInChildren<Text>();
                 if (label != null)
                 {
                     if (i < labels.Length) label.text = labels[i];
                     label.fontSize = 14;
+                    label.color = i == 0 ? new Color(1f, 0.82f, 0.39f) : Color.white;
                 }
+            }
+        }
+
+        private void ArrangeCompactCard(string name, string buttonName)
+        {
+            Transform card = safeArea.Find(name);
+            if (card == null) return;
+            Image background = card.GetComponent<Image>();
+            if (background != null) background.color = new Color(0.035f, 0.04f, 0.045f, 0.91f);
+
+            for (int i = 0; i < card.childCount; i++)
+            {
+                Transform child = card.GetChild(i);
+                RectTransform rect = child as RectTransform;
+                if (rect == null) continue;
+                if (child.name == buttonName)
+                {
+                    rect.anchorMin = new Vector2(0.5f, 0f);
+                    rect.anchorMax = new Vector2(0.5f, 0f);
+                    rect.sizeDelta = new Vector2(168f, 32f);
+                    rect.anchoredPosition = new Vector2(0f, 3f);
+                    continue;
+                }
+                Text label = child.GetComponent<Text>();
+                if (label == null) continue;
+                label.fontSize = 15;
+                rect.anchorMin = Vector2.zero;
+                rect.anchorMax = Vector2.one;
+                rect.offsetMin = new Vector2(6f, child.name.Contains("+0 GOLD") ? 29f : 48f);
+                rect.offsetMax = new Vector2(-6f, child.name.Contains("+0 GOLD") ? -28f : -2f);
             }
         }
 
@@ -162,8 +234,8 @@ namespace SandsOfLegends.UI
         {
             if (auxiliaryHudBuilt || homeCanvas == null) return;
             auxiliaryHudBuilt = true;
-            CreateHudPanel("Home Chat Panel", new Vector2(0f, 0f), new Vector2(0.31f, 0f), new Vector2(0f, 70f), new Vector2(0f, 0f), new Color(0.025f, 0.035f, 0.045f, 0.82f),
-                "[K581] Alliance: Welcome to the kingdom\n[K580] Your heroes are ready for battle", 16, TextAnchor.MiddleLeft);
+            CreateHudPanel("Home Chat Panel", new Vector2(0f, 0f), new Vector2(0.31f, 0f), new Vector2(0f, 66f), Vector2.zero,
+                new Color(0.025f, 0.035f, 0.045f, 0.88f), "No chat yet", 16, TextAnchor.MiddleLeft);
         }
 
         private void CreateHudPanel(string name, Vector2 min, Vector2 max, Vector2 size, Vector2 position, Color color, string text, int fontSize, TextAnchor anchor)
@@ -176,16 +248,25 @@ namespace SandsOfLegends.UI
             rect.pivot = new Vector2(min.x == max.x ? min.x : 0f, 0f);
             rect.sizeDelta = size;
             rect.anchoredPosition = position;
-            panel.GetComponent<Image>().color = color;
-            panel.GetComponent<Image>().raycastTarget = false;
+            Image panelImage = panel.GetComponent<Image>();
+            panelImage.color = color;
+            panelImage.raycastTarget = false;
 
             GameObject labelObject = new GameObject("Chat Preview", typeof(RectTransform), typeof(Text));
             labelObject.transform.SetParent(panel.transform, false);
             Text label = labelObject.GetComponent<Text>();
-            label.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            Font font = null;
+            try { font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); }
+            catch (System.ArgumentException) { }
+            if (font == null)
+            {
+                try { font = Resources.GetBuiltinResource<Font>("Arial.ttf"); }
+                catch (System.ArgumentException) { }
+            }
+            label.font = font;
             label.text = text;
             label.fontSize = fontSize;
-            label.color = new Color(0.82f, 0.9f, 0.79f, 1f);
+            label.color = new Color(0.88f, 0.88f, 0.82f, 1f);
             label.alignment = anchor;
             label.horizontalOverflow = HorizontalWrapMode.Wrap;
             label.verticalOverflow = VerticalWrapMode.Overflow;
