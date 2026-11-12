@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SandsOfLegends.UI
@@ -33,7 +34,8 @@ namespace SandsOfLegends.UI
             GameObject prefab = Resources.Load<GameObject>("HomeCastle/LegendsRebornCastle");
             if (prefab == null)
             {
-                Debug.LogError("Original 3D castle prefab is missing. Run Sands > Setup MVP Home Scene in the Unity Editor.");
+                Debug.LogWarning("Generated castle prefab is missing; building the low-poly fallback castle from runtime meshes.");
+                BuildFallbackCastle();
                 return;
             }
 
@@ -65,6 +67,134 @@ namespace SandsOfLegends.UI
 
             // The dais top is y=0.7075 in the generated mesh; account for the castle's ground offset.
             castleDaisTop = (0.7075f - bounds.min.y) * fit;
+        }
+
+        // Fallback keeps the Home hub readable even when the optional generated castle prefab
+        // has not been exported into Resources yet. All parts are lightweight, unlit-shadow primitives.
+        private void BuildFallbackCastle()
+        {
+            Transform castle = new GameObject("Fallback Blue-Roof Castle").transform;
+            castle.SetParent(root, false);
+            castleDaisTop = 1.05f;
+
+            Color stone = new Color(.78f, .75f, .68f);
+            Color lightStone = new Color(.91f, .86f, .73f);
+            Color blue = new Color(.10f, .34f, .70f);
+            Color blueLight = new Color(.20f, .53f, .88f);
+            Color gold = new Color(.94f, .69f, .22f);
+            Color wine = new Color(.40f, .055f, .12f);
+            Color green = new Color(.16f, .42f, .20f);
+
+            CastlePart(castle, PrimitiveType.Cube, new Vector3(0f, .42f, 0f), new Vector3(18f, .8f, 11f), stone, "Castle Foundation");
+            CastlePart(castle, PrimitiveType.Cube, new Vector3(0f, .9f, 0f), new Vector3(15.8f, .22f, 9.2f), gold, "Foundation Gold Inlay");
+            CastlePart(castle, PrimitiveType.Cube, new Vector3(0f, 4.1f, .4f), new Vector3(7.4f, 6.2f, 6.6f), lightStone, "Central Keep");
+            CastlePart(castle, PrimitiveType.Cube, new Vector3(0f, 1.55f, -3.02f), new Vector3(2.0f, 2.7f, .16f), new Color(.25f,.14f,.10f), "Main Gate");
+            CastlePart(castle, PrimitiveType.Cube, new Vector3(0f, 2.95f, -3.12f), new Vector3(2.5f, .22f, .2f), gold, "Gate Header");
+
+            for (int side = -1; side <= 1; side += 2)
+            {
+                float x = side * 6.0f;
+                CastlePart(castle, PrimitiveType.Cube, new Vector3(x, 3.25f, .4f), new Vector3(5.0f, 4.5f, 6.0f), stone, "Side Keep");
+                CastlePart(castle, PrimitiveType.Cube, new Vector3(x, 5.55f, .4f), new Vector3(5.25f, .24f, 6.25f), gold, "Side Keep Cornice");
+            }
+
+            CastleTower(castle, new Vector3(-6.0f, 0f, -3.2f), 2.15f, 4.6f, blue, gold);
+            CastleTower(castle, new Vector3(6.0f, 0f, -3.2f), 2.15f, 4.6f, blue, gold);
+            CastleTower(castle, new Vector3(-6.0f, 0f, 4.0f), 2.0f, 4.0f, blueLight, gold);
+            CastleTower(castle, new Vector3(6.0f, 0f, 4.0f), 2.0f, 4.0f, blueLight, gold);
+            CastleTower(castle, new Vector3(0f, 0f, 2.8f), 2.6f, 7.6f, blue, gold);
+
+            for (int side = -1; side <= 1; side += 2)
+            {
+                CastlePart(castle, PrimitiveType.Cylinder, new Vector3(side * 3.0f, 5.3f, -3.45f), new Vector3(.13f, 2.0f, .13f), gold, "Banner Pole");
+                CastlePart(castle, PrimitiveType.Cube, new Vector3(side * 3.0f, 5.0f, -3.45f), new Vector3(1.25f, 1.65f, .10f), wine, "Royal Wine Banner");
+                CastlePart(castle, PrimitiveType.Cube, new Vector3(side * 3.0f, 5.0f, -3.52f), new Vector3(.22f, .95f, .05f), gold, "Banner Emblem");
+            }
+
+            // A small emerald guardian statue and a blue crystal echo the reference artwork.
+            CastlePart(castle, PrimitiveType.Sphere, new Vector3(4.25f, 1.55f, -5.0f), new Vector3(1.15f, 1.05f, 1.1f), green, "Dragon Guardian Head");
+            CastlePart(castle, PrimitiveType.Sphere, new Vector3(4.25f, 1.25f, -5.55f), new Vector3(.9f, .48f, .72f), green, "Dragon Guardian Snout");
+            CastleCone(castle, new Vector3(3.75f, 2.15f, -4.95f), new Vector3(.38f, .8f, .38f), gold, "Guardian Horn L");
+            CastleCone(castle, new Vector3(4.75f, 2.15f, -4.95f), new Vector3(.38f, .8f, .38f), gold, "Guardian Horn R");
+            CastlePart(castle, PrimitiveType.Cylinder, new Vector3(-4.1f, 1.35f, -5.0f), new Vector3(1.2f, .22f, 1.2f), gold, "Crystal Pedestal");
+            CastlePart(castle, PrimitiveType.Cube, new Vector3(-4.1f, 2.15f, -5.0f), new Vector3(.78f, 1.2f, .78f), new Color(.15f,.66f,.96f), "Blue Crystal");
+        }
+
+        private void CastleTower(Transform parent, Vector3 basePosition, float diameter, float height, Color roof, Color trim)
+        {
+            CastlePart(parent, PrimitiveType.Cylinder,
+                basePosition + Vector3.up * (height * .5f),
+                new Vector3(diameter, height, diameter), new Color(.84f,.80f,.72f), "Round Castle Tower");
+            CastlePart(parent, PrimitiveType.Cylinder,
+                basePosition + Vector3.up * (height - .12f),
+                new Vector3(diameter * 1.12f, .18f, diameter * 1.12f), trim, "Tower Gold Band");
+            CastleCone(parent,
+                basePosition + Vector3.up * (height + .95f),
+                new Vector3(diameter * 1.42f, 2.0f, diameter * 1.42f), roof, "Blue Tower Roof");
+            CastlePart(parent, PrimitiveType.Sphere,
+                basePosition + Vector3.up * (height + 2.0f),
+                new Vector3(.28f,.34f,.28f), trim, "Roof Finial");
+        }
+
+        private void CastleCone(Transform parent, Vector3 position, Vector3 scale, Color color, string partName)
+        {
+            const int sides = 8;
+            List<Vector3> vertices = new List<Vector3>();
+            List<int> triangles = new List<int>();
+            Vector3 apex = new Vector3(0f, .5f, 0f);
+            for (int i = 0; i < sides; i++)
+            {
+                float a0 = 2f * Mathf.PI * i / sides;
+                float a1 = 2f * Mathf.PI * (i + 1) / sides;
+                Vector3 p0 = new Vector3(Mathf.Cos(a0) * .5f, -.5f, Mathf.Sin(a0) * .5f);
+                Vector3 p1 = new Vector3(Mathf.Cos(a1) * .5f, -.5f, Mathf.Sin(a1) * .5f);
+                int start = vertices.Count;
+                vertices.Add(apex); vertices.Add(p1); vertices.Add(p0);
+                triangles.Add(start); triangles.Add(start + 1); triangles.Add(start + 2);
+                int baseStart = vertices.Count;
+                vertices.Add(new Vector3(0f, -.5f, 0f)); vertices.Add(p0); vertices.Add(p1);
+                triangles.Add(baseStart); triangles.Add(baseStart + 1); triangles.Add(baseStart + 2);
+            }
+            Mesh mesh = new Mesh();
+            mesh.name = "Castle Low Poly Cone";
+            mesh.SetVertices(vertices);
+            mesh.SetTriangles(triangles, 0);
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+
+            GameObject part = new GameObject(partName);
+            part.transform.SetParent(parent, false);
+            part.transform.localPosition = position;
+            part.transform.localScale = scale;
+            part.AddComponent<MeshFilter>().sharedMesh = mesh;
+            MeshRenderer renderer = part.AddComponent<MeshRenderer>();
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null) shader = Shader.Find("Standard");
+            Material material = new Material(shader);
+            material.color = color;
+            renderer.sharedMaterial = material;
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            renderer.receiveShadows = false;
+        }
+
+        private void CastlePart(Transform parent, PrimitiveType type, Vector3 position, Vector3 scale, Color color, string partName)
+        {
+            GameObject part = GameObject.CreatePrimitive(type);
+            part.name = partName;
+            part.transform.SetParent(parent, false);
+            part.transform.localPosition = position;
+            part.transform.localScale = scale;
+            Collider collider = part.GetComponent<Collider>();
+            if (collider != null) Destroy(collider);
+            Renderer renderer = part.GetComponent<Renderer>();
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null) shader = Shader.Find("Standard");
+            Material material = new Material(shader);
+            material.color = color;
+            if (material.HasProperty("_Metallic")) material.SetFloat("_Metallic", color == new Color(.94f,.69f,.22f) ? .35f : .02f);
+            renderer.sharedMaterial = material;
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            renderer.receiveShadows = false;
         }
 
         private void PlaceNature()
@@ -175,7 +305,7 @@ namespace SandsOfLegends.UI
                 go.tag = "MainCamera";
             }
 
-            // Pulled back and tilted slightly down so the castle, hills, mountains and sky all fit a portrait screen.
+            // Framed as a wide Home-world establishing shot for the locked landscape mobile layout.
             cam.transform.position = new Vector3(0f, 15f, -34f);
             cam.transform.LookAt(new Vector3(0f, 5.5f, 6f));
             cam.fieldOfView = 50f;
