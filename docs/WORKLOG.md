@@ -4,6 +4,10 @@
 **Done:** Added world-space HP bars to `HeroView`, updated them from damage/heal/death `BattleEvent` values, and retained the existing basic attack lunge, hit shake, ultimate motion and defeat fall presentation.
 **Not verified:** لم يتم التحقق في Unity؛ Battle scene rendering, Canvas layout, imported model presentation and Play Mode execution were not run in this environment.
 
+## 2026-11-12 - A2 Home 3D hero showcase
+**Done:** Updated `HomeWorldStage` to load Cleric, Monk, Ranger, Rogue, Warrior and Wizard from `Resources/HomeHeroes/` and place the six models across the Home castle dais.
+**Not verified:** لم يتم التحقق في Unity؛ FBX import, generated `.meta` files, Home scene framing and runtime presentation were not run in this environment. The A2 branch expects the six binaries from A1 PR #33.
+
 ## 2026-11-12 - A0 Unity font crash guard
 **Done:** Replaced direct Arial loading with LegacyRuntime.ttf plus guarded Arial fallback in GameFlowController and HomeScreen; assigned the TextMesh font and font material in DamageNumbers.
 **Not verified:** لم يتم التحقق في Unity؛ CI/Android workflow was not run in this environment.
