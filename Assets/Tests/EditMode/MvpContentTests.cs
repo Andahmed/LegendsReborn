@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using SandsOfLegends.Combat;
 using SandsOfLegends.Core;
@@ -18,6 +20,38 @@ namespace SandsOfLegends.Tests
             Assert.AreEqual(7, pool[Rarity.Rare].Count);
             Assert.AreEqual(3, pool[Rarity.Epic].Count);
             Assert.AreEqual(3, pool[Rarity.Legendary].Count);
+        }
+
+
+        [Test]
+        public void HeroCatalogVisualMetadata_HasValidUniqueTintsAndPortraitIds()
+        {
+            Assert.AreEqual(20, HeroCatalog.All.Count);
+            var colorsByModel = new Dictionary<string, HashSet<string>>();
+            var portraitHeroes = new HashSet<string>
+            {
+                "warrior", "paladin", "berserker", "healer", "sharpshooter"
+            };
+
+            foreach (HeroCardData hero in HeroCatalog.All)
+            {
+                Assert.IsNotNull(hero.TintHex, hero.Id + " tint");
+                Assert.AreEqual(7, hero.TintHex.Length, hero.Id + " tint length");
+                Assert.AreEqual('#', hero.TintHex[0], hero.Id + " tint prefix");
+                for (int i = 1; i < hero.TintHex.Length; i++)
+                    Assert.IsTrue(Uri.IsHexDigit(hero.TintHex[i]), hero.Id + " tint hex digit");
+
+                HashSet<string> colors;
+                if (!colorsByModel.TryGetValue(hero.ModelId, out colors))
+                {
+                    colors = new HashSet<string>();
+                    colorsByModel.Add(hero.ModelId, colors);
+                }
+                Assert.IsTrue(colors.Add(hero.TintHex), "Duplicate tint for model " + hero.ModelId);
+
+                string expectedPortrait = portraitHeroes.Contains(hero.Id) ? "hero_" + hero.Id : "";
+                Assert.AreEqual(expectedPortrait, hero.PortraitId, hero.Id + " portrait id");
+            }
         }
 
         [Test]
