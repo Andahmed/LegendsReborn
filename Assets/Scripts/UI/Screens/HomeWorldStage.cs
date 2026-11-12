@@ -10,6 +10,7 @@ namespace SandsOfLegends.UI
     {
         private Transform root;
         private float castleDaisTop = 0.91f;
+        private bool lastLandscape;
 
         private void Awake()
         {
@@ -20,6 +21,12 @@ namespace SandsOfLegends.UI
             CreateSnowyBackdrop();
             ConfigureCamera();
             CreateWarmLights();
+        }
+
+        private void Update()
+        {
+            bool landscape = Screen.width > Screen.height;
+            if (landscape != lastLandscape) ConfigureCamera();
         }
 
         private void OnEnable()
@@ -206,6 +213,7 @@ namespace SandsOfLegends.UI
             }
 
             bool landscape = Screen.width > Screen.height;
+            lastLandscape = landscape;
             cam.transform.position = landscape ? new Vector3(0f, 6.2f, -14.2f) : new Vector3(0f, 8.5f, -20.5f);
             cam.transform.LookAt(landscape ? new Vector3(0f, 3.2f, 4.2f) : new Vector3(0f, 4.2f, 4.8f));
             cam.fieldOfView = landscape ? 40f : 48f;
