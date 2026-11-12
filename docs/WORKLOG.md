@@ -1,5 +1,9 @@
 # Work Log (newest first)
 
+## 2026-11-12 - A5 Roster details and progression UI
+**Done:** Extended the existing Heroes screen cards with level-scaled HP/ATK/DEF/SPD details from the existing hero data; list, portraits, level-up, star-up and ascension continue to use the existing Meta-backed operations. No Combat, Meta, Server or HeroCatalog files changed.
+**Not verified:** لم يتم التحقق في Unity؛ layout, portrait import and button interaction require Unity Play Mode/device verification.
+
 ## 2026-11-12 - A0 Unity font crash guard
 **Done:** Replaced direct Arial loading with LegacyRuntime.ttf plus guarded Arial fallback in GameFlowController and HomeScreen; assigned the TextMesh font and font material in DamageNumbers.
 **Not verified:** لم يتم التحقق في Unity؛ CI/Android workflow was not run in this environment.
