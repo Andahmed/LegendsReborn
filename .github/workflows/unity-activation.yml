@@ -7,20 +7,35 @@ permissions:
   contents: read
 
 jobs:
-  request-activation:
-    name: Generate Unity Personal activation file
+  check-personal-license:
+    name: Check Unity Personal repository secrets
     runs-on: ubuntu-latest
     steps:
-      - name: Request manual activation file
-        id: activation
-        uses: game-ci/unity-request-activation-file@v2
-        with:
-          unityVersion: 2022.3.62f3
+      - name: Check required Unity secrets without exposing their values
+        shell: bash
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        run: |
+          missing=()
+          [[ -n "${UNITY_LICENSE:-}" ]] || missing+=("UNITY_LICENSE")
+          [[ -n "${UNITY_EMAIL:-}" ]] || missing+=("UNITY_EMAIL")
+          [[ -n "${UNITY_PASSWORD:-}" ]] || missing+=("UNITY_PASSWORD")
 
-      - name: Upload activation file
-        uses: actions/upload-artifact@v4
-        with:
-          name: Unity-Activation-File
-          path: ${{ steps.activation.outputs.filePath }}
-          if-no-files-found: error
-          retention-days: 3
+          if [[ ${#missing[@]} -eq 0 ]]; then
+            {
+              echo "## Unity Personal secrets"
+              echo "All three required repository secrets are present."
+              echo "This confirms configuration only; the Unity license is validated by the Android GameCI build."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "## Unity Personal secrets are not ready"
+              echo "Add the following repository Actions secrets:"
+              for name in "${missing[@]}"; do echo "- `$name`"; done
+              echo ""
+              echo "See `docs/UNITY_LICENSE_SETUP.md` for the supported Unity Hub activation steps."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::Missing Unity repository secrets: ${missing[*]}"
+          fi

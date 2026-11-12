@@ -1,5 +1,9 @@
 # Work Log (newest first)
 
+## 2026-11-12 - Unity Personal activation workflow correction
+**Done:** Replaced the deprecated `unity-request-activation-file` action with a manual secret-readiness check. Updated the instructions to the currently supported Unity Hub Personal-license flow and documented the OS-specific `.ulf` locations.
+**Not verified:** The actual Unity license remains unvalidated until GameCI runs the Android build with the repository secrets.
+
 ## 2026-11-12 - A3b Hero portrait and tint metadata
 **Done:** Wired `HeroCardData.PortraitId` to the roster portrait resource lookup and `TintHex` to the portrait plate and hero-card accent. Missing portrait IDs safely omit the portrait; missing/invalid tints fall back to the existing teal accent.
 **Not verified:** Unity Editor import, roster rendering and Android runtime presentation remain unverified. Engine-Free CI does not compile Unity UI code.
