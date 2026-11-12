@@ -1,5 +1,9 @@
 # Work Log (newest first)
 
+## 2026-11-12 - A3b Hero card tint and portrait metadata
+**Done:** Updated the roster UI to read `TintHex` and `PortraitId` directly from `HeroCardData`. Hero card art panels use the catalog tint; portraits load from `Resources/HeroPortraits/<PortraitId>` and receive a subtle tint. Heroes without a portrait ID retain their tinted card panel. No HeroCatalog, Combat, Meta or Server files changed.
+**Not verified:** لم يتم التحقق في Unity؛ portrait asset presence, color appearance, layout and runtime UI rendering require Unity Play Mode verification.
+
 ## 2026-11-12 - B3 Hero visual metadata (GPT Lane B)
 - Added TintHex and PortraitId metadata for the 20 hero catalog entries. Engine-Free C# CI evidence is pending; no Unity verification.
 ## 2026-11-12 - A7 Boot to Home game flow
