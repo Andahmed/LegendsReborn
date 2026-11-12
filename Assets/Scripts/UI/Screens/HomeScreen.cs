@@ -138,10 +138,10 @@ namespace SandsOfLegends.UI
         private void BuildEventRail()
         {
             eventRail = Box("Limited Events Rail", safeAreaRoot, new Vector2(0,0.69f), new Vector2(0.22f,0.69f), new Vector2(0,420), new Vector2(0,0), Color.clear);
-            AddNav(rail,"EVENTS",onEvents, gold, 68);
-            AddNav(rail,"DAILY LOGIN",onDailyLogin,turquoise,68);
-            AddNav(rail,"BATTLE PASS",onBattlePass,gold,68);
-            AddNav(rail,"MONTHLY CARD",onMonthlyCard,turquoise,68);
+            AddNav(eventRail,"EVENTS",onEvents, gold, 68);
+            AddNav(eventRail,"DAILY LOGIN",onDailyLogin,turquoise,68);
+            AddNav(eventRail,"BATTLE PASS",onBattlePass,gold,68);
+            AddNav(eventRail,"MONTHLY CARD",onMonthlyCard,turquoise,68);
         }
 
         private void BuildSideMenus()
