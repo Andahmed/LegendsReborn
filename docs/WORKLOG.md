@@ -1,5 +1,9 @@
 # Work Log (newest first)
 
+## 2026-11-12 - First on-device Home screenshots (Ahmed + Claude)
+**Done:** Added two phone screenshots of the first installed APK (Home screen, landscape and portrait) to docs/screenshots/. Visible: castle, six heroes on the dais, HUD, side menus, bottom nav. Heroes render all white (no textures/tint); idle-rewards and campaign panels overlap the lower area; portrait camera is too close.
+**Not verified:** Battle, Heroes, Summon screens not yet seen on device.
+
 ## 2026-11-12 - Log Boot and Home scene generation during CI builds
 **Done:** MVPProjectInstaller now checks SaveScene results and emits explicit Unity log lines for generated Assets/Scenes/Boot.unity and Assets/Scenes/Home.unity. A failed save throws immediately instead of silently continuing.
 **Not verified:** The logs have not yet been observed in a real Unity/GameCI build; this is pending the first build with Unity Personal credentials.
