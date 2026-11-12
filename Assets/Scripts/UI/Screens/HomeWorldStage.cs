@@ -120,37 +120,89 @@ namespace SandsOfLegends.UI
             };
 
             for (int i = 0; i < modelNames.Length; i++)
-            {
-                GameObject prefab = Resources.Load<GameObject>("HomeHeroes/" + modelNames[i]);
-                if (prefab == null)
-                {
-                    Debug.LogWarning("Missing HomeHeroes model: " + modelNames[i]);
-                    continue;
-                }
+                PlaceHero(modelNames[i], positions[i]);
+        }
 
-                GameObject hero = Instantiate(prefab, root);
-                hero.name = modelNames[i];
-                hero.transform.localPosition = positions[i];
-                hero.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
-                hero.transform.localScale = Vector3.one * 1.35f;
+        private void PlaceHero(string modelName, Vector3 position)
+        {
+            GameObject prefab = Resources.Load<GameObject>("HomeHeroes/" + modelName);
+            if (prefab == null)
+            {
+                Debug.LogWarning("Missing HomeHeroes model: " + modelName + ". Merge the A1 asset PR or run the art installer.");
+                return;
+            }
+
+            GameObject hero = Instantiate(prefab, root);
+            hero.name = "Home Hero - " + modelName;
+            hero.transform.localPosition = position;
+            hero.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+
+            Renderer[] renderers = hero.GetComponentsInChildren<Renderer>(true);
+            if (renderers.Length == 0) return;
+            Bounds bounds = renderers[0].bounds;
+            for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
+            float scale = 2.65f / Mathf.Max(.01f, bounds.size.y);
+            hero.transform.localScale = Vector3.one * scale;
+            // The generated dais top sits just below one world unit after the castle fit.
+            hero.transform.localPosition = new Vector3(
+                position.x,
+                castleDaisTop - bounds.min.y * scale,
+                position.z);
+        }
+
+        private void CreateWarmLights()
+        {
+            for (int side = -1; side <= 1; side += 2)
+            {
+                GameObject go = new GameObject("Castle Warm Point Light");
+                go.transform.SetParent(root, false);
+                go.transform.localPosition = new Vector3(side * 3.1f, 2.1f, .9f);
+                Light light = go.AddComponent<Light>();
+                light.type = LightType.Point;
+                light.color = new Color(1f, .63f, .31f);
+                light.intensity = 1.35f;
+                light.range = 7f;
             }
         }
 
         private void ConfigureCamera()
         {
             Camera cam = Camera.main;
-            if (cam == null) return;
-            cam.transform.position = new Vector3(0f, 9.2f, -14.5f);
-            cam.transform.rotation = Quaternion.Euler(28f, 0f, 0f);
-            cam.fieldOfView = 42f;
-            cam.nearClipPlane = 0.1f;
-            cam.farClipPlane = 80f;
-        }
+            if (cam == null)
+            {
+                GameObject go = new GameObject("Home World Camera", typeof(Camera));
+                cam = go.GetComponent<Camera>();
+                go.tag = "MainCamera";
+            }
 
-        private void CreateWarmLights()
-        {
-            Light sun = gameObject.AddComponent<Light>();
-            sun.type = LightType.Directional;
+            // Pulled back and tilted slightly down so the castle, hills, mountains and sky all fit a portrait screen.
+            cam.transform.position = new Vector3(0f, 15f, -34f);
+            cam.transform.LookAt(new Vector3(0f, 5.5f, 6f));
+            cam.fieldOfView = 50f;
+            cam.nearClipPlane = .3f;
+            cam.farClipPlane = 260f;
+            cam.clearFlags = CameraClearFlags.SolidColor;
+            Color sky = new Color(.55f, .78f, .96f);
+            cam.backgroundColor = sky;
+
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+            RenderSettings.ambientLight = new Color(.60f, .66f, .76f);
+            RenderSettings.fog = true;
+            RenderSettings.fogMode = FogMode.ExponentialSquared;
+            RenderSettings.fogColor = sky;
+            RenderSettings.fogDensity = .0075f;
+
+            Light sun = null;
+            Light[] lights = FindObjectsOfType<Light>();
+            for (int i = 0; i < lights.Length; i++)
+                if (lights[i].type == LightType.Directional) { sun = lights[i]; break; }
+
+            if (sun == null)
+            {
+                GameObject sunObject = new GameObject("Home Directional Light");
+                sun = sunObject.AddComponent<Light>();
+                sun.type = LightType.Directional;
+            }
             sun.color = new Color(1f, .95f, .84f);
             sun.intensity = 1.15f;
             sun.shadows = LightShadows.None;
