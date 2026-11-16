@@ -306,7 +306,7 @@ namespace SandsOfLegends.Presentation
 
         private void TryCreatePlayableGraph()
         {
-            if (animator == null || animator.avatar == null || idleClip == null) return;
+            if (animator == null || idleClip == null) return;
 
             animationGraph = PlayableGraph.Create("HeroView_" + Team + "_" + Slot);
             animationGraph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
