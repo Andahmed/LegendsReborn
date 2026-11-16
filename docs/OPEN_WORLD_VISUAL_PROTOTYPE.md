@@ -28,3 +28,15 @@
 
 ## Next art pass
 Replace placeholder landmark geometry with license-verified GLB/FBX environment packs, improve biome transitions, add proper terrain textures and foliage LODs, then connect exploration locations to the existing LegendsReborn story and stage progression.
+
+
+## Follow-up hardening
+
+- Water is positioned just above the terrain and uses transparent blending where supported by the active shader.
+- Material creation checks several Built-in/URP shader names and reports a clear error if none are available.
+- The terrain mesh uses Unity's default 16-bit index format; its 161 × 161 vertices fit within that limit, which is friendlier to mobile GPUs.
+- The editor installer now creates and closes an additive preview scene, preserving whichever scene was already open.
+
+## Validation status
+
+These changes were reviewed against the repository source, but have **not** yet been compiled or opened in the Unity Editor. The generated scene, visual quality, and Android performance remain unverified. The preview is still a procedural environment prototype: landmarks are placeholder geometry, and it does not yet include a player controller, world streaming, NPCs, quests, or story integration.
