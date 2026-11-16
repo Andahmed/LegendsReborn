@@ -83,7 +83,6 @@ namespace SandsOfLegends.World
 
             Mesh mesh = new Mesh();
             mesh.name = "Open World Terrain Mesh";
-            mesh.indexFormat = IndexFormat.UInt32;
             mesh.vertices = vertices;
             mesh.uv = uv;
             mesh.subMeshCount = triangles.Length;
@@ -169,7 +168,8 @@ namespace SandsOfLegends.World
                 float t = i / (float)segments;
                 float z = -HalfSize + t * WorldSize;
                 float x = 76f + Mathf.Sin(t * Mathf.PI * 3f) * 13f;
-                float y = HeightAt(x, z) - .32f;
+                // Keep the water surface just above the terrain so it remains visible without z-fighting.
+                float y = HeightAt(x, z) + .08f;
                 vertices.Add(new Vector3(x - width * .5f, y, z));
                 vertices.Add(new Vector3(x + width * .5f, y, z));
                 if (i < segments)
@@ -194,7 +194,9 @@ namespace SandsOfLegends.World
             MeshFilter filter = go.AddComponent<MeshFilter>();
             filter.sharedMesh = mesh;
             MeshRenderer renderer = go.AddComponent<MeshRenderer>();
-            renderer.sharedMaterial = MakeMaterial(name + " Material", color);
+            Material material = MakeMaterial(name + " Material", color);
+            if (color.a < .999f) ConfigureTransparentMaterial(material);
+            renderer.sharedMaterial = material;
         }
 
         private static void ScatterNature(Transform root)
@@ -318,12 +320,46 @@ namespace SandsOfLegends.World
 
         private static Material MakeMaterial(string name, Color color)
         {
-            Shader shader = Shader.Find("Standard");
-            if (shader == null) shader = Shader.Find("Diffuse");
+            // Support both the Built-in renderer and URP projects.
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null) shader = Shader.Find("Standard");
+            if (shader == null) shader = Shader.Find("Unlit/Color");
+            if (shader == null) shader = Shader.Find("Sprites/Default");
+            if (shader == null)
+                throw new InvalidOperationException("No compatible Unity shader was found. Check the project's render pipeline and included shaders.");
+
             Material material = new Material(shader);
             material.name = name;
             material.color = color;
             return material;
+        }
+
+        private static void ConfigureTransparentMaterial(Material material)
+        {
+            if (material == null) return;
+
+            // URP Lit transparency.
+            if (material.HasProperty("_Surface"))
+            {
+                material.SetFloat("_Surface", 1f);
+                material.SetFloat("_Blend", 0f);
+                material.SetFloat("_ZWrite", 0f);
+                material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            }
+
+            // Built-in Standard transparency.
+            if (material.HasProperty("_Mode"))
+            {
+                material.SetFloat("_Mode", 3f);
+                material.SetInt("_SrcBlend", (int)BlendMode.SrcAlpha);
+                material.SetInt("_DstBlend", (int)BlendMode.OneMinusSrcAlpha);
+                material.SetInt("_ZWrite", 0);
+                material.DisableKeyword("_ALPHATEST_ON");
+                material.EnableKeyword("_ALPHABLEND_ON");
+                material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            }
+
+            material.renderQueue = (int)RenderQueue.Transparent;
         }
     }
 }
