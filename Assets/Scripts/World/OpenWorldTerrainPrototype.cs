@@ -42,6 +42,7 @@ namespace SandsOfLegends.World
             ScatterNature(root);
             BuildLandmarks(root);
             ConfigureLightingAndCamera(root);
+            BuildPlayer(root);
         }
 
         private static void BuildTerrain(Transform root)
@@ -286,6 +287,59 @@ namespace SandsOfLegends.World
             tower.transform.localPosition = new Vector3(0f, 3.2f, 0f);
             tower.transform.localScale = new Vector3(2.5f, 6f, 2.5f);
             tower.GetComponent<Renderer>().sharedMaterial = MakeMaterial(name + " Tower", color * .82f);
+
+            SphereCollider proximity = group.AddComponent<SphereCollider>();
+            proximity.isTrigger = true;
+            proximity.center = new Vector3(0f, 2f, 0f);
+            proximity.radius = 9f;
+            group.AddComponent<OpenWorldLandmark>().Initialize(name);
+        }
+
+        private static void BuildPlayer(Transform root)
+        {
+            float spawnZ = -126f;
+            GameObject player = new GameObject("Player - Exploration");
+            player.transform.SetParent(root, false);
+            player.transform.position = new Vector3(0f, HeightAt(0f, spawnZ) + .2f, spawnZ);
+            player.AddComponent<CharacterController>();
+            OpenWorldPlayerController controller = player.AddComponent<OpenWorldPlayerController>();
+
+            GameObject heroPrefab = Resources.Load<GameObject>("HomeHeroes/Warrior");
+            if (heroPrefab != null)
+            {
+                GameObject hero = UnityEngine.Object.Instantiate(heroPrefab, player.transform);
+                hero.name = "Warrior - Player Model";
+                hero.transform.localPosition = Vector3.zero;
+                hero.transform.localRotation = Quaternion.identity;
+                Renderer[] renderers = hero.GetComponentsInChildren<Renderer>(true);
+                if (renderers.Length > 0)
+                {
+                    Bounds bounds = renderers[0].bounds;
+                    for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
+                    float scale = 2.25f / Mathf.Max(.01f, bounds.size.y);
+                    hero.transform.localScale = Vector3.one * scale;
+                    hero.transform.localPosition = Vector3.up * (-bounds.min.y + player.transform.position.y) * scale;
+                }
+            }
+            else
+            {
+                GameObject fallback = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                fallback.name = "Temporary Player Visual";
+                fallback.transform.SetParent(player.transform, false);
+                fallback.transform.localPosition = Vector3.up;
+                fallback.transform.localScale = new Vector3(.72f, 1f, .72f);
+                Collider visualCollider = fallback.GetComponent<Collider>();
+                if (visualCollider != null) UnityEngine.Object.Destroy(visualCollider);
+            }
+
+            Camera camera = Camera.main;
+            if (camera == null)
+            {
+                GameObject cameraObject = new GameObject("Open World Camera");
+                cameraObject.tag = "MainCamera";
+                camera = cameraObject.AddComponent<Camera>();
+            }
+            controller.SetCamera(camera);
         }
 
         private static void ConfigureLightingAndCamera(Transform root)
