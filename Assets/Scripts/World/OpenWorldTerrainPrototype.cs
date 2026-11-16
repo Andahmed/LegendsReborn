@@ -318,7 +318,11 @@ namespace SandsOfLegends.World
                     for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
                     float scale = 2.25f / Mathf.Max(.01f, bounds.size.y);
                     hero.transform.localScale = Vector3.one * scale;
-                    hero.transform.localPosition = Vector3.up * (-bounds.min.y + player.transform.position.y) * scale;
+                    // Recalculate after scaling, then align the imported model's feet to the controller origin.
+                    renderers = hero.GetComponentsInChildren<Renderer>(true);
+                    bounds = renderers[0].bounds;
+                    for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
+                    hero.transform.localPosition = Vector3.up * (player.transform.position.y - bounds.min.y);
                 }
             }
             else
