@@ -82,6 +82,39 @@ namespace SandsOfLegends.Combat
             return true;
         }
 
+        /// <summary>Returns the next living actors ordered by time-to-action.</summary>
+        public List<BattleTurnInfo> GetUpcomingTurns(int maxCount)
+        {
+            List<BattleTurnInfo> result = new List<BattleTurnInfo>();
+            for (int i = 0; i < Units.Count; i++)
+            {
+                BattleUnit unit = Units[i];
+                if (!unit.Alive) continue;
+                int speed = Math.Max(1, unit.Spec.Spd);
+                result.Add(new BattleTurnInfo
+                {
+                    Team = unit.Team,
+                    Slot = unit.Slot,
+                    UnitId = unit.Spec.Id,
+                    Speed = speed,
+                    Progress = Math.Max(0f, Math.Min(1f, unit.ActionMeter)),
+                    SecondsToAct = Math.Max(0f, 1f - unit.ActionMeter) * 100f / speed
+                });
+            }
+            result.Sort(delegate(BattleTurnInfo a, BattleTurnInfo b)
+            {
+                int time = a.SecondsToAct.CompareTo(b.SecondsToAct);
+                if (time != 0) return time;
+                int speed = b.Speed.CompareTo(a.Speed);
+                if (speed != 0) return speed;
+                int team = a.Team.CompareTo(b.Team);
+                return team != 0 ? team : a.Slot.CompareTo(b.Slot);
+            });
+            if (maxCount >= 0 && result.Count > maxCount)
+                result.RemoveRange(maxCount, result.Count - maxCount);
+            return result;
+        }
+
         public void Run()
         {
             while (!Finished) Step();
@@ -91,26 +124,39 @@ namespace SandsOfLegends.Combat
         {
             if (Finished) return;
             Time += Dt;
-
+            List<BattleUnit> ready = new List<BattleUnit>();
             for (int i = 0; i < Units.Count; i++)
             {
-                var u = Units[i];
-                if (!u.Alive) continue;
-                if (u.SkillCd > 0f) u.SkillCd -= Dt;
-                u.ActionMeter += Dt * u.Spec.Spd / 100f;
-                if (u.ActionMeter >= 1f)
-                {
-                    u.ActionMeter -= 1f;
-                    Act(u);
-                    if (CheckEnd()) return;
-                }
+                BattleUnit unit = Units[i];
+                if (!unit.Alive) continue;
+                if (unit.SkillCd > 0f) unit.SkillCd = Math.Max(0f, unit.SkillCd - Dt);
+                unit.ActionMeter += Dt * Math.Max(1, unit.Spec.Spd) / 100f;
+                if (unit.ActionMeter >= 1f) ready.Add(unit);
             }
-
+            ready.Sort(CompareReadyUnits);
+            for (int i = 0; i < ready.Count; i++)
+            {
+                BattleUnit unit = ready[i];
+                if (!unit.Alive || unit.ActionMeter < 1f) continue;
+                unit.ActionMeter -= 1f;
+                Act(unit);
+                if (CheckEnd()) return;
+            }
             if (Time >= MaxTime && !Finished)
             {
                 Finished = true; Winner = 1;
                 Events.Add(new BattleEvent { Time = Time, Type = BattleEventType.End });
             }
+        }
+
+        private static int CompareReadyUnits(BattleUnit a, BattleUnit b)
+        {
+            int meter = b.ActionMeter.CompareTo(a.ActionMeter);
+            if (meter != 0) return meter;
+            int speed = b.Spec.Spd.CompareTo(a.Spec.Spd);
+            if (speed != 0) return speed;
+            int team = a.Team.CompareTo(b.Team);
+            return team != 0 ? team : a.Slot.CompareTo(b.Slot);
         }
 
         private void Act(BattleUnit u)

@@ -11,8 +11,8 @@ Unity mobile Idle RPG for Android. Working title: **Sands of Legends**.
 
 1. Open this repository with Unity 2022.3.62f3.
 2. Run **Sands → Setup MVP Home Scene**. This creates Assets/Scenes/Home.unity and registers it in Build Settings.
-3. The repository already contains 21 Quaternius CC0 FBX files for the modular castle, four monster types and six nature props; Unity imports them automatically.
-4. For the six humanoid character rigs, run **Legends Reborn → Art → Install MVP Art** and select the local Free3D folder from the legacy LegendsStyleRPG checkout. This copies the character FBXs into Resources/HomeHeroes; the importer no longer downloads from a private raw GitHub URL.
+3. The repository contains 27 Quaternius FBX models: six humanoid heroes, four animated monster types, modular dungeon pieces and nature props. They use the current Quaternius Asset License (QAL), not CC0; see ArtSource/ThirdParty/Quaternius_QAL_NOTICE.md.
+4. The six humanoid hero FBXs are already committed under `Assets/Resources/HomeHeroes/`. Unity imports them as animated Generic rigs using `QuaterniusFbxImporter`; runtime presentation loads model-specific clips.
 5. Wait for the FBX import to complete, then open Home.unity and press Play.
 
 The Android build menu also creates/registers the Home scene before calling BuildPlayer. Android SDK/NDK, signing and device settings still need to be configured in the local Unity installation.

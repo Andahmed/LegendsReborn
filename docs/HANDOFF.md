@@ -9,18 +9,18 @@ Working title: **Sands of Legends**. Unity 2022.3.62f3, Android IL2CPP/ARM64 tar
 - Five starter heroes and a first-run profile with test currency, energy, gear and saved five-slot formation.
 - Roster level-up and star-up operations; duplicate summons convert into rarity-based shards.
 - 200 generated campaign stage definitions across five biomes, boss stages every ten stages and stage-scaled 5-unit enemy teams.
-- Deterministic 5v5 combat core remains engine-free. Battle flow now consumes campaign energy, plays BattleSim events, supports x1/x2/x4 and manual or automatic ultimates, awards win rewards and updates campaign progress.
+- Deterministic 5v5 combat core remains engine-free. Speed fills each actor's action meter; simultaneously ready actors resolve by meter overflow, speed and stable team/slot tie-breaks. The battle HUD shows the next five actors and their meter progress. Battle flow retains x1/x2/x4 and manual/automatic ultimates.
 - Six equipment slots per hero; upgrades spend Gold and Gear Materials and gear levels add combat stats. The Equipment screen now lets the player select any owned hero before upgrading gear. Hero progression includes shard-based star-up and resource-gated ascension.
-- Five approved hero portrait PNGs are bundled and shown in the roster; these are concept/portrait art, not the missing rigged 3D hero models.
+- Five hero portrait PNGs are bundled for roster cards. Separate rigged 3D FBX models for six humanoid archetypes are included under `Assets/Resources/HomeHeroes/`.
 - Save schema version 2 persists formation and equipment in addition to resources, roster, campaign, pity, energy and quests.
 
 ### Runtime UI and art pipeline
 - GameFlowController connects the Home HUD UnityEvents to Campaign, Heroes, Formation, Summon, Equipment, Backpack, Quests and feature-status screens. Long screens and the battle HUD now use a scrollable viewport.
 - Heroes, Campaign and Summon screen classes now expose validated gameplay operations; BattleHud controls speed/ultimates.
-- HeroView loads Quaternius FBX models when imported, with forward attack lunges, hit reactions and a defeat fall; combat feedback uses floating damage numbers. Summon results reuse the approved hero portraits.
+- HeroView loads committed hero/monster FBX models with model-specific Idle/Attack/Hit/Death clips through Unity Playables, preserves world-space HP bars, adds team ground markers and colored impact particles, and has no capsule-character fallback. Combat feedback also uses floating damage numbers.
 - 27 Quaternius FBX files are bundled in Assets/Resources: 11 modular dungeon pieces, four animated monster types, six nature props, and six temporary humanoid home hero models.
 - HomeWorldStage loads an original editor-generated low-poly castle Mesh prefab (bevelled stone blocks, arched gate, polygonal towers, crenellations, banners and courtyard) and places the committed Quaternius nature meshes around it. It does not instantiate Unity primitive cubes for the castle.
-- QuaterniusAssetImporter can copy any missing character rigs from a locally selected Free3D folder. The six MVP home hero FBXs are now committed under `Assets/Resources/HomeHeroes/`; the source project is public at https://github.com/Andahmed/LegendsStyleRPG.
+- `QuaterniusFbxImporter` configures humanoid/monster FBXs for Generic animation import. Six hero FBXs and four monster FBXs are committed in Resources and load directly at runtime. The source project is public at https://github.com/Andahmed/LegendsStyleRPG.
 - MVPProjectInstaller generates Assets/Scenes/Home.unity, adds GameBootstrap + HomeScreen and registers the scene in Build Settings. BuildScript calls it before Android builds.
 
 ### Development backend
@@ -39,7 +39,7 @@ Working title: **Sands of Legends**. Unity 2022.3.62f3, Android IL2CPP/ARM64 tar
 6. From Server, install requirements, run uvicorn and python -m unittest discover -s tests -v.
 7. Run **Sands → Validate MVP Assets** and inspect `Reports/MVP_ASSET_READINESS.md` for missing files and import status.
 
-## Explicitly not complete or not verified
+## Asset licensing\n\n- Quaternius models use the current Quaternius Asset License (QAL), not CC0. The QAL permits integration into a completed game/product but prohibits standalone asset-pack redistribution. See `ArtSource/ThirdParty/Quaternius_QAL_NOTICE.md`.\n\n## Explicitly not complete or not verified
 
 - No Unity Editor compile, Play Mode run, Android APK, mobile touch or aspect-ratio test has been performed in this environment. The GameCI Android APK workflow is configured, but it skips the build until the three Unity Actions secrets are present.
 - Unity will generate .meta files when it first imports the new scripts/FBX assets; they must be committed after editor import.

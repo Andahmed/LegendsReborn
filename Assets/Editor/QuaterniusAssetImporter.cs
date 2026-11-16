@@ -34,7 +34,7 @@ namespace SandsOfLegends.Editor
                 new[] { "Bush_1", "Cactus_1", "Grass", "PalmTree_1", "PalmTree_2", "Rock_1" })
         };
 
-        [MenuItem("Legends Reborn/Art/Install All CC0 3D Models")]
+        [MenuItem("Legends Reborn/Art/Install Quaternius Game Models")]
         public static void InstallAll()
         {
             string root = FindLocalRoot();
@@ -81,22 +81,24 @@ namespace SandsOfLegends.Editor
                         "Original archive: https://github.com/Andahmed/LegendsStyleRPG\n" +
                         "Source folder: GameClient/Assets/Resources/GameArt/Free3D/" + pack.Folder + "/FBX\n" +
                         "License reference: https://quaternius.com/license.html\n" +
-                        "The project asset inventory records this pack as CC0. Keep this notice with the imported files.\n");
+                        "License: Quaternius Asset License (QAL), not CC0. Use inside a completed game/product is permitted; standalone asset-pack redistribution is prohibited.\n" +
+                        "Keep this notice with the imported files.\n");
                 }
 
                 Directory.CreateDirectory("ArtSource/ThirdParty");
-                File.WriteAllText("ArtSource/ThirdParty/Quaternius_CC0_NOTICE.md",
-                    "Quaternius third-party 3D assets\n" +
-                    "===============================\n\n" +
+                File.WriteAllText("ArtSource/ThirdParty/Quaternius_QAL_NOTICE.md",
+                    "Quaternius third-party 3D assets — Quaternius Asset License (QAL)\n" +
+                    "==============================================================\n\n" +
                     "Packs used: RPG Characters, Animated Monsters, Modular Dungeon and Nature.\n" +
-                    "Project asset inventory identifies the Quaternius packs as CC0. License reference:\n" +
+                    "These assets are NOT CC0. The QAL permits use inside a completed game/product but prohibits standalone asset-pack redistribution.\n" +
+                    "License reference:\n" +
                     "https://quaternius.com/license.html\n\n" +
                     "Official pack pages:\n" +
                     "- https://quaternius.itch.io/lowpoly-animated-monsters\n" +
                     "- https://quaternius.itch.io/150-lowpoly-nature-models\n" +
                     "- https://quaternius.itch.io/lowpoly-modular-dungeon-pack\n\n" +
                     "Source archive: https://github.com/Andahmed/LegendsStyleRPG\n" +
-                    "The character and environment FBX files are used as game assets, not redistributed as a standalone asset pack.\n");
+                    "The character and environment FBX files are integrated into this game project. Do not redistribute them as a standalone asset pack.\n");
 
                 AssetDatabase.Refresh();
                 string summary = "Already present: " + present + "\nCopied from local source: " + copied;

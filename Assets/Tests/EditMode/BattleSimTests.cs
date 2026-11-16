@@ -43,6 +43,36 @@ namespace SandsOfLegends.Tests
         }
 
         [Test]
+        public void SpeedMeter_ActsHigherOverflowFirst()
+        {
+            var slow = U("slow", Faction.Fortress, 10000, 10, 50, 100);
+            var fast = U("fast", Faction.Wild, 10000, 10, 50, 200);
+            var sim = new BattleSim(new[] { slow }, new[] { fast }, 7);
+            sim.Get(0, 0).ActionMeter = .99f;
+            sim.Get(1, 0).ActionMeter = .99f;
+            sim.Step();
+            Assert.Greater(sim.Events.Count, 0);
+            Assert.AreEqual(1, sim.Events[0].SourceTeam,
+                "The faster unit gains more meter in the same fixed step and must act first.");
+        }
+
+        [Test]
+        public void UpcomingTurns_SortsByTimeToActAndExposesProgress()
+        {
+            var slow = U("slow", Faction.Fortress, 10000, 10, 50, 100);
+            var fast = U("fast", Faction.Wild, 10000, 10, 50, 200);
+            var sim = new BattleSim(new[] { slow }, new[] { fast }, 9);
+            sim.Get(0, 0).ActionMeter = .2f;
+            sim.Get(1, 0).ActionMeter = .2f;
+            var upcoming = sim.GetUpcomingTurns(2);
+            Assert.AreEqual(2, upcoming.Count);
+            Assert.AreEqual(1, upcoming[0].Team);
+            Assert.AreEqual("fast", upcoming[0].UnitId);
+            Assert.AreEqual(.2f, upcoming[0].Progress, 1e-5f);
+            Assert.Less(upcoming[0].SecondsToAct, upcoming[1].SecondsToAct);
+        }
+
+        [Test]
         public void StrongerTeam_Wins()
         {
             var a = new[] { U("a1", Faction.Fortress, 5000, 400), U("a2", Faction.Fortress, 5000, 400) };

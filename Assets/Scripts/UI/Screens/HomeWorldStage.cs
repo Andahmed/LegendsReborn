@@ -3,7 +3,7 @@ using UnityEngine;
 namespace SandsOfLegends.UI
 {
     /// <summary>
-    /// Loads the original generated castle mesh and Quaternius CC0 nature and hero models.
+    /// Loads the original generated castle mesh and Quaternius nature and hero models.
     /// The castle is a real multi-part Mesh prefab, not Unity primitive cubes.
     /// </summary>
     public sealed class HomeWorldStage : MonoBehaviour

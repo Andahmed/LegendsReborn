@@ -5,17 +5,17 @@
 - Creates an EventSystem + StandaloneInputModule only when the scene has none.
 - Keeps the portrait HUD and adds a live idle reward preview based on the existing 12-hour capped reward calculation.
 - Claim calls `GameState.ClaimIdle(TimeService.NowUnix)`, saves with `GameBootstrap.SaveNow()`, and refreshes the displayed values.
-- Replaces the castle facade's primitive wall/gate/tower blocks with modular Quaternius FBX meshes (CC0): arch gate, wall modules, decorative wall pieces, columns, banners, stairs, floor and torches.
+- Replaces the castle facade's primitive wall/gate/tower blocks with modular Quaternius FBX meshes: arch gate, wall modules, decorative wall pieces, columns, banners, stairs, floor and torches.
 - Keeps the hero as a clearly temporary silhouette; hero replacement is a separate art task.
 
 ## Import the castle meshes (one-time)
 1. Open the project in Unity Editor with internet access.
-2. From the top menu choose **Legends Reborn → Art → Install Home Castle CC0 Models**.
+2. From the top menu choose **Legends Reborn → Art → Install Home Castle Models**.
 3. Wait for Unity to finish importing the FBX files. The installer skips files already downloaded and writes the source/license note into `Assets/Resources/HomeCastle/LICENSE.txt`.
 4. Enter Play mode again. `HomeWorldStage` loads the imported FBX meshes from `Resources/HomeCastle`.
 5. If the installer cannot reach GitHub, the scene uses temporary geometric fallbacks for missing meshes; rerun the menu command after network access returns.
 
-Source pack: [Quaternius Modular Dungeon Pack](https://quaternius.itch.io/lowpoly-modular-dungeon-pack), listed as CC0 by the official pack page. The installer fetches only the named FBX parts used by this home scene, not the entire source pack.
+Source pack: [Quaternius Modular Dungeon Pack](https://quaternius.itch.io/lowpoly-modular-dungeon-pack), covered by the current Quaternius Asset License (QAL), not CC0. The installer fetches only the named FBX parts used by this home scene, not the entire source pack.
 
 ## Scene setup
 1. Boot must initialize `GameBootstrap` before Home is shown.
@@ -26,7 +26,7 @@ Source pack: [Quaternius Modular Dungeon Pack](https://quaternius.itch.io/lowpol
 
 ## Not final / verification still required
 - The castle is now assembled from real CC0 modular meshes, but it is not yet a bespoke final castle model; proportions, mesh pivots, materials and camera framing must be checked in Unity.
-- The hero remains primitive placeholder geometry, not one of the approved five hero models.
+- The Home scene uses the committed Quaternius humanoid hero models; final bespoke hero models and animation polish remain outstanding.
 - Built-in Arial does not provide Arabic shaping; current labels remain English.
 - Navigation events without listeners remain hooks, not working destination screens.
 - This repository update has not been compiled or run in Unity Editor, and no Android build or touch/aspect-ratio test has been performed.

@@ -1,3 +1,7 @@
+## 2026-11-16 - Real FBX combat actors and deterministic speed turn order
+**Done:** Replaced the production capsule-character fallback with committed FBX hero/monster models; added model-specific FBX animation playback (Idle/Attack/Hit/Death) through Playables, preserved world-space HP bars, added team ground markers and impact particles. Combat now resolves simultaneously-ready actors by action-meter overflow, speed, then stable team/slot order; the battle HUD shows the next five actors and their meter progress. Added engine-free tests for speed priority and turn-order projection. Corrected Quaternius licensing documentation from CC0 to the current QAL terms.
+**Not verified:** No Unity Editor import/compile, Play Mode, Android build or device test was run in this environment. FBX clip names and runtime appearance must be checked in Unity 2022.3.62f3. Engine-free tests must pass in GitHub Actions before this work is treated as verified.
+
 # Work Log (newest first)
 
 ## 2026-11-12 - Log Boot and Home scene generation during CI builds

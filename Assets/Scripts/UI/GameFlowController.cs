@@ -25,6 +25,7 @@ namespace SandsOfLegends.UI
         private Text battleStatus;
         private Text battleLog;
         private Text battleSummary;
+        private Text battleTurnOrder;
         private BattleSim battle;
         private BattleView battleView;
         private BattleHud battleHud;
@@ -761,6 +762,7 @@ namespace SandsOfLegends.UI
             battleStatus = AddText(panel, "BATTLE IN PROGRESS", 24, cream, 56);
             battleLog = AddText(panel, "The teams are entering the arena...", 18, teal, 100);
             battleSummary = AddText(panel, "Your team 5  •  Enemy team 5", 18, cream, 70);
+            battleTurnOrder = AddText(panel, "NEXT UP  •  Speed order loading...", 16, teal, 76);
             AddButton(panel, "SPEED x1", () => SetBattleSpeed(1), 54, teal);
             AddButton(panel, "SPEED x2", () => SetBattleSpeed(2), 54, teal);
             AddButton(panel, "SPEED x4", () => SetBattleSpeed(4), 54, teal);
@@ -841,6 +843,20 @@ namespace SandsOfLegends.UI
             }
             battleSummary.text = "ALLY  " + aliveA + "/5  •  HP " + hpA +
                 "\nENEMY  " + aliveB + "/5  •  HP " + hpB;
+            if (battleTurnOrder != null)
+            {
+                var upcoming = battle.GetUpcomingTurns(5);
+                string queue = "NEXT UP  ";
+                for (int i = 0; i < upcoming.Count; i++)
+                {
+                    BattleTurnInfo turn = upcoming[i];
+                    BattleUnit actor = battle.Get(turn.Team, turn.Slot);
+                    if (actor == null) continue;
+                    if (queue != "NEXT UP  ") queue += "   ›   ";
+                    queue += actor.Spec.Name + "  " + Mathf.RoundToInt(turn.Progress * 100f) + "%";
+                }
+                battleTurnOrder.text = queue;
+            }
         }
 
         private void FinishBattle()

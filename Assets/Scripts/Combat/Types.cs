@@ -71,6 +71,17 @@ namespace SandsOfLegends.Combat
         public SkillSpec Ultimate;       // energy-based ultimate (optional)
     }
 
+    /// <summary>Read-only UI projection of the deterministic speed/action meter.</summary>
+    public struct BattleTurnInfo
+    {
+        public int Team;
+        public int Slot;
+        public string UnitId;
+        public int Speed;
+        public float Progress;
+        public float SecondsToAct;
+    }
+
     public enum BattleEventType { Attack, Skill, Ultimate, Heal, Death, End }
 
     public struct BattleEvent
