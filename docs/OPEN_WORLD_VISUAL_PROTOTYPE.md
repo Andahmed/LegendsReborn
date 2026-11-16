@@ -12,7 +12,9 @@
 - A winding kingdom trade road and a river ribbon.
 - Scattered existing Quaternius nature prefabs from `Resources/HomeNature`, with procedural fallback trees.
 - Five visual landmarks to establish exploration destinations: Old Kingdom Outpost, Forgotten Watchtower, Ancient Ruins, Northern Gate and World Boss Clearing.
-- A separate directional light and wide camera framing.
+- A separate directional light and third-person follow camera.
+- A controllable Warrior preview character with a CharacterController, keyboard movement in the Editor, and a left-side touch joystick on mobile.
+- Proximity markers that display the current named landmark in the exploration HUD.
 
 ## Generate in Unity
 1. Open the project with Unity 2022.3.62f3.
@@ -22,7 +24,9 @@
 
 ## Current limitations
 - This is a visual terrain blockout, not yet a connected playable world.
-- There is no player controller, streaming, minimap, quest triggers, NPC logic, collision tuning, or mobile performance profile yet.
+- This remains a single-scene exploration slice: there is no world streaming, minimap, combat encounter spawning, NPC dialogue, quest rewards, save integration, or mobile performance profile yet.
+- The Warrior preview uses a static imported model; locomotion animations are not wired.
+- The landmark proximity HUD is informational only and does not alter campaign progression.
 - Existing Quaternius assets are reused from the LegendsReborn project. NJ MMO assets have not been copied into this branch; each external model must be checked for its individual license and attribution before import.
 - The prototype has not been compiled or rendered in Unity in this environment. Review it in the Unity Editor before treating the visuals or performance as approved.
 
@@ -39,4 +43,4 @@ Replace placeholder landmark geometry with license-verified GLB/FBX environment 
 
 ## Validation status
 
-These changes were reviewed against the repository source, but have **not** yet been compiled or opened in the Unity Editor. The generated scene, visual quality, and Android performance remain unverified. The preview is still a procedural environment prototype: landmarks are placeholder geometry, and it does not yet include a player controller, world streaming, NPCs, quests, or story integration.
+These changes were reviewed against the repository source, but have **not** yet been compiled or opened in the Unity Editor. The generated scene, visual quality, and Android performance remain unverified. The preview now includes a basic player controller, third-person camera, and landmark proximity HUD. Landmarks remain placeholder geometry; animation, streaming, NPCs, quests, save integration, and story progression are not implemented.
