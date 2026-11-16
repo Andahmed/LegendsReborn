@@ -175,8 +175,9 @@ namespace SandsOfLegends.World
                 if (i < segments)
                 {
                     int a = i * 2;
-                    indices.Add(a); indices.Add(a + 1); indices.Add(a + 2);
-                    indices.Add(a + 1); indices.Add(a + 3); indices.Add(a + 2);
+                    // Match the terrain's upward-facing winding so the water is visible from above.
+                    indices.Add(a); indices.Add(a + 2); indices.Add(a + 1);
+                    indices.Add(a + 1); indices.Add(a + 2); indices.Add(a + 3);
                 }
             }
             CreateRibbon(root, "Silver River", vertices, indices, new Color(.12f, .48f, .68f, .88f));
